@@ -1,0 +1,165 @@
+import React, { useState } from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  Image,
+  Pressable,
+  Modal,
+  TextInput
+} from 'react-native';
+import Header from '../../Components/Header'
+import { Colors } from '../../Config';
+
+const GridViewItems = [
+  { key: '1' },
+  { key: '2' },
+  { key: '3' },
+  { key: '4' },
+  { key: '5' },
+  { key: '6' },
+]
+
+const HairCutDescriptionScreen = (props) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const _onBack = () => props.navigation.goBack()
+
+  const renderAddNoteModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setModalVisible(!modalVisible)}>
+              <Image
+                style={{ marginRight: 14.49, marginTop: 18.5 }}
+                source={require('../../Images/cross.png')}
+              />
+            </Pressable>
+            <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
+            <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} />
+            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }}>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }}>SAVE</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  return (
+    <View style={styles.container}>
+      {
+        <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
+      }
+      {
+        <View>
+          {renderAddNoteModal()}
+          <Text style={styles.afroHairTextStyle}>Afro Hair</Text>
+          <FlatList
+            data={GridViewItems}
+            renderItem={({ item }) =>
+              <View style={styles.GridViewBlockStyle}>
+                <Image
+                  style={{ marginLeft: 26, marginTop: 14 }}
+                  source={require('../../Images/upcoming.png')}
+                />
+              </View>}
+            numColumns={3}
+          />
+          <Text style={[styles.title,{marginTop: 25}]}>DESCRIPTION</Text>
+          <Text style={styles.subTitle}>Requires fizzy hair. Make uniform in length and set that to be about one heads with long</Text>
+          <Text style={[styles.title,{ marginTop: 15 }]}>NOTES</Text>
+          <Text style={styles.subTitle}>Next time I would ask for it to be shorter around the lower neck.</Text>
+          <Pressable onPress={() => setModalVisible(true)}>
+            <Image
+              style={{ marginLeft: 27, marginTop: 14 }}
+              source={require('../../Images/plus.png')}
+            />
+          </Pressable>
+          <Pressable style={styles.button}>
+            <Text style={styles.buttonText}>PICK SALON</Text>
+          </Pressable>
+        </View>
+      }
+    </View>
+  )
+}
+export default HairCutDescriptionScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  afroHairTextStyle: {
+    color: Colors.black,
+    fontSize: 16,
+    fontFamily: 'Avenir-Medium',
+    marginLeft: 27,
+    marginTop: 25
+  },
+  title: {
+    color: Colors.black, 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Heavy', 
+    marginLeft: 27
+  },
+  subTitle: {
+    color: Colors.black, 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Medium', 
+    marginLeft: 27, 
+    marginTop: 3, 
+    marginRight: 30
+  },
+  GridViewBlockStyle: {
+    justifyContent: 'center',
+    flex: 1,
+    alignItems: 'center',
+    marginRight: 20
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  button: {
+    borderWidth: 1, 
+    borderColor: Colors.greyLight, 
+    marginLeft: 122.5, 
+    marginRight: 122.5, 
+    marginTop: 26.5
+  },
+  buttonText: {
+    color: Colors.black, 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Medium', 
+    marginLeft: 29.5, 
+    marginTop: 9.5, 
+    marginBottom: 6.5, 
+    marginRight: 28.5
+  }
+})
