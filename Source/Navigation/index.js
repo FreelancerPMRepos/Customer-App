@@ -9,11 +9,14 @@ import { useSelector } from 'react-redux';
 import Login from '../Screens/Auth/Login';
 import Signup from '../Screens/Auth/Signup';
 import ForgotPassword from '../Screens/Auth/ForgotPassword';
+import OtpVerification from '../Screens/Auth/OtpVerification';
+import ResetPassword from '../Screens/Auth/ResetPassword';
 
 // Main
 import Home from '../Screens/Main/Home';
 import Search from '../Screens/Main/Search';
 import Settings from '../Screens/Main/Settings';
+import StoreDescription from '../Screens/Main/StoreDescription';
 
 // HairCut
 import HairCuts from '../Screens/HairCut/HairCuts';
@@ -106,6 +109,8 @@ const Routes = (props) => {
               <Stack.Screen name="Appointments" component={Appointments} />
               <Stack.Screen name="AppointmentsDescriptionScreen" component={AppointmentsDescriptionScreen} />
               <Stack.Screen name="Settings" component={Settings} />
+              <Stack.Screen name="StoreDescription" component={StoreDescription} />
+              <Stack.Screen name="ResetPassword" component={ResetPassword} />
             </>
           )
             :
@@ -114,6 +119,8 @@ const Routes = (props) => {
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="Signup" component={Signup} />
                 <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                <Stack.Screen name="OtpVerification" component={OtpVerification} />
+                <Stack.Screen name="ResetPassword" component={ResetPassword} />
               </>
             )
         }

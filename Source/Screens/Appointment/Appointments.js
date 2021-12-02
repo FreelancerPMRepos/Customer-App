@@ -1,34 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
   StyleSheet,
   Image,
-  Pressable
+  Pressable,
+  ScrollView
 } from 'react-native';
 import Header from '../../Components/Header'
 import SelectDropdown from 'react-native-select-dropdown'
+import axios from 'axios';
+import { BASE_URL, IMAGE_URL } from '../../Config';
+
 
 const countries = ["Egypt", "Canada", "Australia", "Ireland"]
 
 const HelloWorldApp = (props) => {
+  const [list, setList] = useState([]);
+  const [upcomingList, setUpcomingList] = useState([]);
 
-  const renderUpcomingView = () => {
-    return (
-      <View style={styles.row}>
-        <Image
-          style={{ marginLeft: 26, marginTop: 14 }}
-          source={require('../../Images/upcoming.png')}
-        />
-        <View style={{ marginTop: 29, marginLeft: 25 }}>
-          <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>Short Hair</Text>
-          <Text style={{ color: '#1A1919', marginTop: 2 }}>Tomorrow at 8:30 PM</Text>
-          <Pressable style={{ borderWidth: 1, marginTop: 10.5 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen')}>
-            <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
-          </Pressable>
-        </View>
-      </View>
-    )
+  useEffect(() => {
+    getUpcomingList()
+    getPassedList()
+  }, [])
+
+  const getUpcomingList = () => {
+    axios.get(`${BASE_URL}/booking/customer/list?type=UPCOMING`)
+      .then(res => {
+        setUpcomingList(res.data)
+        console.log('res appointment', res.data)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
+  }
+
+  const getPassedList = () => {
+    axios.get(`${BASE_URL}/booking/customer/list?type=PASSED`)
+    .then(res => {
+      setList(res.data)
+      console.log('res appointment', res.data)
+    })
+    .catch(e => {
+      console.log('e', e)
+    })
   }
 
   return (
@@ -37,9 +52,39 @@ const HelloWorldApp = (props) => {
         <Header {...props} />
       }
       {
-        <View>
+        <ScrollView style={{marginBottom : 10}}>
           <Text style={styles.upcomingTextStyle}>Upcoming</Text>
-          {renderUpcomingView()}
+          {
+            upcomingList.map((res) => {
+              console.log("Sdf",`${IMAGE_URL}/${res.style.upload_front_photo}`)
+              return (
+                <View style={styles.row}>
+                  {
+                    res.style.upload_front_photo == null
+                      ?
+                      <Image
+                        style={{height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain'}}
+                        source={require('../../Images/noImage.jpg')}
+                      />
+                      :
+                      <Image
+                        style={{ marginLeft: 26, marginTop: 14 ,height: 118, width: 103,}}
+                        source={{
+                          uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
+                        }}
+                      />
+                  }
+                  <View style={{ marginTop: 23, marginLeft: 25 }}>
+                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res.style.name}</Text>
+                    <Text style={{ color: '#1A1919', marginTop: 2 }}>Tomorrow at 8:30 PM</Text>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen')}>
+                      <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )
+            })
+          }
           <View
             style={{
               borderBottomColor: '#979797',
@@ -69,20 +114,37 @@ const HelloWorldApp = (props) => {
             // }}
             />
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Image
-              style={{ marginLeft: 26, marginTop: 14 }}
-              source={require('../../Images/passed.png')}
-            />
-            <View style={{ marginTop: 29, marginLeft: 25 }}>
-              <Text style={{ color: '#1A1919', fontSize: 16 }}>Hair Cut</Text>
-              <Text style={{ color: '#1A1919', marginTop: 2 }}>Wed 11 Mar 2020</Text>
-              <Pressable style={{ borderWidth: 1, marginTop: 10.5 }}>
-                <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
+          {
+            list.map((res) => {
+              return (
+                <View style={{ flexDirection: 'row' }}>
+                   {
+                    res.style.upload_front_photo == null
+                      ?
+                      <Image
+                        style={{height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain'}}
+                        source={require('../../Images/noImage.jpg')}
+                      />
+                      :
+                      <Image
+                        style={{ marginLeft: 26, marginTop: 14 ,height: 118, width: 103,}}
+                        source={{
+                          uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
+                        }}
+                      />
+                  }
+                  <View style={{ marginTop: 29, marginLeft: 25 }}>
+                    <Text style={{ color: '#1A1919', fontSize: 16 }}>{res.style.name}</Text>
+                    <Text style={{ color: '#1A1919', marginTop: 2 }}>Wed 11 Mar 2020</Text>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }}>
+                      <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )
+            })
+          }
+        </ScrollView>
       }
     </View>
   )

@@ -15,18 +15,17 @@ import { login } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
 
 const Login = (props) => {
-    const [email, setEmail] = useState('')
-    const [Password, setPassword] = useState('')
     const dispatch = useDispatch()
     const auth = useSelector(state => state.auth)
     const { isError } = auth
+    const [email, setEmail] = useState('')
+    const [Password, setPassword] = useState('')
 
     const _onLogin = () => {
-        console.log("email",email)
-        if (email === '') {
+        if (email == '') {
             alert('Please Enter Email Address')
             return false
-        } else if (Password === '') {
+        } else if (Password == '') {
             alert('Please Enter Password')
             return false
         } else {

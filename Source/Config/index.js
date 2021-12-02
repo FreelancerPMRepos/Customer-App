@@ -12,6 +12,8 @@ const Colors = {
 
 const BASE_URL = `https://haircut.winayak.com/api`
 
+const IMAGE_URL = `https://haircut.winayak.com/img`
+
 const isValidEmail = value => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     if (reg.test(value) === false) {
@@ -29,4 +31,5 @@ export {
     Colors,
     BASE_URL,
     isValidEmail,
+    IMAGE_URL
 }

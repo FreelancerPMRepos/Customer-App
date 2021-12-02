@@ -17,7 +17,8 @@ export const login = (payload) => {
             }
         })
         .catch(e => {
-            console.log("payload",payload)
+            console.log("asd",e.message)
+            alert(e.message)
             dispatch({ type: AUTH_ERROR, payload: { error: e}})
         })
     }
