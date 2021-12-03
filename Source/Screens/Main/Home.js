@@ -113,7 +113,7 @@ const Home = (props) => {
               :
               storeList.map((res) => {
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, }} onPress={() => props.navigation.navigate('StoreDescription', { storeId: res.id })}>
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
                     <Image source={require('../../Images/home_dummy.png')} />
                     <View style={{ marginLeft: 23 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

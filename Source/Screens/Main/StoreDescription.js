@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Image,
     Pressable,
-    Modal
+    Modal,
+    ScrollView
 } from 'react-native';
 import Header from '../../Components/Header';
 import SelectDropdown from 'react-native-select-dropdown'
@@ -19,23 +20,50 @@ const countries = ["Egypt", "Canada", "Australia", "Ireland"]
 const StoreDescription = ({ navigation, route, props }) => {
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
+    const [hairdresserList, setHairdresserList] = useState([]);
+    const [pickStyleList, setPickStyleList] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
+    const [pickStyleModal, setPickStyleModal] = useState(false);
+    const [hairdresserModal, setHairdresserModal] = useState(false);
     const [serviceId, setServiceId] = useState('');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const { storeId } = route.params
+    const { storeDetails } = route.params
 
-    console.log("storeId", storeId)
+    console.log("storeDetails.id", storeDetails)
 
     useEffect(() => {
         getServiceList();
+        getHairdresserList();
         console.log("asd", serviceTypeList)
     }, [])
 
     const getServiceList = () => {
-        axios.get(`${BASE_URL}/style/list/${storeId}`)
+        axios.get(`${BASE_URL}/style/list/${storeDetails.id}`)
             .then(res => {
                 setServiceList(res.data)
+                console.log('res', res.data)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+
+    const getHairdresserList = () => {
+        axios.get(`${BASE_URL}/employee/list/${storeDetails.id}`)
+            .then(res => {
+                setHairdresserList(res.data)
+                console.log('res', res.data)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+
+    const getPickStyleList = () => {
+        axios.get(`${BASE_URL}/favourite/${storeDetails.id}`)
+            .then(res => {
+                setPickStyleList(res.data)
                 console.log('res', res.data)
             })
             .catch(e => {
@@ -88,17 +116,145 @@ const StoreDescription = ({ navigation, route, props }) => {
         setDatePickerVisibility(false);
     };
 
+    const renderService = () => {
+        return (
+            <View>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => onService()}>
+                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
+                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                </Pressable>
+                {
+                    modalVisible == true ?
+                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                            {
+                                serviceList.map((res) => {
+                                    return (
+                                        <Pressable onPress={() => service(res.id)}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                            <View
+                                                style={{
+                                                    borderBottomColor: '#979797',
+                                                    borderBottomWidth: 1,
+                                                }}
+                                            />
+                                        </Pressable>
+                                    )
+                                })
+                            }
+                        </View> :
+                        null
+                }
+            </View>
+        )
+    }
+
+    const renderServiceType = () => {
+        return (
+            <View>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => getServiceTypeList()}>
+                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
+                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                </Pressable>
+                {
+                    serviceTypeModal == true ?
+                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                            {
+                                serviceTypeList.map((res) => {
+                                    return (
+                                        <Pressable onPress={() => setServiceTypeModal(!serviceTypeModal)}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                            <View
+                                                style={{
+                                                    borderBottomColor: '#979797',
+                                                    borderBottomWidth: 1,
+                                                }}
+                                            />
+                                        </Pressable>
+                                    )
+                                })
+                            }
+                        </View> :
+                        null
+                }
+            </View>
+        )
+    }
+
+    const renderPickStyle = () => {
+        return (
+            <View>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setPickStyleModal(!pickStyleModal)}>
+                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
+                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                </Pressable>
+                {
+                    pickStyleModal == true ?
+                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                            {
+                                pickStyleList.map((res) => {
+                                    return (
+                                        <Pressable onPress={() => setPickStyleModal(!pickStyleModal)}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                            <View
+                                                style={{
+                                                    borderBottomColor: '#979797',
+                                                    borderBottomWidth: 1,
+                                                }}
+                                            />
+                                        </Pressable>
+                                    )
+                                })
+                            }
+                        </View> :
+                        null
+                }
+            </View>
+        )
+    }
+
+    const renderHairDresser = () => {
+        return (
+            <View>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setHairdresserModal(!hairdresserModal)}>
+                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
+                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                </Pressable>
+                {
+                    hairdresserModal == true ?
+                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                            {
+                                hairdresserList.map((res) => {
+                                    return (
+                                        <Pressable onPress={() => setHairdresserModal(!hairdresserModal)}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                            <View
+                                                style={{
+                                                    borderBottomColor: '#979797',
+                                                    borderBottomWidth: 1,
+                                                }}
+                                            />
+                                        </Pressable>
+                                    )
+                                })
+                            }
+                        </View> :
+                        null
+                }
+            </View>
+        )
+    }
+
     return (
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
             }
             {
-                <View>
+                <ScrollView>
                     <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: 10 }}>
                         <Image source={require('../../Images/home_dummy.png')} />
                         <View style={{ marginLeft: 15 }}>
-                            <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>Tommy Guns Salon</Text>
+                            <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeDetails.store_name}</Text>
                             <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
                             <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>8-18 Open</Text>
                         </View>
@@ -113,108 +269,19 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 28, marginTop: 10 }}>Book</Text>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 28, marginTop: 7 }}>Service</Text>
                     <View style={{ marginLeft: 27.5 }}>
-
-
-                        {/* service modal */}
-
-                        <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => onService()}>
-                            <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
-                            <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
-                            <Modal
-                                animationType="slide"
-                                transparent={true}
-                                visible={modalVisible}
-                                onRequestClose={() => {
-                                    Alert.alert("Modal has been closed.");
-                                    setModalVisible(!modalVisible);
-                                }}
-                            >
-                                <View style={[styles.centeredView, { marginTop: 410 }]}>
-                                    <View style={styles.modalView}>
-                                        {
-                                            serviceList.map((res) => {
-                                                return (
-                                                    <Pressable onPress={() => service(res.id)}>
-                                                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
-                                                        <View
-                                                            style={{
-                                                                borderBottomColor: '#979797',
-                                                                borderBottomWidth: 1,
-                                                            }}
-                                                        />
-                                                    </Pressable>
-                                                )
-                                            })
-                                        }
-                                    </View>
-                                </View>
-                            </Modal>
-                        </Pressable>
-
-
-
-
-
+                        {renderService()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Service Type</Text>
-
-
-                        {/* service Type Modal */}
-                        <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => getServiceTypeList()}>
-                            <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
-                            <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
-                            <Modal
-                                animationType="slide"
-                                transparent={true}
-                                visible={serviceTypeModal}
-                                onRequestClose={() => {
-                                    Alert.alert("Modal has been closed.");
-                                    setServiceTypeModal(!serviceTypeModal);
-                                }}
-                            >
-                                <View style={[styles.centeredView, { marginTop: 324 }]}>
-                                    <View style={styles.modalView}>
-                                        {
-                                            serviceTypeList.map((res) => {
-                                                return (
-                                                    <Pressable onPress={() => setServiceTypeModal(!serviceTypeModal)}>
-                                                        <Text>{res.name}</Text>
-                                                    </Pressable>
-                                                )
-                                            })
-                                        }
-                                    </View>
-                                </View>
-                            </Modal>
-                        </Pressable>
-
-
-
-
-
+                        {renderServiceType()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Pick Style</Text>
-                        <SelectDropdown
-                            data={countries}
-                            buttonStyle={{ backgroundColor: 'white', borderWidth: 1, borderColor: '#979797', height: 35, marginTop: 7.5, width: 336 }}
-                            buttonTextStyle={{ textAlign: "left" }}
-                            onSelect={(selectedItem, index) => {
-                                console.log(selectedItem, index)
-                            }}
-                        />
+                        {renderPickStyle()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Hairdresser</Text>
-                        <SelectDropdown
-                            data={countries}
-                            buttonStyle={{ backgroundColor: 'white', borderWidth: 1, borderColor: '#979797', height: 35, marginTop: 7.5, width: 336 }}
-                            buttonTextStyle={{ textAlign: "left" }}
-                            onSelect={(selectedItem, index) => {
-                                console.log(selectedItem, index)
-                            }}
-                        />
+                        {renderHairDresser()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
                         <DateTimePickerModal
                             isVisible={isDatePickerVisible}
                             mode="date"
                             display="inline"
-                           // onConfirm={handleConfirm}
+                            // onConfirm={handleConfirm}
                             onCancel={hideDatePicker}
                         />
                         <View style={{ flexDirection: 'row' }}>
@@ -237,7 +304,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                             <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 10.59, marginBottom: 10.59 }}>BOOK NOW</Text>
                         </Pressable>
                     </View>
-                </View>
+                </ScrollView>
             }
         </View>
     )
