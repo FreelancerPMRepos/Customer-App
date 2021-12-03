@@ -16,7 +16,7 @@ const IMAGE_URL = `https://haircut.winayak.com/img`
 
 const isValidEmail = value => {
     let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (reg.test(value) === false) {
+    if (reg.test(value) == false) {
       //console.log("Email is Not Correct");
       return false;
     } else {

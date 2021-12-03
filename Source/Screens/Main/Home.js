@@ -7,7 +7,8 @@ import {
   Dimensions,
   Pressable,
   ScrollView,
-  TextInput
+  TextInput,
+  PixelRatio
 } from 'react-native';
 
 import { BASE_URL } from '../../Config';
@@ -15,6 +16,7 @@ import axios from 'axios';
 import { setAuthToken } from '../../Utils/setHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import MapView from 'react-native-maps';
+import Loader from '../../Components/Loader';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -24,6 +26,7 @@ const Home = (props) => {
   const auth = useSelector(state => state.auth)
   const [viewHideShow, setViewHideShow] = useState(false);
   const [storeList, setStoreList] = useState([]);
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
     let isCancelled = false;
@@ -39,20 +42,26 @@ const Home = (props) => {
   }, [])
 
   const getStoreList = () => {
+    setLoading(true)
     axios.get(`${BASE_URL}/store/list`)
       .then(res => {
         setStoreList(res.data)
         console.log('res', res.data)
+        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
+        setLoading(false)
       })
   }
   return (
     <View style={styles.container}>
+      {
+        isLoading && <Loader />
+      }
       <View style={{
-        height: 440,
-        width: 400,
+        height: height * 0.56,
+        width: width * 1,
         //   justifyContent: 'flex-end',
         alignItems: 'center',
       }}>
@@ -86,8 +95,8 @@ const Home = (props) => {
           </View>
         </View>
       </View>
-      <View style={{ position: 'absolute', bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? 410 : 270 }}>
-        <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow === true ? 380 : 240, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
+      <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? 410 : height * 0.38, position: 'absolute', }}>
+        <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? 380 : height * 0.34, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
           {
             viewHideShow == true ?
               <Image source={require('../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
@@ -97,22 +106,27 @@ const Home = (props) => {
         </Pressable>
         <ScrollView>
           {
-            storeList.map((res) => {
-              return (
-                <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, }} onPress={() => props.navigation.navigate('StoreDescription', { storeId: res.id })}>
-                  <Image source={require('../../Images/home_dummy.png')} />
-                  <View style={{ marginLeft: 23 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                      <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{res.store_name}</Text>
-                      <Text style={{ marginRight: 27 }}>8-18 Open</Text>
+            storeList.length == 0 ?
+              <View style={{flex : 1}}>
+                <Text>NO store available</Text>
+              </View>
+              :
+              storeList.map((res) => {
+                return (
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, }} onPress={() => props.navigation.navigate('StoreDescription', { storeId: res.id })}>
+                    <Image source={require('../../Images/home_dummy.png')} />
+                    <View style={{ marginLeft: 23 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{res.store_name}</Text>
+                        <Text style={{ marginRight: 27 }}>8-18 Open</Text>
+                      </View>
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
+                      <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy' }}>££</Text>
+                      <Text style={{ width: width * 0.69, fontSize: 12, fontFamily: 'Avenir-Medium' }}>Step into our salon and experience the most contemporary hair services.</Text>
                     </View>
-                    <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
-                    <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy' }}>££</Text>
-                    <Text style={{ width: width * 0.69, fontSize: 12, fontFamily: 'Avenir-Medium' }}>Step into our salon and experience the most contemporary hair services.</Text>
-                  </View>
-                </Pressable>
-              )
-            })
+                  </Pressable>
+                )
+              })
           }
         </ScrollView>
       </View>

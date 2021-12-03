@@ -9,11 +9,11 @@ const Header = ({ leftIcon, onLeftIconPress, ...props }) => {
                 <View style={styles.column}>
                     <Pressable onPress={onLeftIconPress}>
                         {
-                            leftIcon === 'back' && <Image style={styles.tinyLogo} source={require('../../Images/back-arrow.png')} />
+                            leftIcon == 'back' && <Image style={styles.tinyLogo} source={require('../../Images/back-arrow.png')} />
                         }
                     </Pressable>
                 </View>
-                <View style={ leftIcon === 'back' ? [styles.titleView,{marginLeft: 70}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
+                <View style={ leftIcon == 'back' ? [styles.titleView,{marginLeft: 70}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
                     <Image source={require('../../Images/hairkut.png')} style={{resizeMode :'contain'}}/>
                 </View>
             </View>

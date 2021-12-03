@@ -13,6 +13,7 @@ import { width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
+import Loader from '../../Components/Loader';
 
 const Login = (props) => {
     const dispatch = useDispatch()
@@ -20,6 +21,7 @@ const Login = (props) => {
     const { isError } = auth
     const [email, setEmail] = useState('')
     const [Password, setPassword] = useState('')
+    const [isLoading, setLoading] = useState(false)
 
     const _onLogin = () => {
         if (email == '') {
@@ -29,11 +31,11 @@ const Login = (props) => {
             alert('Please Enter Password')
             return false
         } else {
-           const data = {
-            username: email,
-            password: Password
-           }
-           dispatch(login(data))
+            const data = {
+                username: email,
+                password: Password
+            }
+            dispatch(login(data))
         }
     }
 
@@ -41,7 +43,7 @@ const Login = (props) => {
         return (
             <View style={{ width: width * 0.83, marginTop: 44 }}>
                 <Text style={{ color: Colors.white }}>Email</Text>
-                <TextInput placeholder="Enter Email" onChangeText={text => setEmail(text)} value={email}  style={styles.input} placeholderTextColor='#FFFFFF' />
+                <TextInput placeholder="Enter Email" onChangeText={text => setEmail(text)} value={email} style={styles.input} placeholderTextColor='#FFFFFF' />
             </View>
         )
     }
@@ -50,7 +52,7 @@ const Login = (props) => {
         return (
             <View style={{ width: width * 0.83, marginTop: 24.50 }}>
                 <Text style={{ color: Colors.white }}>Password</Text>
-                <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' secureTextEntry={true} onChangeText={text => setPassword(text)} value={Password}/>
+                <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' secureTextEntry={true} onChangeText={text => setPassword(text)} value={Password} />
             </View>
         )
     }
@@ -92,18 +94,21 @@ const Login = (props) => {
 
     const renderSocialButton = () => {
         return (
-            <View style={{flexDirection: 'row', marginTop: 7}}>
-                <Pressable style={{backgroundColor: '#FFFFFF'}}>
-                    <Text style={{marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4}}>Google</Text>
+            <View style={{ flexDirection: 'row', marginTop: 7 }}>
+                <Pressable style={{ backgroundColor: '#FFFFFF' }}>
+                    <Text style={{ marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Google</Text>
                 </Pressable>
-                <Pressable style={{backgroundColor: '#1976D2', marginLeft: 7}}>
-                    <Text style={{color: '#FFFFFF', marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4}}>Facebook</Text>
+                <Pressable style={{ backgroundColor: '#1976D2', marginLeft: 7 }}>
+                    <Text style={{ color: '#FFFFFF', marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Facebook</Text>
                 </Pressable>
             </View>
         )
     }
     return (
         <View style={styles.container}>
+            {
+                (auth.isLoading && isLoading) && <Loader />
+            }
             <ImageBackground source={require('../../Images/background.png')} resizeMode="cover" style={styles.image}>
                 <Image
                     source={require('../../Images/logo.png')}
@@ -141,14 +146,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Avenir-Book'
     },
     quoteText: {
-        color: Colors.white, 
-        fontSize: 16, 
+        color: Colors.white,
+        fontSize: 16,
         fontFamily: 'Avenir-Heavy'
     },
     loginText: {
-        color: Colors.white, 
-        fontSize: 18, 
-        marginTop: 33, 
+        color: Colors.white,
+        fontSize: 18,
+        marginTop: 33,
         fontFamily: 'Avenir-Heavy'
     }
 })

@@ -11,19 +11,21 @@ import Header from '../../Components/Header';
 import SelectDropdown from 'react-native-select-dropdown'
 import { BASE_URL, width } from '../../Config';
 import axios from 'axios';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 
 const countries = ["Egypt", "Canada", "Australia", "Ireland"]
 
-const StoreDescription = ({navigation, route, props}) => {
+const StoreDescription = ({ navigation, route, props }) => {
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
     const [serviceId, setServiceId] = useState('');
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const { storeId } = route.params
 
-    console.log("storeId",storeId)
+    console.log("storeId", storeId)
 
     useEffect(() => {
         getServiceList();
@@ -46,15 +48,19 @@ const StoreDescription = ({navigation, route, props}) => {
             console.log("Please Select Service First")
             alert('Please Select Service First')
         } else {
-            console.log("Adf")
-            setServiceTypeModal(!serviceTypeModal)
             axios.get(`${BASE_URL}/style/type/list/${serviceId}`)
                 .then(res => {
                     setServiceTypeList(res.data)
                     console.log('res', res.data)
+                    if (res.data.length == 0) {
+                        alert('No Service Type available')
+                    } else {
+                        setServiceTypeModal(!serviceTypeModal)
+                    }
                 })
                 .catch(e => {
                     console.log('e', e)
+                    alert('No Service Type available')
                 })
         }
     }
@@ -64,7 +70,23 @@ const StoreDescription = ({navigation, route, props}) => {
         setModalVisible(!modalVisible)
     }
 
+    const onService = () => {
+        if (serviceList.length == 0) {
+            alert('No Service available')
+        } else {
+            setModalVisible(!modalVisible)
+        }
+    }
+
     const _onBack = () => navigation.goBack()
+
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -73,7 +95,7 @@ const StoreDescription = ({navigation, route, props}) => {
             }
             {
                 <View>
-                    <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: 21 }}>
+                    <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: 10 }}>
                         <Image source={require('../../Images/home_dummy.png')} />
                         <View style={{ marginLeft: 15 }}>
                             <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>Tommy Guns Salon</Text>
@@ -95,7 +117,7 @@ const StoreDescription = ({navigation, route, props}) => {
 
                         {/* service modal */}
 
-                        <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setModalVisible(!modalVisible)}>
+                        <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => onService()}>
                             <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>Select</Text>
                             <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
                             <Modal
@@ -114,7 +136,6 @@ const StoreDescription = ({navigation, route, props}) => {
                                                 return (
                                                     <Pressable onPress={() => service(res.id)}>
                                                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
-                                                        <Text>gygg</Text>
                                                         <View
                                                             style={{
                                                                 borderBottomColor: '#979797',
@@ -153,13 +174,13 @@ const StoreDescription = ({navigation, route, props}) => {
                                 <View style={[styles.centeredView, { marginTop: 324 }]}>
                                     <View style={styles.modalView}>
                                         {
-                                                serviceTypeList.map((res) => {
-                                                    return (
-                                                        <Pressable onPress={() => setServiceTypeModal(!serviceTypeModal)}>
+                                            serviceTypeList.map((res) => {
+                                                return (
+                                                    <Pressable onPress={() => setServiceTypeModal(!serviceTypeModal)}>
                                                         <Text>{res.name}</Text>
                                                     </Pressable>
-                                                    )  
-                                                })
+                                                )
+                                            })
                                         }
                                     </View>
                                 </View>
@@ -189,7 +210,30 @@ const StoreDescription = ({navigation, route, props}) => {
                             }}
                         />
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
-                        <Pressable style={{ borderWidth: 1, marginLeft: 123, marginRight: 123, marginTop: 20 }}>
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            display="inline"
+                           // onConfirm={handleConfirm}
+                            onCancel={hideDatePicker}
+                        />
+                        <View style={{ flexDirection: 'row' }}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35 }} onPress={() => showDatePicker()}>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>15 Aug 2021</Text>
+                                <Image
+                                    style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
+                                    source={require('../../Images/storeCalendar.png')}
+                                />
+                            </Pressable>
+                            <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }}>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>14:30</Text>
+                                <Image
+                                    style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
+                                    source={require('../../Images/Triangle.png')}
+                                />
+                            </View>
+                        </View>
+                        <Pressable style={{ borderWidth: 1, marginLeft: 123, marginRight: 123, marginTop: 10 }}>
                             <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 10.59, marginBottom: 10.59 }}>BOOK NOW</Text>
                         </Pressable>
                     </View>
@@ -207,7 +251,7 @@ const styles = StyleSheet.create({
     },
     centeredView: {
         flex: 1,
-   //     justifyContent: "center",
+        //     justifyContent: "center",
         alignItems: "center",
     },
     modalView: {

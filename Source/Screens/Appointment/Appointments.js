@@ -11,6 +11,7 @@ import Header from '../../Components/Header'
 import SelectDropdown from 'react-native-select-dropdown'
 import axios from 'axios';
 import { BASE_URL, IMAGE_URL } from '../../Config';
+import Loader from '../../Components/Loader';
 
 
 const countries = ["Egypt", "Canada", "Australia", "Ireland"]
@@ -18,6 +19,7 @@ const countries = ["Egypt", "Canada", "Australia", "Ireland"]
 const HelloWorldApp = (props) => {
   const [list, setList] = useState([]);
   const [upcomingList, setUpcomingList] = useState([]);
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
     getUpcomingList()
@@ -25,25 +27,31 @@ const HelloWorldApp = (props) => {
   }, [])
 
   const getUpcomingList = () => {
+    setLoading(true)
     axios.get(`${BASE_URL}/booking/customer/list?type=UPCOMING`)
       .then(res => {
         setUpcomingList(res.data)
         console.log('res appointment', res.data)
+        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
+        setLoading(false)
       })
   }
 
   const getPassedList = () => {
-    axios.get(`${BASE_URL}/booking/customer/list?type=PASSED`)
-    .then(res => {
-      setList(res.data)
-      console.log('res appointment', res.data)
-    })
-    .catch(e => {
-      console.log('e', e)
-    })
+    setLoading(true)
+    axios.get(`${BASE_URL}/booking/customer/list?type=PAST`)
+      .then(res => {
+        setList(res.data)
+        console.log('res appointment', res.data)
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
+      })
   }
 
   return (
@@ -52,23 +60,27 @@ const HelloWorldApp = (props) => {
         <Header {...props} />
       }
       {
-        <ScrollView style={{marginBottom : 10}}>
+        isLoading && <Loader />
+      }
+      {
+        <ScrollView style={{ marginBottom: 10 }}>
           <Text style={styles.upcomingTextStyle}>Upcoming</Text>
           {
             upcomingList.map((res) => {
-              console.log("Sdf",`${IMAGE_URL}/${res.style.upload_front_photo}`)
+              // console.log("dsa",res.style.name)
+              console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
               return (
                 <View style={styles.row}>
                   {
                     res.style.upload_front_photo == null
                       ?
                       <Image
-                        style={{height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain'}}
+                        style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
                         source={require('../../Images/noImage.jpg')}
                       />
                       :
                       <Image
-                        style={{ marginLeft: 26, marginTop: 14 ,height: 118, width: 103,}}
+                        style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
                           uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
                         }}
@@ -116,18 +128,19 @@ const HelloWorldApp = (props) => {
           </View>
           {
             list.map((res) => {
+              console.log("tye", res)
               return (
                 <View style={{ flexDirection: 'row' }}>
-                   {
+                  {
                     res.style.upload_front_photo == null
                       ?
                       <Image
-                        style={{height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain'}}
+                        style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
                         source={require('../../Images/noImage.jpg')}
                       />
                       :
                       <Image
-                        style={{ marginLeft: 26, marginTop: 14 ,height: 118, width: 103,}}
+                        style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
                           uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
                         }}

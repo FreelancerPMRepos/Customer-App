@@ -45,7 +45,7 @@ const Routes = (props) => {
           options={{
             tabBarIcon: ({ focused }) => {
               return (
-                <Image source={focused ? require('../Images/hair-salon.png') : require('../Images/search.png')} />
+                <Image source={focused ? require('../Images/hair-salon.png') : require('../Images/hair-salon-light.png')} />
               )
             }
           }} />

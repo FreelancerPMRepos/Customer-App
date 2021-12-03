@@ -20,6 +20,8 @@
     "react-native-dropdown-picker": "^5.2.3",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-maps": "^0.29.4",
+    "react-native-modal-datetime-picker": "^13.0.0",
+    "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.9.0",
     "react-native-select-dropdown": "^1.4.0",

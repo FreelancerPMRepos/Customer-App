@@ -22,16 +22,16 @@ const Signup = (props) => {
   const { isError } = auth
 
   const _onSignUp = () => {
-    if (email === '') {
+    if (email == '') {
       alert('Please Enter Email Address')
       return false
     } else if (!isValidEmail(email)) {
       alert('Please Enter Valid Email Address')
       return false
-    } else if (password === '') {
+    } else if (password == '') {
       alert('Please Enter Password')
       return false
-    } else if (confirmPassword === '') {
+    } else if (confirmPassword == '') {
       alert('Please Enter Confirm Password')
       return false
     } else if (password !== confirmPassword) {
