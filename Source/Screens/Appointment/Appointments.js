@@ -89,7 +89,7 @@ const HelloWorldApp = (props) => {
                   <View style={{ marginTop: 23, marginLeft: 25 }}>
                     <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res.style.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2 }}>Tomorrow at 8:30 PM</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen')}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
                       <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
                     </Pressable>
                   </View>
@@ -149,7 +149,7 @@ const HelloWorldApp = (props) => {
                   <View style={{ marginTop: 29, marginLeft: 25 }}>
                     <Text style={{ color: '#1A1919', fontSize: 16 }}>{res.style.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2 }}>Wed 11 Mar 2020</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
                       <Text style={{ color: '#1A1919', marginLeft: 28.5, marginTop: 8.5, marginBottom: 8.5, marginRight: 27.5 }}>Look at booking</Text>
                     </Pressable>
                   </View>
