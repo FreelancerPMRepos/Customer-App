@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -8,9 +9,11 @@ import {
   FlatList,
   Image,
   ScrollView,
-  Modal
+  Modal,
+  ImageBackground
 } from 'react-native';
 import Header from '../../Components/Header'
+import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
 
 const GridViewItems = [
   { key: '1' },
@@ -20,6 +23,22 @@ const GridViewItems = [
 
 const HelloWorldApp = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [list, setList] = useState(false);
+
+  useEffect(() => {
+    getTopStyleList();
+  }, [])
+
+  const getTopStyleList = () => {
+    axios.get(`${BASE_URL}/style/rating/Customer/all`)
+      .then(res => {
+        setList(res.data)
+        console.log('res Top style', res.data)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -56,7 +75,7 @@ const HelloWorldApp = (props) => {
                   <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Blowout</Text>
                   <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Dyes</Text>
                 </View>
-                <View style={{ flexDirection: 'row', marginLeft: 17.5, marginTop: 18, marginBottom: 44.5}}>
+                <View style={{ flexDirection: 'row', marginLeft: 17.5, marginTop: 18, marginBottom: 44.5 }}>
                   <View style={{ backgroundColor: '#4D4C4C', borderRadius: 17 }}>
                     <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>Bald</Text>
                   </View>
@@ -76,18 +95,30 @@ const HelloWorldApp = (props) => {
           </Pressable>
           <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 26.67 }}>Top Cuts</Text>
           <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <View style={styles.GridViewBlockStyle}>
-                <Image
-                  style={{ marginLeft: 26, marginTop: 14 }}
-                  source={require('../../Images/upcoming.png')}
-                />
-                {/* <Text style={styles.GridViewInsideTextItemStyle} onPress={GetGridViewItem.bind(this, item.key)} > {item.key} </Text> */}
-              </View>}
+            data={list}
+            renderItem={({ item }) => {
+              console.log("item", item.upload_front_photo)
+              return (
+                <View style={styles.GridViewBlockStyle}>
+                  <ImageBackground
+                    style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end'}}
+                    source={{
+                      uri: item.upload_front_photo,
+                    }}
+                  >
+                    <Image 
+                    style={{marginTop: 7, marginRight: 7.51}}
+                    source={require('../../Images/heart.png')}
+                    />
+                  </ImageBackground>
+                </View>
+              )
+            }
+            }
             numColumns={3}
+            columnWrapperStyle={{ flex: 1, }}
           />
-          <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
+          {/* <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
           <FlatList
             data={GridViewItems}
             renderItem={({ item }) =>
@@ -96,10 +127,9 @@ const HelloWorldApp = (props) => {
                   style={{ marginLeft: 26, marginTop: 14 }}
                   source={require('../../Images/upcoming.png')}
                 />
-                {/* <Text style={styles.GridViewInsideTextItemStyle} onPress={GetGridViewItem.bind(this, item.key)} > {item.key} </Text> */}
               </View>}
             numColumns={3}
-          />
+          /> */}
         </View>
       }
     </ScrollView>
@@ -113,13 +143,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   GridViewBlockStyle: {
-    justifyContent: 'center',
-    flex: 1,
-    alignItems: 'center',
-    marginRight: 20
+    //  justifyContent: 'center',
+    //  flex: 1,
+    //  alignItems: 'center',
+    //  marginRight: 20,
     //  height: 100,
     //  margin: 5,
-    // backgroundColor: '#00BCD4'
+    // backgroundColor: 'red'
   },
   GridViewInsideTextItemStyle: {
     color: '#fff',

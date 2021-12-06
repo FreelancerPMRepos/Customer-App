@@ -14,7 +14,7 @@ import { BASE_URL, IMAGE_URL } from '../../Config';
 import Loader from '../../Components/Loader';
 
 
-const countries = ["Egypt", "Canada", "Australia", "Ireland"]
+const countries = ["Chronological"]
 
 const HelloWorldApp = (props) => {
   const [list, setList] = useState([]);

@@ -95,7 +95,7 @@ const Home = (props) => {
           </View>
         </View>
       </View>
-      <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? 410 : height * 0.38, position: 'absolute', }}>
+      <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? 410 : height * 0.38, position: 'absolute', width: width * 1 }}>
         <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? 380 : height * 0.34, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
           {
             viewHideShow == true ?
@@ -107,22 +107,22 @@ const Home = (props) => {
         <ScrollView>
           {
             storeList.length == 0 ?
-              <View style={{flex : 1}}>
+              <View style={{ flex: 1 }}>
                 <Text>NO store available</Text>
               </View>
               :
               storeList.map((res) => {
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
-                    <Image source={require('../../Images/home_dummy.png')} />
-                    <View style={{ marginLeft: 23 }}>
+                  <Pressable style={{flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07 }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
+                     <Image source={require('../../Images/home_dummy.png',)} />
+                    <View style={{ marginLeft: 23, flex: 1 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{res.store_name}</Text>
-                        <Text style={{ marginRight: 27 }}>8-18 Open</Text>
+                        <Text style={{ }}>8-18 Open</Text>
                       </View>
                       <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
                       <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy' }}>££</Text>
-                      <Text style={{ width: width * 0.69, fontSize: 12, fontFamily: 'Avenir-Medium' }}>Step into our salon and experience the most contemporary hair services.</Text>
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>Step into our salon and experience the most contemporary hair services.</Text>
                     </View>
                   </Pressable>
                 )

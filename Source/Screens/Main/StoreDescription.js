@@ -12,7 +12,7 @@ import Header from '../../Components/Header';
 import SelectDropdown from 'react-native-select-dropdown'
 import { BASE_URL, width } from '../../Config';
 import axios from 'axios';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 const countries = ["Egypt", "Canada", "Australia", "Ireland"]
@@ -27,14 +27,21 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [pickStyleModal, setPickStyleModal] = useState(false);
     const [hairdresserModal, setHairdresserModal] = useState(false);
     const [serviceId, setServiceId] = useState('');
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const { storeDetails } = route.params
+    // Date Picker
+    const [date, setDate] = useState(new Date(1598051730000));
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+
+    console.log("date", date)
+    
 
     console.log("storeDetails.id", storeDetails)
 
     useEffect(() => {
         getServiceList();
         getHairdresserList();
+        getPickStyleList();
         console.log("asd", serviceTypeList)
     }, [])
 
@@ -64,7 +71,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/favourite/${storeDetails.id}`)
             .then(res => {
                 setPickStyleList(res.data)
-                console.log('res', res.data)
+                console.log('res pick style', res.data)
             })
             .catch(e => {
                 console.log('e', e)
@@ -108,12 +115,23 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const _onBack = () => navigation.goBack()
 
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShow(Platform.OS === 'ios');
+        setDate(currentDate);
     };
 
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
+    const showMode = (currentMode) => {
+        setShow(true);
+        setMode(currentMode);
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
+
+    const showTimepicker = () => {
+        showMode('time');
     };
 
     const renderService = () => {
@@ -277,28 +295,32 @@ const StoreDescription = ({ navigation, route, props }) => {
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Hairdresser</Text>
                         {renderHairDresser()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
-                        <DateTimePickerModal
-                            isVisible={isDatePickerVisible}
-                            mode="date"
-                            display="inline"
-                            // onConfirm={handleConfirm}
-                            onCancel={hideDatePicker}
-                        />
+                        {show && (
+                            <DateTimePicker
+                                testID="dateTimePicker"
+                                value={date}
+                                mode={mode}
+                                minimumDate={new Date()}
+                                is24Hour={true}
+                                display="default"
+                                onChange={onChange}
+                            />
+                        )}
                         <View style={{ flexDirection: 'row' }}>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35 }} onPress={() => showDatePicker()}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35 }} onPress={showDatepicker}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>15 Aug 2021</Text>
                                 <Image
                                     style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
                                     source={require('../../Images/storeCalendar.png')}
                                 />
                             </Pressable>
-                            <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={showTimepicker}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>14:30</Text>
                                 <Image
                                     style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
                                     source={require('../../Images/Triangle.png')}
                                 />
-                            </View>
+                            </Pressable>
                         </View>
                         <Pressable style={{ borderWidth: 1, marginLeft: 123, marginRight: 123, marginTop: 10 }}>
                             <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 10.59, marginBottom: 10.59 }}>BOOK NOW</Text>

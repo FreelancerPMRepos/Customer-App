@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Header from '../../Components/Header'
 import { BASE_URL, Colors, IMAGE_URL } from '../../Config';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   const [isLoading, setLoading] = useState(false)
@@ -72,7 +73,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
             <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} onChangeText={text => setNote(text)} value={note} />
             <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => addNote()}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }}>ADD</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginTop: 8.5, marginBottom: 7.5, textAlign: 'center' }}>ADD</Text>
             </Pressable>
           </View>
         </View>
@@ -100,12 +101,12 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
               />
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 55, marginRight: 55, textAlign: 'center' }}>Are you sure you want to cancel your booking?</Text>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: 'row' }}>
               <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 26.5, marginTop: 21, marginBottom: 26 }} onPress={() => onCancelYes()}>
                 <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }}>Yes</Text>
               </Pressable>
-              <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 20, marginTop: 21, marginBottom: 26}} onPress={() => setCancelModal(!cancelModal)}>
-                <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5}}>No</Text>
+              <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 20, marginTop: 21, marginBottom: 26 }} onPress={() => setCancelModal(!cancelModal)}>
+                <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }}>No</Text>
               </Pressable>
             </View>
           </View>
@@ -125,16 +126,27 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           {renderCancelModal()}
           <View style={{ flexDirection: 'row' }}>
             <Image
-              style={{ marginLeft: 27, marginTop: 28, height: 118, width: 103, }}
+              style={{ marginLeft: 27, marginTop: 28, height: 127, width: 112, }}
               source={{
                 uri: `${IMAGE_URL}/${appointmentDetails.style.upload_front_photo}`,
               }}
             />
-            <View style={{ marginLeft: 32, marginTop: 28 }}>
+            <View style={{ marginLeft: 32, marginTop: 20 }}>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{appointmentDetails.style.name}</Text>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium' }}>Tomorrow at 8:30 PM</Text>
-              <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 5 }}>Location</Text>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium' }}>{appointmentDetails.store.store_name}</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>Tomorrow at 8:30 PM</Text>
+              <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 14.67, lineHeight: 22 }}>Location</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{appointmentDetails.store.store_name}</Text>
+              <View style={{marginTop: 13, marginRight: 129}}>
+                <Rating
+                  type='custom'
+                  ratingCount={5}
+                  ratingColor='#1F1E1E'
+                  ratingBackgroundColor='#c8c7c8'
+                  tintColor="#FFFFFF"
+                  imageSize={16}
+                //   onFinishRating={this.ratingCompleted}
+                />
+              </View>
             </View>
           </View>
           <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 27, marginTop: 28 }}>Description</Text>
