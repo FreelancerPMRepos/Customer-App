@@ -25,9 +25,9 @@ const ForgotPassword = (props) => {
                         style={styles.tinyLogo}
                         source={require('../../Images/forgot.png')}
                     />
-                    <Text style={styles.titleText}>Please enter your registered mobile number/ Email.</Text>
-                    <TextInput placeholder="Registered Mobile Number/Email" style={styles.emailTextinput} />
-                    <Text style={styles.subtitleText}>We will send verification code on your registered mobile number.</Text>
+                    <Text style={styles.titleText}>Please enter your registered Email.</Text>
+                    <TextInput placeholder="Registered Email" style={styles.emailTextinput} />
+                    <Text style={styles.subtitleText}>We will send verification code on your registered Email.</Text>
                     <Pressable style={styles.sendButton} onPress={() => props.navigation.navigate('OtpVerification')}>
                         <Text style={styles.buttonText}>Send</Text>
                     </Pressable>
@@ -76,7 +76,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginLeft: 15.5,
         marginRight: 15.5,
-        marginTop: 14.5
+        marginTop: 14.5,
+        paddingLeft: 15.5
     },
     sendButton: {
         borderWidth: 1,

@@ -7,7 +7,8 @@ import {
     TextInput,
     Pressable
 } from 'react-native';
-import Header from '../../Components/Header'
+import Header from '../../Components/Header';
+import { width } from '../../Config/index'
 
 const ResetPassword = (props) => {
 
@@ -71,13 +72,15 @@ const styles = StyleSheet.create({
         bottom: 89.5, 
         borderWidth: 1, 
         borderColor: '#504E4E', 
-        marginLeft: 22.5
+        marginLeft: 23.5,
+        width: width * 0.88
     },
     buttonText: {
         fontSize: 16, 
         fontFamily: 'Avenir-Medium', 
-        marginLeft: 145.5, 
-        marginRight: 144.5, 
+        textAlign: 'center',
+     //   marginLeft: 145.5, 
+     //   marginRight: 144.5, 
         marginTop: 11.5, 
         marginBottom: 11.5
     }

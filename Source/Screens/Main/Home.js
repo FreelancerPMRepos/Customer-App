@@ -17,6 +17,7 @@ import { setAuthToken } from '../../Utils/setHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import MapView from 'react-native-maps';
 import Loader from '../../Components/Loader';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -40,6 +41,8 @@ const Home = (props) => {
       isCancelled = true
     }
   }, [])
+
+  console.log("width", width)
 
   const getStoreList = () => {
     setLoading(true)
@@ -80,7 +83,7 @@ const Home = (props) => {
           <View style={{ backgroundColor: '#FFFFFF', flexDirection: 'row' }}>
             <TextInput
               placeholder="Search By Salons, Location"
-              style={{ marginLeft: 18, marginRight: 37 }}
+              style={{ width: width * 0.6, paddingLeft: 18 }}
             />
             <Image
               style={{ marginTop: 12, marginRight: 12 }}
@@ -95,7 +98,7 @@ const Home = (props) => {
           </View>
         </View>
       </View>
-      <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? 410 : height * 0.38, position: 'absolute', width: width * 1 }}>
+      <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? height * 0.52 : height * 0.38, position: 'absolute', width: width * 1 }}>
         <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? 380 : height * 0.34, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
           {
             viewHideShow == true ?
@@ -113,16 +116,44 @@ const Home = (props) => {
               :
               storeList.map((res) => {
                 return (
-                  <Pressable style={{flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07 }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
-                     <Image source={require('../../Images/home_dummy.png',)} />
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
+                    <Image source={{
+                      uri: res.images[0].url,
+                    }} style={{ height: 83, width: 71 }} />
                     <View style={{ marginLeft: 23, flex: 1 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{res.store_name}</Text>
-                        <Text style={{ }}>8-18 Open</Text>
+                        <Text style={{ color: '#1A1919', fontSize: width / 26, fontFamily: 'Avenir-Medium', lineHeight: 20 }}>{res.store_name}</Text>
+                        <View style={{ flexDirection: 'row' }}>
+                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>8-18</Text>
+                          {
+                            res.is_available == 1 ?
+                              <Text style={{ color: '#70CF2B', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Open</Text>
+                              :
+                              <Text style={{ color: '#E73E3E', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Closed</Text>
+                          }
+                        </View>
                       </View>
-                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
-                      <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy' }}>££</Text>
-                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>Step into our salon and experience the most contemporary hair services.</Text>
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>0.4 Miles</Text>
+                      <View style={{ flexDirection: 'row' }}>
+                        <View style={{ marginTop: 3 }}>
+                          <Rating
+                            type='custom'
+                            ratingCount={5}
+                            ratingColor='#1F1E1E'
+                            ratingBackgroundColor='#c8c7c8'
+                            tintColor="#FFFFFF"
+                            readonly={true}
+                            startingValue={4}
+                            imageSize={16}
+                          //   onFinishRating={this.ratingCompleted}
+                          />
+                        </View>
+                        <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 14 }}>££</Text>
+                      </View>
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{res.description}</Text>
+                      <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 13, marginRight: 35 }}>
+                        <Text style={{ marginTop: 8, fontFamily: 'Avenir-Heavy', borderBottomWidth: 1, lineHeight: 16 }}>SEE MORE</Text>
+                      </View>
                     </View>
                   </Pressable>
                 )

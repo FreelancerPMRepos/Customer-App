@@ -7,6 +7,7 @@ import {
     Pressable
 } from 'react-native';
 import Header from '../../Components/Header'
+import { width } from '../../Config';
 
 const OtpVerification = (props) => {
 
@@ -76,13 +77,15 @@ const styles = StyleSheet.create({
     verifyButton: {
         borderWidth: 1, 
         borderColor: '#504E4E', 
-        marginLeft: 22.5
+        marginLeft: 22.5,
+        width: width * 0.87
     },
     verifyButtonText: {
         fontSize: 16, 
-        fontFamily: 'Avenir-Medium', 
-        marginLeft: 144.5, 
-        marginRight: 143.5, 
+        fontFamily: 'Avenir-Medium',
+        textAlign: 'center', 
+     //   marginLeft: 144.5, 
+     //   marginRight: 143.5, 
         marginTop: 11.5, 
         marginBottom: 11.5
     },

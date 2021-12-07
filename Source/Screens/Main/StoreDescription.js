@@ -13,6 +13,7 @@ import SelectDropdown from 'react-native-select-dropdown'
 import { BASE_URL, width } from '../../Config';
 import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 
 const countries = ["Egypt", "Canada", "Australia", "Ireland"]
@@ -34,7 +35,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [show, setShow] = useState(false);
 
     console.log("date", date)
-    
+
 
     console.log("storeDetails.id", storeDetails)
 
@@ -270,11 +271,34 @@ const StoreDescription = ({ navigation, route, props }) => {
             {
                 <ScrollView>
                     <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: 10 }}>
-                        <Image source={require('../../Images/home_dummy.png')} />
+                        <Image source={{
+                            uri: storeDetails.images[0].url,
+                        }} style={{ height: 83, width: 71 }} />
                         <View style={{ marginLeft: 15 }}>
                             <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeDetails.store_name}</Text>
-                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>0.4 Miles</Text>
-                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium' }}>8-18 Open</Text>
+                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>0.4 Miles</Text>
+                            <View style={{ marginRight: 186 }}>
+                                <Rating
+                                    type='custom'
+                                    ratingCount={5}
+                                    ratingColor='#1F1E1E'
+                                    ratingBackgroundColor='#c8c7c8'
+                                    tintColor="#FFFFFF"
+                                    readonly={true}
+                                    startingValue={4}
+                                    imageSize={16}
+                                //   onFinishRating={this.ratingCompleted}
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>8-18</Text>
+                                {
+                                    storeDetails.is_available == 1 ?
+                                        <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#70CF2B' }}> Open</Text>
+                                        :
+                                        <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#E73E3E' }}> Closed</Text>
+                                }
+                            </View>
                         </View>
                     </View>
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 26, marginTop: 10 }}>Reviews</Text>

@@ -10,7 +10,7 @@ import {
   TextInput
 } from 'react-native';
 import Header from '../../Components/Header'
-import { BASE_URL, Colors, IMAGE_URL } from '../../Config';
+import { BASE_URL, Colors, IMAGE_URL, width } from '../../Config';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 
 const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
@@ -131,18 +131,20 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
                 uri: `${IMAGE_URL}/${appointmentDetails.style.upload_front_photo}`,
               }}
             />
-            <View style={{ marginLeft: 32, marginTop: 20 }}>
+            <View style={{ marginLeft: 32, marginTop: 20, width: width * 0.52 }}>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{appointmentDetails.style.name}</Text>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>Tomorrow at 8:30 PM</Text>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 14.67, lineHeight: 22 }}>Location</Text>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{appointmentDetails.store.store_name}</Text>
-              <View style={{marginTop: 13, marginRight: 129}}>
+              <View style={{ marginTop: 13, marginRight: 129 }}>
                 <Rating
                   type='custom'
                   ratingCount={5}
                   ratingColor='#1F1E1E'
                   ratingBackgroundColor='#c8c7c8'
                   tintColor="#FFFFFF"
+                  readonly={true}
+                  startingValue={4}
                   imageSize={16}
                 //   onFinishRating={this.ratingCompleted}
                 />
