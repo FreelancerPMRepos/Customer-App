@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import MapView from 'react-native-maps';
 import Loader from '../../Components/Loader';
 import { Rating, AirbnbRating } from 'react-native-ratings';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -34,7 +35,9 @@ const Home = (props) => {
     if (!isCancelled) {
       if (auth.access_token) {
         setAuthToken(auth.access_token)
+        console.log("token home", auth.access_token)
         getStoreList()
+        getUserInfo()
       }
     }
     return () => {
@@ -50,6 +53,25 @@ const Home = (props) => {
       .then(res => {
         setStoreList(res.data)
         console.log('res', res.data)
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
+      })
+  }
+
+  const getUserInfo = async () => {
+    setLoading(true)
+    axios.get(`${BASE_URL}/users/me`)
+      .then(res => {
+        try {
+          const jsonValue = JSON.stringify(res.data)
+          AsyncStorage.setItem('@user_details', jsonValue)
+          console.log('res user info', res.data)
+        } catch (e) {
+          // saving error
+        }
         setLoading(false)
       })
       .catch(e => {
@@ -117,9 +139,17 @@ const Home = (props) => {
               storeList.map((res) => {
                 return (
                   <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
-                    <Image source={{
-                      uri: res.images[0].url,
-                    }} style={{ height: 83, width: 71 }} />
+                    {
+                      res.images.length == 0 ?
+                        <Image
+                          style={{ height: 83, width: 71 }}
+                          source={require('../../Images/noImage.jpg')}
+                        />
+                        :
+                        <Image source={{
+                          uri: res?.images[0]?.url,
+                        }} style={{ height: 83, width: 71 }} />
+                    }
                     <View style={{ marginLeft: 23, flex: 1 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={{ color: '#1A1919', fontSize: width / 26, fontFamily: 'Avenir-Medium', lineHeight: 20 }}>{res.store_name}</Text>

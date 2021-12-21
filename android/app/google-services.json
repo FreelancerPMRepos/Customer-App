@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "423891850043",
+    "project_id": "haircut-customer-app",
+    "storage_bucket": "haircut-customer-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423891850043:android:4c8d00e8cc249a2c8f9d1e",
+        "android_client_info": {
+          "package_name": "com.haircut"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "423891850043-lhlcvfq0ih6m4qthi1f9fg53ob3sdktf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCacROLLkQIryyrM9TbEMtAayO5A0_WNTM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "423891850043-e8nks50e9jpcqo615qh7ngjfbncgnqhs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,10 +1,11 @@
-import { AUTH_SERVICE_RUNNING, RESET_AUTH, SET_LOGIN_SUCCESS, SET_USER } from "../Actions/Types"
+import { AUTH_SERVICE_RUNNING, RESET_AUTH, SET_LOGIN_SUCCESS, SET_USER, SET_LOGIN_TYPE } from "../Actions/Types"
 
 const initialState = {
     isLoading: false,
     isError: false,
     error: null,
     token: null,
+    loginType: false,
 }
 
 export default (state = initialState, action) => {
@@ -25,6 +26,11 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 loginSuccess: true
+            }
+        case SET_LOGIN_TYPE:
+            return {
+                ...state,
+                loginType: true,
             }
         case RESET_AUTH:
             return initialState

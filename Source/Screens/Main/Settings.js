@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -13,9 +13,14 @@ import {
 import Header from '../../Components/Header';
 import { useDispatch } from 'react-redux';
 import { resetAuth } from '../../Actions/AuthActions';
+import axios from 'axios';
+import { BASE_URL } from '../../Config';
+import Loader from '../../Components/Loader';
 
 const Settings = (props) => {
+  const [isLoading, setLoading] = useState(false)
   const dispatch = useDispatch()
+
 
   const onLogout = () => {
     Alert.alert(
@@ -34,8 +39,18 @@ const Settings = (props) => {
   }
 
   const _log = () => {
-    dispatch(resetAuth())
-    console.log("USER LOGOUT")
+    setLoading(true)
+    axios.delete(`${BASE_URL}/logout`)
+      .then(res => {
+        console.log('res', res.data)
+        dispatch(resetAuth())
+        console.log("USER LOGOUT")
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
+      })
   }
 
 
@@ -43,6 +58,9 @@ const Settings = (props) => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {
         <Header {...props} />
+      }
+       {
+        isLoading && <Loader />
       }
       {
         <View style={styles.mainView} >
@@ -96,49 +114,49 @@ const styles = StyleSheet.create({
     color: '#1A1919'
   },
   commonText: {
-    color: '#1A1919', 
+    color: '#1A1919',
     marginTop: 15.59
   },
   resetPasswordText: {
-    fontSize: 12, 
+    fontSize: 12,
     color: '#1A1919'
   },
   changeLocationText: {
-    fontSize: 12, 
+    fontSize: 12,
     color: '#1A1919'
   },
   servicesText: {
-    marginTop: 29, 
+    marginTop: 29,
     color: '#1A1919'
   },
-  privacyPolicyText:{
-    borderBottomWidth: 1, 
+  privacyPolicyText: {
+    borderBottomWidth: 1,
     color: '#17171A'
   },
   termsServiceText: {
-    borderBottomWidth: 1, 
+    borderBottomWidth: 1,
     color: '#17171A'
   },
   logoutText: {
-    borderBottomWidth: 1, 
+    borderBottomWidth: 1,
     color: '#17171A'
   },
   bottomButtonView: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 20.59
   },
   textInputStyle: {
     borderWidth: 1,
-    marginTop: 12.5, 
-    borderColor: '#979797', 
-    height: 35, 
+    marginTop: 12.5,
+    borderColor: '#979797',
+    height: 35,
     paddingLeft: 10.5
   },
   loactionpasswordButton: {
-    justifyContent: 'flex-end', 
-    alignSelf: 'flex-end', 
-    marginTop: 13, 
+    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
+    marginTop: 13,
     borderBottomWidth: 1
   }
 })

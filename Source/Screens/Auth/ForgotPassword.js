@@ -1,4 +1,5 @@
-import React from 'react';
+import axios from 'axios';
+import React, { useState } from 'react';
 import {
     Text,
     View,
@@ -8,15 +9,39 @@ import {
     Image
 } from 'react-native';
 import Header from '../../Components/Header'
+import { BASE_URL } from '../../Config';
+import Loader from '../../Components/Loader';
 
 const ForgotPassword = (props) => {
+    const [isLoading, setLoading] = useState(false)
 
     const _onBack = () => props.navigation.goBack()
+
+    const _onSend = () => {
+        setLoading(true)
+        axios.post(`${BASE_URL}/forgot/password`, {
+            mobile_number: "98997979496"
+        })
+            .then(res => {
+                console.log('res', res.data)
+                props.navigation.navigate('OtpVerification')
+                setLoading(false)
+            })
+            .catch(e => {
+                console.log('e', e)
+                props.navigation.navigate('OtpVerification')
+                setLoading(false)
+            })
+    }
+
 
     return (
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
+            }
+            {
+                isLoading && <Loader />
             }
             {
                 <View>
@@ -28,7 +53,7 @@ const ForgotPassword = (props) => {
                     <Text style={styles.titleText}>Please enter your registered Email.</Text>
                     <TextInput placeholder="Registered Email" style={styles.emailTextinput} />
                     <Text style={styles.subtitleText}>We will send verification code on your registered Email.</Text>
-                    <Pressable style={styles.sendButton} onPress={() => props.navigation.navigate('OtpVerification')}>
+                    <Pressable style={styles.sendButton} onPress={() => _onSend()}>
                         <Text style={styles.buttonText}>Send</Text>
                     </Pressable>
                 </View>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     View,
@@ -9,11 +9,38 @@ import {
     Pressable
 } from 'react-native';
 
-import { width } from '../../Config';
+import { BASE_URL, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../Actions/AuthActions'
+import { login, socialLogin } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
 import Loader from '../../Components/Loader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+    statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {
+    LoginManager,
+    AccessToken,
+    GraphRequest,
+    GraphRequestManager,
+    Profile
+} from 'react-native-fbsdk-next'
+import axios from 'axios';
+
+
+GoogleSignin.configure({
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'], // [Android] what API you want to access on behalf of the user, default is email and profile
+    webClientId: '423891850043-hn0jkc7hlbncun2i7ngcm4cb8tpin6um.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+    offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+    hostedDomain: '', // specifies a hosted domain restriction
+    iosClientId: '<FROM DEVELOPER CONSOLE>', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
+    googleServicePlistPath: '', // [iOS] if you renamed your GoogleService-Info file, new name here, e.g. GoogleService-Info-Staging
+    openIdRealm: '', // [iOS] The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.
+    profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
+});
 
 const Login = (props) => {
     const dispatch = useDispatch()
@@ -22,6 +49,10 @@ const Login = (props) => {
     const [email, setEmail] = useState('')
     const [Password, setPassword] = useState('')
     const [isLoading, setLoading] = useState(false)
+
+    useEffect(() => {
+        GoogleSignin.configure()
+    }, [])
 
     const _onLogin = () => {
         if (email == '') {
@@ -37,6 +68,100 @@ const Login = (props) => {
             }
             dispatch(login(data))
         }
+    }
+
+    const _onGoogleSignin = async () => {
+        console.log("tappedOnGoogleButton")
+        try {
+            await GoogleSignin.hasPlayServices()
+            const userInfo = await GoogleSignin.signIn()
+            userInfo.social_type = 'GOOGLE'
+            console.log("User Info", userInfo.user.id)
+            const data = {
+                social_id: userInfo.user.id,
+                type: "GOOGLE"
+            }
+            try {
+                const jsonValue = JSON.stringify(data)
+                await AsyncStorage.setItem('@storage_Key', jsonValue)
+                dispatch(socialLogin(data))
+            } catch (e) {
+                // saving error
+            }
+        } catch (error) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+                this.setState({
+                    isGoogleLoading: false
+                })
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+                // operation (f.e. sign in) is in progress already
+                this.setState({
+                    isGoogleLoading: false
+                })
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+                // play services not available or outdated
+                alert('Google SignIn Play Services Not Available')
+                this.setState({
+                    isGoogleLoading: false
+                })
+            } else {
+                // some other error happened
+                alert(error)
+            }
+        }
+    }
+
+    const _onFacebookSignin = async () => {
+        // Attempt a login using the Facebook login dialog asking for default permissions.
+        let self = this
+        LoginManager.logInWithPermissions(['public_profile', 'email']).then(
+            function (result) {
+                console.log("result", result)
+                if (result.isCancelled) {
+                    //   self.setState({
+                    //     isFacebookLoading: false
+                    //   })
+                } else {
+                    AccessToken.getCurrentAccessToken().then(data => {
+                        let accessToken = data.accessToken
+                        console.log("adsaf", accessToken)
+                        try {
+                            const currentProfile = Profile.getCurrentProfile().then(
+                                function (currentProfile) {
+                                    if (currentProfile) {
+                                        // console.log("The current logged user is: " +
+                                        //     currentProfile.name
+                                        //     + ". His profile id is: " +
+                                        //     currentProfile.userID
+                                        // );\
+                                        const data = {
+                                            social_id: currentProfile.userID,
+                                            type: "FACEBOOK"
+                                        }
+                                        console.log("data",data)
+                                        try {
+                                            const jsonValue = JSON.stringify(data)
+                                             AsyncStorage.setItem('@storage_Key', jsonValue)
+                                            dispatch(socialLogin(data))
+                                        } catch (e) {
+                                            // saving error
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                        catch {
+                            console.log("error")
+                        }
+                    })
+                }
+            },
+            function (error) {
+                this.setState({
+                    btnFacebookLoading: false
+                })
+            }
+        )
     }
 
     const renderEmailView = () => {
@@ -95,10 +220,10 @@ const Login = (props) => {
     const renderSocialButton = () => {
         return (
             <View style={{ flexDirection: 'row', marginTop: 7 }}>
-                <Pressable style={{ backgroundColor: '#FFFFFF' }}>
+                <Pressable style={{ backgroundColor: '#FFFFFF' }} onPress={() => _onGoogleSignin()}>
                     <Text style={{ marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Google</Text>
                 </Pressable>
-                <Pressable style={{ backgroundColor: '#1976D2', marginLeft: 7 }}>
+                <Pressable style={{ backgroundColor: '#1976D2', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
                     <Text style={{ color: '#FFFFFF', marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Facebook</Text>
                 </Pressable>
             </View>

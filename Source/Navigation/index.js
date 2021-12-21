@@ -11,6 +11,7 @@ import Signup from '../Screens/Auth/Signup';
 import ForgotPassword from '../Screens/Auth/ForgotPassword';
 import OtpVerification from '../Screens/Auth/OtpVerification';
 import ResetPassword from '../Screens/Auth/ResetPassword';
+import UserDetails from '../Screens/Auth/UserDetails';
 
 // Main
 import Home from '../Screens/Main/Home';
@@ -29,10 +30,13 @@ import AppointmentsDescriptionScreen from '../Screens/Appointment/AppointmentsDe
 
 const Routes = (props) => {
   const loginSuccess = useSelector(state => state.auth.loginSuccess)
+  const loginType = useSelector(state => state.auth.loginType)
 
   const Stack = createStackNavigator();
 
   const Tab = createBottomTabNavigator();
+
+  console.log("yu",loginType)
 
   const HomeTabs = () => {
     return (
@@ -101,6 +105,14 @@ const Routes = (props) => {
         {
           loginSuccess ? (
             <>
+            {
+              loginType ? (
+                 <Stack.Screen name="UserDetails" component={UserDetails} />
+              )
+              :
+              null
+            }
+             
               <Stack.Screen name="HomeTabs" component={HomeTabs} />
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="HairCuts" component={HairCuts} />
