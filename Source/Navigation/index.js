@@ -18,6 +18,7 @@ import Home from '../Screens/Main/Home';
 import Search from '../Screens/Main/Search';
 import Settings from '../Screens/Main/Settings';
 import StoreDescription from '../Screens/Main/StoreDescription';
+import PaymentScreen from '../Screens/Main/PaymentScreen';
 
 // HairCut
 import HairCuts from '../Screens/HairCut/HairCuts';
@@ -123,6 +124,7 @@ const Routes = (props) => {
               <Stack.Screen name="Settings" component={Settings} />
               <Stack.Screen name="StoreDescription" component={StoreDescription} />
               <Stack.Screen name="ResetPassword" component={ResetPassword} />
+              <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
             </>
           )
             :

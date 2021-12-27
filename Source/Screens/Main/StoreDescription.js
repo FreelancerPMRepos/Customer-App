@@ -9,19 +9,21 @@ import {
     ScrollView,
 } from 'react-native';
 import Header from '../../Components/Header';
-import { BASE_URL, width } from '../../Config';
+import { BASE_URL, width, height } from '../../Config';
 import axios from 'axios';
-import { Rating, AirbnbRating } from 'react-native-ratings';
+import { Rating } from 'react-native-ratings';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector, useDispatch } from 'react-redux';
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 const DaysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
-
-
 const StoreDescription = ({ navigation, route, props }) => {
+    const updatedName = useSelector(state => state)
+    console.log("new name andar fav", updatedName.fav)
+    const dispatch = useDispatch()
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
     const [hairdresserList, setHairdresserList] = useState([]);
@@ -60,18 +62,27 @@ const StoreDescription = ({ navigation, route, props }) => {
         getPickStyleList();
         getDateSlot();
         getData();
+        Check()
     }, [])
+
+    const Check = () => {
+        if (updatedName.fav.data == null) {
+            null
+        } else {
+            setServiceId(updatedName.fav.data.service.id)
+        }
+    }
 
     const getData = async () => {
         try {
-          const jsonValue = await AsyncStorage.getItem('@user_details')
-          const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-          console.log("jdfhughs",parData)
-          setUserDetails(parData)
+            const jsonValue = await AsyncStorage.getItem('@user_details')
+            const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
+            console.log("jdfhughs", parData)
+            setUserDetails(parData)
         } catch (e) {
-          // error reading value
+            // error reading value
         }
-      }
+    }
 
     const getTime = (date, day) => {
         setSelectedDate(date)
@@ -167,7 +178,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const getServiceList = () => {
         // axios.get(`${BASE_URL}/style/list/${storeDetails.id}`)
-         axios.get(`${BASE_URL}/service/all/list`)
+        axios.get(`${BASE_URL}/service/all/list`)
             .then(res => {
                 setServiceList(res.data)
                 //    console.log('res', res.data)
@@ -192,7 +203,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/favourite/${storeDetails.id}`)
             .then(res => {
                 setPickStyleList(res.data)
-                 console.log('res pick style', res.data)
+                console.log('res pick style', res.data)
             })
             .catch(e => {
                 console.log('e', e)
@@ -242,7 +253,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onPickStyle = (res) => {
-        console.log("sd",res)
+        console.log("sd", res)
         setPickStyleId(res.style.id)
         setPickStyleName(res.style.name)
         setPickStyleModal(!pickStyleModal)
@@ -292,25 +303,42 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onBook = () => {
-        console.log("sdf",`${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`)
-        axios.post(`${BASE_URL}/booking`, {
-            store_id: storeDetails.id,
-            employee_id: hairdresserId,
-            customer_id: userDetails.id,
-            service_id: serviceId,
-            style_type_id: serviceTypeId,
-            style_id: pickStyleId,
-            booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`,
-        })
-        .then(res => {
-           console.log("booking response",res.data)
-           alert(res.data.message)
-           navigation.goBack()
-        })
-        .catch(e => {
-            console.log('e', e)
-            alert(e)
-        })
+        if (serviceId == '') {
+            alert('Please select service')
+            return false
+        } else if (serviceTypeId == '') {
+            alert('Please select service type')
+            return false
+        } else if (serviceTypeId == '') {
+            alert('Please select pick style')
+            return false
+        } else if (hairdresserId == '') {
+            alert('Please select hairdresser')
+            return false
+        } else if (selectedDate && selectedTime == '') {
+            alert('Please select date and time')
+            return false
+        } else {
+            axios.post(`${BASE_URL}/booking`, {
+                store_id: storeDetails.id,
+                employee_id: hairdresserId,
+                customer_id: userDetails.id,
+                service_id: serviceId,
+                style_type_id: serviceTypeId,
+                style_id: pickStyleId,
+                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`,
+            })
+                .then(res => {
+                    console.log("booking response", res.data)
+                    //    alert(res.data.message)
+                    //    navigation.goBack()
+                    navigation.navigate('PaymentScreen')
+                })
+                .catch(e => {
+                    console.log('e', e)
+                    alert(e)
+                })
+        }
     }
 
 
@@ -443,15 +471,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
-
-    // var myloop = [];
-    // for (let i = 0; i < 31; i++) {
-    //     myloop.push (
-    //             <View key={i}>
-    //             <Text>{i}</Text>
-    //             </View>
-    //         );
-    // }
     return (
         <View style={styles.container}>
             {
@@ -459,7 +478,38 @@ const StoreDescription = ({ navigation, route, props }) => {
             }
             {
                 <ScrollView>
-                    <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: 10 }}>
+                    {
+                        updatedName.fav.data == null ?
+                            null
+                            :
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
+                    }
+                    {
+                        updatedName.fav.data == null ?
+                            null
+                            :
+                            <View style={{ flexDirection: 'row' }}>
+                                <Image
+                                    style={{ marginLeft: 26, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
+                                    source={{
+                                        uri: updatedName.fav.data.upload_front_photo,
+                                    }}
+                                />
+                                <Image
+                                    style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
+                                    source={{
+                                        uri: updatedName.fav.data.upload_back_photo,
+                                    }}
+                                />
+                                <Image
+                                    style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, marginRight: 26 }}
+                                    source={{
+                                        uri: updatedName.fav.data.upload_right_photo,
+                                    }}
+                                />
+                            </View>
+                    }
+                    <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: updatedName.fav.data ? 23 : 10 }}>
                         {
                             storeDetails.images.length == 0 ?
                                 <Image
@@ -498,21 +548,45 @@ const StoreDescription = ({ navigation, route, props }) => {
                             </View>
                         </View>
                     </View>
-                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 26, marginTop: 10 }}>Reviews</Text>
-                    <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, marginTop: 3 }}
-                    />
-                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Brilliant and professional, I was in and out before the end of my lunch break.”</Text>
-                    <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
-                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Had a stop over in town tonight and needed a haircut before a meeting tomorrow. Last minute lifesaver.”</Text>
-                    <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                    {
+                        updatedName.fav.data == null ?
+                            <View>
+                                <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 26, marginTop: 10 }}>Reviews</Text>
+                                <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, marginTop: 3 }}
+                                />
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Brilliant and professional, I was in and out before the end of my lunch break.”</Text>
+                                <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Had a stop over in town tonight and needed a haircut before a meeting tomorrow. Last minute lifesaver.”</Text>
+                                <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                            </View>
+                            :
+                            null
+                    }
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 28, marginTop: 10 }}>Book</Text>
-                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 28, marginTop: 7 }}>Service</Text>
                     <View style={{ marginLeft: 27.5 }}>
-                        {renderService()}
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Service Type</Text>
+                        {
+                            updatedName.fav.data == null ?
+                                <View>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7 }}>Service</Text>
+                                    {renderService()}
+
+                                </View>
+                                :
+                                null
+
+                        }
+                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Service Type</Text>
                         {renderServiceType()}
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Pick Style</Text>
-                        {renderPickStyle()}
+                        {
+                            updatedName.fav.data == null ?
+                                <View>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Pick Style</Text>
+                                    {renderPickStyle()}
+                                </View>
+                                :
+                                null
+                        }
+
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Hairdresser</Text>
                         {renderHairDresser()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
@@ -754,7 +828,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     </View>
                 </ScrollView>
             }
-        </View>
+        </View >
     )
 }
 export default StoreDescription;

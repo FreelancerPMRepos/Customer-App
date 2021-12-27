@@ -7,10 +7,12 @@ import {
   FlatList,
   Image,
   Pressable,
-  ImageBackground
+  ImageBackground,
+  ScrollView
 } from 'react-native';
 import Header from '../../Components/Header'
-import { BASE_URL, height, width } from '../../Config';
+import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
+import Loader from '../../Components/Loader';
 
 const GridViewItems = [
   { key: '../../Images/cut1.png' },
@@ -20,6 +22,7 @@ const GridViewItems = [
 
 const HelloWorldApp = (props) => {
   const [list, setList] = useState([]);
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
     getAllFavouriteList();
@@ -28,13 +31,16 @@ const HelloWorldApp = (props) => {
   console.log("key", GridViewItems.key)
 
   const getAllFavouriteList = () => {
+    setLoading(true)
     axios.get(`${BASE_URL}/all/favourite`)
       .then(res => {
         setList(res.data)
         console.log('res All Favourite style', res.data)
+        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
+        setLoading(false)
       })
   }
   return (
@@ -42,62 +48,46 @@ const HelloWorldApp = (props) => {
       {
         <Header {...props} />
       }
+       {
+        isLoading && <Loader />
+      }
       {
-        <View>
+        <ScrollView style={{marginBottom: 15}}>
           <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 27, marginTop: 28, fontFamily: 'Avenir-Heavy' }}>Saved and Custom Styles</Text>
-          <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 34.67 }}>Haircuts</Text>
-          <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <View style={styles.GridViewBlockStyle}>
-                <ImageBackground
-                  style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end' }}
-                  source={require(`../../Images/upcoming.png`)}
-                >
-                  <Image
-                    style={{ marginTop: 7, marginRight: 7.51 }}
-                    source={require('../../Images/heart.png')}
-                  />
-                </ImageBackground>
-              </View>}
-            numColumns={3}
-          />
-          <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 14.67 }}>Dyes</Text>
-          <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <Pressable style={styles.GridViewBlockStyle} onPress={() => props.navigation.navigate('HairCutDescriptionScreen')}>
-                <ImageBackground
-                  style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end' }}
-                  source={require('../../Images/upcoming.png')}
-                >
-                  <Image
-                    style={{ marginTop: 7, marginRight: 7.51, }}
-                    source={require('../../Images/scisor.png')}
-                  />
-                </ImageBackground>
-              </Pressable>}
-            numColumns={3}
-          />
-          <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 14.67 }}>Nails</Text>
-          <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <View style={styles.GridViewBlockStyle}>
-                <ImageBackground
-                  style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end' }}
-                  source={require('../../Images/upcoming.png')}
-                >
-                  <Image
-                    style={{ marginTop: 7, marginRight: 7.51 }}
-                    source={require('../../Images/scisor.png')}
-                  />
-                </ImageBackground>
-                {/* <Text style={styles.GridViewInsideTextItemStyle} onPress={GetGridViewItem.bind(this, item.key)} > {item.key} </Text> */}
-              </View>}
-            numColumns={3}
-          />
-        </View>
+          {/* <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 34.67 }}>Haircuts</Text> */}
+          {
+            list.map((res, index) => {
+              console.log("res", res.list.length)
+              return (
+                <View key={index}>
+                  <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 10 }}>{res.name}</Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    {
+                      res.list.map((val, index) => {
+                        return (
+                          <Pressable style={{}} key={index} onPress={() => props.navigation.navigate('HairCutDescriptionScreen', { id: val.style_id})}>
+                            <ImageBackground
+                              style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end', }}
+                              //  source={require('../../Images/upcoming.png')}
+                              source={{
+                                uri: `${val.upload_front_photo}`,
+                              }}
+                            >
+                              <Image
+                                style={{ marginTop: 7, marginRight: 7.51 }}
+                                source={require('../../Images/heart.png')}
+                              />
+                            </ImageBackground>
+                          </Pressable>
+                        )
+                      })
+                    }
+                  </View>
+                </View>
+              )
+            })
+          }
+        </ScrollView>
       }
     </View>
   )
@@ -110,10 +100,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   GridViewBlockStyle: {
-    justifyContent: 'center',
-    flex: 1,
-    alignItems: 'center',
-    marginRight: 20
+    //  justifyContent: '',
+    //   flex: 1,
+    //   alignItems: 'center',
+    //  marginRight: 20,
+    flexDirection: 'row'
     //  height: 100,
     //  margin: 5,
     // backgroundColor: '#00BCD4'

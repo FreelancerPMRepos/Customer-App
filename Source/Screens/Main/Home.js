@@ -8,7 +8,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
-  PixelRatio
+  PixelRatio,
 } from 'react-native';
 
 import { BASE_URL } from '../../Config';
@@ -19,16 +19,21 @@ import MapView from 'react-native-maps';
 import Loader from '../../Components/Loader';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { deleteSalon } from '../../Actions/PickSalon'
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 const Home = (props) => {
-  const dispatch = useDispatch()
   const auth = useSelector(state => state.auth)
   const [viewHideShow, setViewHideShow] = useState(false);
   const [storeList, setStoreList] = useState([]);
   const [isLoading, setLoading] = useState(false)
+  const [pickSalonData, setPickSalonData] = useState('');
+  const updatedName = useSelector(state => state)
+  console.log("new name andar fav", updatedName.fav)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     let isCancelled = false;
@@ -38,6 +43,7 @@ const Home = (props) => {
         console.log("token home", auth.access_token)
         getStoreList()
         getUserInfo()
+        getPickSalon()
       }
     }
     return () => {
@@ -45,20 +51,37 @@ const Home = (props) => {
     }
   }, [])
 
-  console.log("width", width)
+  // console.log("width", width)
 
   const getStoreList = () => {
     setLoading(true)
     axios.get(`${BASE_URL}/store/list`)
       .then(res => {
         setStoreList(res.data)
-        console.log('res', res.data)
+        //    console.log('res', res.data)
         setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
         setLoading(false)
       })
+  }
+
+  const getPickSalon = async () => {
+    console.log("yaha aaya")
+    try {
+      const jsonValue = await AsyncStorage.getItem('@pick_salon')
+      const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
+      console.log("jdfhughs", parData)
+      setPickSalonData(parData)
+      console.log("data", pickSalonData)
+    } catch (e) {
+      // error reading value
+    }
+  }
+
+  const _onSalonCancel = async () => {
+    dispatch(deleteSalon(updatedName.fav))
   }
 
   const getUserInfo = async () => {
@@ -68,7 +91,7 @@ const Home = (props) => {
         try {
           const jsonValue = JSON.stringify(res.data)
           AsyncStorage.setItem('@user_details', jsonValue)
-          console.log('res user info', res.data)
+          //     console.log('res user info', res.data)
         } catch (e) {
           // saving error
         }
@@ -79,6 +102,9 @@ const Home = (props) => {
         setLoading(false)
       })
   }
+
+
+
   return (
     <View style={styles.container}>
       {
@@ -119,6 +145,18 @@ const Home = (props) => {
             />
           </View>
         </View>
+        {
+          updatedName.fav.data == null ?
+            null
+            :
+            <View style={{ top: 95, backgroundColor: Colors.white, marginLeft: width * 0.57, flexDirection: 'row' }}>
+              <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={{ height: 60, width: 59.39, marginTop: 5.5, marginLeft: 7.8, marginBottom: 5.5 }} />
+              <Pressable onPress={() => _onSalonCancel()}>
+                <Image source={require('../../Images/cross.png')} style={{ marginTop: 20, marginLeft: 10, marginRight: 14 }} />
+              </Pressable>
+            </View>
+        }
+
       </View>
       <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? height * 0.52 : height * 0.38, position: 'absolute', width: width * 1 }}>
         <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? 380 : height * 0.34, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
@@ -136,9 +174,9 @@ const Home = (props) => {
                 <Text>NO store available</Text>
               </View>
               :
-              storeList.map((res) => {
+              storeList.map((res, index) => {
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res })}>
                     {
                       res.images.length == 0 ?
                         <Image

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
@@ -7,24 +8,51 @@ import {
   Image,
   Pressable,
   Modal,
-  TextInput
+  TextInput,
 } from 'react-native';
 import Header from '../../Components/Header'
-import { Colors } from '../../Config';
+import { BASE_URL, Colors, height, width } from '../../Config';
+import { useDispatch, useSelector } from 'react-redux'
+import { addSalon } from '../../Actions/PickSalon'
 
-const GridViewItems = [
-  { key: '1' },
-  { key: '2' },
-  { key: '3' },
-  { key: '4' },
-  { key: '5' },
-  { key: '6' },
-]
 
-const HairCutDescriptionScreen = (props) => {
+const HairCutDescriptionScreen = ({ navigation, route, props }) => {
+  const { id } = route.params
   const [modalVisible, setModalVisible] = useState(false);
+  const [list, setList] = useState([]);
+  const [note, setNote] = useState('');
+  const dispatch = useDispatch()
 
-  const _onBack = () => props.navigation.goBack()
+  // console.log("id", id)
+
+  const _onBack = () => navigation.goBack()
+
+  useEffect(() => {
+    getDetails()
+  }, [])
+
+  const getDetails = () => {
+    axios.get(`${BASE_URL}/style/detail/${id}`)
+      .then(res => {
+        setList(res.data)
+        console.log('res details', res.data)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
+  }
+
+  const _onNoteSave = () => {
+    axios.post(`${BASE_URL}/note`, {
+
+    })
+  }
+
+  const _onPick = () => {
+    const user = list
+    dispatch(addSalon(user))
+    alert('Salon Picked!')
+  }
 
   const renderAddNoteModal = () => {
     return (
@@ -46,9 +74,9 @@ const HairCutDescriptionScreen = (props) => {
               />
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
-            <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} />
+            <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} onChangeText={text => setNote(text)} value={note} />
             <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }}>SAVE</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }} onPress={() => _onNoteSave()}>SAVE</Text>
             </Pressable>
           </View>
         </View>
@@ -64,21 +92,50 @@ const HairCutDescriptionScreen = (props) => {
       {
         <View>
           {renderAddNoteModal()}
-          <Text style={styles.afroHairTextStyle}>Afro Hair</Text>
-          <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <View style={styles.GridViewBlockStyle}>
-                <Image
-                  style={{ marginLeft: 26, marginTop: 14 }}
-                  source={require('../../Images/upcoming.png')}
-                />
-              </View>}
-            numColumns={3}
-          />
-          <Text style={[styles.title,{marginTop: 25}]}>DESCRIPTION</Text>
-          <Text style={styles.subTitle}>Requires fizzy hair. Make uniform in length and set that to be about one heads with long</Text>
-          <Text style={[styles.title,{ marginTop: 15 }]}>NOTES</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={styles.afroHairTextStyle}>{list.name}</Text>
+            <Image
+              style={{ marginTop: 5, marginRight: 29 }}
+              source={require('../../Images/black_heart.png')}
+            />
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <Image
+              style={{ marginLeft: 26, marginTop: 15, height: height * 0.16, width: width * 0.28, }}
+              source={{
+                uri: list.upload_front_photo,
+              }}
+            />
+            <Image
+              style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.28, }}
+              source={{
+                uri: list.upload_back_photo,
+              }}
+            />
+            <Image
+              style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.28, marginRight: 26 }}
+              source={{
+                uri: list.upload_right_photo,
+              }}
+            />
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <Image
+              style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, }}
+              source={{
+                uri: list.upload_left_photo,
+              }}
+            />
+            <Image
+              style={{ marginLeft: 12, marginTop: 14, height: height * 0.16, width: width * 0.28, }}
+              source={{
+                uri: list.upload_top_photo,
+              }}
+            />
+          </View>
+          <Text style={[styles.title, { marginTop: 25 }]}>DESCRIPTION</Text>
+          <Text style={styles.subTitle}>{list.description}</Text>
+          <Text style={[styles.title, { marginTop: 15 }]}>NOTES</Text>
           <Text style={styles.subTitle}>Next time I would ask for it to be shorter around the lower neck.</Text>
           <Pressable onPress={() => setModalVisible(true)}>
             <Image
@@ -86,7 +143,7 @@ const HairCutDescriptionScreen = (props) => {
               source={require('../../Images/plus.png')}
             />
           </Pressable>
-          <Pressable style={styles.button}>
+          <Pressable style={styles.button} onPress={() => _onPick()}>
             <Text style={styles.buttonText}>PICK SALON</Text>
           </Pressable>
         </View>
@@ -106,20 +163,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Avenir-Medium',
     marginLeft: 27,
-    marginTop: 25
+    //  marginTop: 25
   },
   title: {
-    color: Colors.black, 
-    fontSize: 14, 
-    fontFamily: 'Avenir-Heavy', 
+    color: Colors.black,
+    fontSize: 14,
+    fontFamily: 'Avenir-Heavy',
     marginLeft: 27
   },
   subTitle: {
-    color: Colors.black, 
-    fontSize: 14, 
-    fontFamily: 'Avenir-Medium', 
-    marginLeft: 27, 
-    marginTop: 3, 
+    color: Colors.black,
+    fontSize: 14,
+    fontFamily: 'Avenir-Medium',
+    marginLeft: 27,
+    marginTop: 3,
     marginRight: 30
   },
   GridViewBlockStyle: {
@@ -147,19 +204,19 @@ const styles = StyleSheet.create({
     elevation: 5
   },
   button: {
-    borderWidth: 1, 
-    borderColor: Colors.greyLight, 
-    marginLeft: 122.5, 
-    marginRight: 122.5, 
+    borderWidth: 1,
+    borderColor: Colors.greyLight,
+    marginLeft: 122.5,
+    marginRight: 122.5,
     marginTop: 26.5
   },
   buttonText: {
-    color: Colors.black, 
-    fontSize: 14, 
-    fontFamily: 'Avenir-Medium', 
-    marginLeft: 29.5, 
-    marginTop: 9.5, 
-    marginBottom: 6.5, 
+    color: Colors.black,
+    fontSize: 14,
+    fontFamily: 'Avenir-Medium',
+    marginLeft: 29.5,
+    marginTop: 9.5,
+    marginBottom: 6.5,
     marginRight: 28.5
   }
 })

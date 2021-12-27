@@ -10,10 +10,12 @@ import {
   Image,
   ScrollView,
   Modal,
-  ImageBackground
+  ImageBackground,
+  LogBox
 } from 'react-native';
 import Header from '../../Components/Header'
 import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
+import Loader from '../../Components/Loader';
 
 const GridViewItems = [
   { key: '1' },
@@ -24,19 +26,43 @@ const GridViewItems = [
 const HelloWorldApp = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [list, setList] = useState(false);
+  const [tagList, setTagList] = useState([]);
+  const [selectedTags, setSelectedTags] = useState('');
+  const [selectedSubTags, setSelectedSubTags] = useState('');
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
+    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
     getTopStyleList();
+    getTags()
   }, [])
 
   const getTopStyleList = () => {
-    axios.get(`${BASE_URL}/style/rating/Customer/all`)
+    setLoading(true)
+    axios.get(`${BASE_URL}/top/cuts/styles`)
       .then(res => {
         setList(res.data)
-        console.log('res Top style', res.data)
+        console.log('res Top style', res.data.top_cuts)
+        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
+        setLoading(false)
+      })
+  }
+
+  const getTags = () => {
+    setLoading(true)
+    axios.get(`${BASE_URL}/service/all/list`)
+      .then(res => {
+        setTagList(res.data)
+        console.log('res Tags', res.data)
+        setSelectedTags(res.data[0].name)
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
       })
   }
 
@@ -44,6 +70,9 @@ const HelloWorldApp = (props) => {
     <ScrollView style={styles.container}>
       {
         <Header {...props} />
+      }
+      {
+        isLoading && <Loader />
       }
       {
         <View>
@@ -68,20 +97,48 @@ const HelloWorldApp = (props) => {
                   </Pressable>
                 </View>
                 <View style={{ backgroundColor: '#D8D8D8', marginLeft: 7.5, marginTop: 8, borderRadius: 5, flexDirection: 'row' }}>
-                  <View style={{ backgroundColor: '#141313', marginTop: 11, marginLeft: 10, marginBottom: 11, width: 75, borderRadius: 5 }}>
-                    <Text style={{ color: '#FFFFFF', textAlign: 'center', marginTop: 8, marginBottom: 7 }}>Haircut</Text>
-                  </View>
-                  <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Updo</Text>
-                  <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Blowout</Text>
-                  <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Dyes</Text>
+                  {
+                    tagList.map((res, index) => {
+                      return (
+                        <View key={index}>
+                          {
+                            res.name == selectedTags ?
+                              <Pressable style={{ backgroundColor: '#141313', marginTop: 11, marginLeft: 10, marginBottom: 11, width: 75, borderRadius: 5 }} onPress={() => setSelectedTags('Cut')}>
+                                <Text style={{ color: '#FFFFFF', textAlign: 'center', marginTop: 8, marginBottom: 7 }}>{res.name}</Text>
+                              </Pressable>
+                              :
+                              <Pressable onPress={() => setSelectedTags(res.name)}>
+                                <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>{res.name}</Text>
+                              </Pressable>
+                          }
+                        </View>
+                      )
+                    })
+                  }
+                  {/* <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Blowout</Text>
+                  <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Dyes</Text> */}
                 </View>
                 <View style={{ flexDirection: 'row', marginLeft: 17.5, marginTop: 18, marginBottom: 44.5 }}>
                   <View style={{ backgroundColor: '#4D4C4C', borderRadius: 17 }}>
                     <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>Bald</Text>
                   </View>
-                  <View style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4 }}>
-                    <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>Mullet</Text>
-                  </View>
+                  {
+                    tagList.map((res, index) => {
+                      return (
+                        <View key={index}>
+                          {
+                            res.name == selectedTags ?
+                              <View style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4 }}>
+                                <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>{res.name}</Text>
+                              </View>
+                              :
+                              null
+                          }
+                        </View>
+                      )
+                    })
+                  }
+
                 </View>
               </View>
             </View>
@@ -95,20 +152,21 @@ const HelloWorldApp = (props) => {
           </Pressable>
           <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 26.67 }}>Top Cuts</Text>
           <FlatList
-            data={list}
-            renderItem={({ item }) => {
+            data={list.top_cuts}
+            renderItem={({ item, index }) => {
               console.log("item", item.upload_front_photo)
               return (
-                <View style={styles.GridViewBlockStyle}>
+                <View style={styles.GridViewBlockStyle} key={index}>
                   <ImageBackground
-                    style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end'}}
+                    style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
+                    //   source={require('../../Images/upcoming.png')}
                     source={{
-                      uri: item.upload_front_photo,
+                      uri: `${item.upload_front_photo}`,
                     }}
                   >
-                    <Image 
-                    style={{marginTop: 7, marginRight: 7.51}}
-                    source={require('../../Images/heart.png')}
+                    <Image
+                      style={{ marginTop: 7, marginRight: 7.51 }}
+                      source={require('../../Images/heart.png')}
                     />
                   </ImageBackground>
                 </View>
@@ -118,18 +176,26 @@ const HelloWorldApp = (props) => {
             numColumns={3}
             columnWrapperStyle={{ flex: 1, }}
           />
-          {/* <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
+          <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
           <FlatList
-            data={GridViewItems}
-            renderItem={({ item }) =>
-              <View style={styles.GridViewBlockStyle}>
-                <Image
-                  style={{ marginLeft: 26, marginTop: 14 }}
-                  source={require('../../Images/upcoming.png')}
-                />
+            data={list.top_styles}
+            renderItem={({ item, index }) =>
+              <View style={styles.GridViewBlockStyle} key={index}>
+                <ImageBackground
+                  style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
+                  //   source={require('../../Images/upcoming.png')}
+                  source={{
+                    uri: `${item.upload_front_photo}`,
+                  }}
+                >
+                  <Image
+                    style={{ marginTop: 7, marginRight: 7.51 }}
+                    source={require('../../Images/heart.png')}
+                  />
+                </ImageBackground>
               </View>}
             numColumns={3}
-          /> */}
+          />
         </View>
       }
     </ScrollView>

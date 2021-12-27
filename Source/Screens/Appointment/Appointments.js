@@ -16,15 +16,20 @@ import Loader from '../../Components/Loader';
 
 const countries = ["Chronological"]
 
-const HelloWorldApp = (props) => {
+const Appointments = ({navigation,props}) => {
   const [list, setList] = useState([]);
   const [upcomingList, setUpcomingList] = useState([]);
   const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
-    getUpcomingList()
-    getPassedList()
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      getUpcomingList()
+      getPassedList()
+      //Put your Data loading function here instead of my loadData()
+    });
+
+    return unsubscribe;
+  }, [navigation])
 
   const getUpcomingList = () => {
     setLoading(true)
@@ -35,7 +40,7 @@ const HelloWorldApp = (props) => {
         setLoading(false)
       })
       .catch(e => {
-        console.log('e', e)
+        console.log('er', e)
         setLoading(false)
       })
   }
@@ -49,7 +54,7 @@ const HelloWorldApp = (props) => {
         setLoading(false)
       })
       .catch(e => {
-        console.log('e', e)
+        console.log('err', e)
         setLoading(false)
       })
   }
@@ -66,13 +71,13 @@ const HelloWorldApp = (props) => {
         <ScrollView style={{ marginBottom: 10 }}>
           <Text style={styles.upcomingTextStyle}>Upcoming</Text>
           {
-            upcomingList.map((res) => {
-              // console.log("dsa",res.style.name)
-              console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
+            upcomingList.map((res, index) => {
+            //   console.log("dsa",res?.style?.name)
+             // console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
               return (
-                <View style={styles.row}>
+                <View style={styles.row} key={index}>
                   {
-                    res.style.upload_front_photo == null
+                    res?.style?.upload_front_photo == null
                       ?
                       <Image
                         style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
@@ -82,14 +87,14 @@ const HelloWorldApp = (props) => {
                       <Image
                         style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
-                          uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
+                          uri: `${IMAGE_URL}/${res?.style?.upload_front_photo}`,
                         }}
                       />
                   }
                   <View style={{ marginTop: 23, marginLeft: 25 }}>
-                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res.style.name}</Text>
+                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2, lineHeight: 19 }}>Tomorrow at 8:30 PM</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center',fontFamily: 'Avenir-Medium' }}>Look at booking</Text>
                     </Pressable>
                   </View>
@@ -114,25 +119,15 @@ const HelloWorldApp = (props) => {
               onSelect={(selectedItem, index) => {
                 console.log(selectedItem, index)
               }}
-            // buttonTextAfterSelection={(selectedItem, index) => {
-            //   // text represented after item is selected
-            //   // if data array is an array of objects then return selectedItem.property to render after item is selected
-            //   return selectedItem
-            // }}
-            // rowTextForSelection={(item, index) => {
-            //   // text represented for each item in dropdown
-            //   // if data array is an array of objects then return item.property to represent item in dropdown
-            //   return item
-            // }}
             />
           </View>
           {
-            list.map((res) => {
-              console.log("tye", res)
+            list.map((res, index) => {
+           //   console.log("tye", res)
               return (
-                <View style={{ flexDirection: 'row' }}>
+                <View style={{ flexDirection: 'row' }} key={index}>
                   {
-                    res.style.upload_front_photo == null
+                    res?.style?.upload_front_photo == null
                       ?
                       <Image
                         style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
@@ -142,14 +137,14 @@ const HelloWorldApp = (props) => {
                       <Image
                         style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
-                          uri: `${IMAGE_URL}/${res.style.upload_front_photo}`,
+                          uri: `${IMAGE_URL}/${res?.style?.upload_front_photo}`,
                         }}
                       />
                   }
                   <View style={{ marginTop: 29, marginLeft: 25 }}>
-                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res.style.name}</Text>
+                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2 , lineHeight: 19}}>Wed 11 Mar 2020</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => props.navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center', fontFamily: 'Avenir-Medium'}}>Look at booking</Text>
                     </Pressable>
                   </View>
@@ -162,7 +157,7 @@ const HelloWorldApp = (props) => {
     </View>
   )
 }
-export default HelloWorldApp;
+export default Appointments;
 
 const styles = StyleSheet.create({
   container: {

@@ -28,7 +28,6 @@ import {
     GraphRequestManager,
     Profile
 } from 'react-native-fbsdk-next'
-import axios from 'axios';
 
 
 GoogleSignin.configure({
@@ -71,7 +70,6 @@ const Login = (props) => {
     }
 
     const _onGoogleSignin = async () => {
-        console.log("tappedOnGoogleButton")
         try {
             await GoogleSignin.hasPlayServices()
             const userInfo = await GoogleSignin.signIn()
@@ -112,57 +110,68 @@ const Login = (props) => {
     }
 
     const _onFacebookSignin = async () => {
-        // Attempt a login using the Facebook login dialog asking for default permissions.
-        let self = this
-        LoginManager.logInWithPermissions(['public_profile', 'email']).then(
-            function (result) {
-                console.log("result", result)
-                if (result.isCancelled) {
-                    //   self.setState({
-                    //     isFacebookLoading: false
-                    //   })
-                } else {
-                    AccessToken.getCurrentAccessToken().then(data => {
-                        let accessToken = data.accessToken
-                        console.log("adsaf", accessToken)
-                        try {
-                            const currentProfile = Profile.getCurrentProfile().then(
-                                function (currentProfile) {
-                                    if (currentProfile) {
-                                        // console.log("The current logged user is: " +
-                                        //     currentProfile.name
-                                        //     + ". His profile id is: " +
-                                        //     currentProfile.userID
-                                        // );\
-                                        const data = {
-                                            social_id: currentProfile.userID,
-                                            type: "FACEBOOK"
-                                        }
-                                        console.log("data",data)
-                                        try {
-                                            const jsonValue = JSON.stringify(data)
-                                             AsyncStorage.setItem('@storage_Key', jsonValue)
-                                            dispatch(socialLogin(data))
-                                        } catch (e) {
-                                            // saving error
-                                        }
-                                    }
-                                }
-                            );
-                        }
-                        catch {
-                            console.log("error")
-                        }
-                    })
-                }
-            },
-            function (error) {
-                this.setState({
-                    btnFacebookLoading: false
-                })
-            }
-        )
+        const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+        if (result.isCancelled) {
+            throw 'User cancelled the login process';
+        }
+        const data = await AccessToken.getCurrentAccessToken();
+        console.log("fb", data.userID)
+        const fbdata = {
+            social_id: data.userID,
+            type: "FACEBOOK"
+        }
+        console.log("data", fbdata)
+        try {
+            const jsonValue = JSON.stringify(fbdata)
+            AsyncStorage.setItem('@storage_Key', jsonValue)
+            dispatch(socialLogin(fbdata))
+        } catch (e) {
+            console.log("error", e)
+        }
     }
+
+    // const _onFacebookSignin = async () => {
+    //     let self = this
+    //     LoginManager.logInWithPermissions(['public_profile', 'email']).then(
+    //         function (result) {
+    //             console.log("result", result)
+    //             if (result.isCancelled) {
+    //             } else {
+    //                 AccessToken.getCurrentAccessToken().then(data => {
+    //                     let accessToken = data.accessToken
+    //                     try {
+    //                         const currentProfile = Profile.getCurrentProfile().then(
+    //                             function (currentProfile) {
+    //                                 if (currentProfile) {
+    //                                     const data = {
+    //                                         social_id: currentProfile.userID,
+    //                                         type: "FACEBOOK"
+    //                                     }
+    //                                     console.log("data",data)
+    //                                     try {
+    //                                         const jsonValue = JSON.stringify(data)
+    //                                          AsyncStorage.setItem('@storage_Key', jsonValue)
+    //                                         dispatch(socialLogin(data))
+    //                                     } catch (e) {
+    //                                         console.log("error", e)
+    //                                     }
+    //                                 }
+    //                             }
+    //                         );
+    //                     }
+    //                     catch {
+    //                         console.log("error")
+    //                     }
+    //                 })
+    //             }
+    //         },
+    //         function (error) {
+    //             this.setState({
+    //                 btnFacebookLoading: false
+    //             })
+    //         }
+    //     )
+    // }
 
     const renderEmailView = () => {
         return (
