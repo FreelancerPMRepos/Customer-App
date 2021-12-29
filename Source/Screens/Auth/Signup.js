@@ -13,6 +13,7 @@ import { isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { login, socialLogin } from '../../Actions/AuthActions'
 
 import {
   GoogleSignin,
@@ -25,7 +26,7 @@ import {
   GraphRequest,
   GraphRequestManager,
   Profile
-} from 'react-native-fbsdk-next'
+} from 'react-native-fbsdk'
 
 
 GoogleSignin.configure({
@@ -117,55 +118,56 @@ const Signup = (props) => {
     }
 }
 
-const _onFacebookSignin = async () => {
+const _onFacebookSignin = () => {
+  console.log("facebook login ke liye aaya")
   // Attempt a login using the Facebook login dialog asking for default permissions.
   let self = this
   LoginManager.logInWithPermissions(['public_profile', 'email']).then(
       function (result) {
-          console.log("result", result)
+       //   console.log("result",LoginManager)
           if (result.isCancelled) {
-              //   self.setState({
-              //     isFacebookLoading: false
-              //   })
+              self.setState({
+                  isFacebookLoading: false
+              })
           } else {
               AccessToken.getCurrentAccessToken().then(data => {
                   let accessToken = data.accessToken
-                  console.log("adsaf", accessToken)
-                  try {
-                      const currentProfile = Profile.getCurrentProfile().then(
-                          function (currentProfile) {
-                              if (currentProfile) {
-                                  // console.log("The current logged user is: " +
-                                  //     currentProfile.name
-                                  //     + ". His profile id is: " +
-                                  //     currentProfile.userID
-                                  // );\
-                                  const data = {
-                                      social_id: currentProfile.userID,
-                                      type: "FACEBOOK"
-                                  }
-                                  console.log("data",data)
-                                  try {
-                                      const jsonValue = JSON.stringify(data)
-                                       AsyncStorage.setItem('@storage_Key', jsonValue)
-                                      dispatch(socialLogin(data))
-                                  } catch (e) {
-                                      // saving error
-                                  }
+                  const jsonValue = JSON.stringify(accessToken)
+                  AsyncStorage.setItem('facebook_token', jsonValue)
+                  const infoRequest = new GraphRequest(
+                      '/me?fields=email,name,first_name,middle_name,last_name,picture.type(large)', // { //   accessToken: accessToken, //   parameters: { //     fields: { //       string: "email"//,name,first_name,middle_name,last_name //     } //   } // },
+                      null,
+                      (error, result) => {
+                          if (error) {
+                              self.setState({
+                                  isFacebookLoading: false
+                              })
+                              alert('Error fetching data: ' + error.toString())
+                          } else {
+                              const fbdata = {
+                                  social_id: result.id,
+                                  type: "FACEBOOK"
+                              }
+                              console.log("data", fbdata)
+                              try {
+                                  const jsonValue = JSON.stringify(fbdata)
+                                  AsyncStorage.setItem('@storage_Key', jsonValue)
+                                  dispatch(socialLogin(fbdata))
+                              } catch (e) {
+                                  console.log("error", e)
                               }
                           }
-                      );
-                  }
-                  catch {
-                      console.log("error")
-                  }
+                      }
+                  )
+                  // Start the graph request.\
+                  new GraphRequestManager().addRequest(infoRequest).start()
               })
           }
       },
       function (error) {
-          this.setState({
-              btnFacebookLoading: false
-          })
+          // this.setState({
+          //   btnFacebookLoading: false
+          // })
       }
   )
 }

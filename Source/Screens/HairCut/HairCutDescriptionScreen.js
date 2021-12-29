@@ -9,6 +9,7 @@ import {
   Pressable,
   Modal,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import Header from '../../Components/Header'
 import { BASE_URL, Colors, height, width } from '../../Config';
@@ -20,6 +21,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   const { id } = route.params
   const [modalVisible, setModalVisible] = useState(false);
   const [list, setList] = useState([]);
+  const [noteData, setNoteData] = useState([]);
   const [note, setNote] = useState('');
   const dispatch = useDispatch()
 
@@ -29,6 +31,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
 
   useEffect(() => {
     getDetails()
+    getNote()
   }, [])
 
   const getDetails = () => {
@@ -42,10 +45,32 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
       })
   }
 
-  const _onNoteSave = () => {
-    axios.post(`${BASE_URL}/note`, {
+  const getNote = () => {
+    axios.get(`${BASE_URL}/note/style/list/${id}`)
+      .then(res => {
+        setNoteData(res.data)
+        console.log('res details', res.data)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
+  }
 
+  const _onNoteSave = () => {
+    axios.post(`${BASE_URL}/note/style`, {
+      style_id: id,
+      note: note,
     })
+      .then(res => {
+        console.log('res details', res.data)
+        alert(res.data.message)
+        getNote()
+        setNote('')
+        setModalVisible(!modalVisible)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
   }
 
   const _onPick = () => {
@@ -90,7 +115,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
         <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
       }
       {
-        <View>
+        <ScrollView>
           {renderAddNoteModal()}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.afroHairTextStyle}>{list.name}</Text>
@@ -136,7 +161,13 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
           <Text style={[styles.title, { marginTop: 25 }]}>DESCRIPTION</Text>
           <Text style={styles.subTitle}>{list.description}</Text>
           <Text style={[styles.title, { marginTop: 15 }]}>NOTES</Text>
-          <Text style={styles.subTitle}>Next time I would ask for it to be shorter around the lower neck.</Text>
+          {
+            noteData.map((res) => {
+              return (
+                <Text style={styles.subTitle}>{res.note}</Text>
+              )
+            })
+          }
           <Pressable onPress={() => setModalVisible(true)}>
             <Image
               style={{ marginLeft: 27, marginTop: 14 }}
@@ -146,7 +177,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
           <Pressable style={styles.button} onPress={() => _onPick()}>
             <Text style={styles.buttonText}>PICK SALON</Text>
           </Pressable>
-        </View>
+        </ScrollView>
       }
     </View>
   )
@@ -208,7 +239,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.greyLight,
     marginLeft: 122.5,
     marginRight: 122.5,
-    marginTop: 26.5
+    marginTop: 26.5,
+    marginBottom: 15
   },
   buttonText: {
     color: Colors.black,

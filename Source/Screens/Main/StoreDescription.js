@@ -15,6 +15,7 @@ import { Rating } from 'react-native-ratings';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
+import { deleteSalon } from '../../Actions/PickSalon'
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -43,6 +44,8 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [hairdresserName, setHairdresserName] = useState('');
     const [userDetails, setUserDetails] = useState('');
     const { storeDetails } = route.params
+    const { page } = route.params
+    const [storeData, setStoreData] = useState([]);
     const [dateModalVisible, setDateModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
@@ -54,6 +57,8 @@ const StoreDescription = ({ navigation, route, props }) => {
     // Time
     const [time, setTime] = useState([]);
 
+    console.log("page",page)
+
     useEffect(() => {
         setNextYear(new Date().getFullYear());
         setNextDate(new Date().getMonth());
@@ -63,7 +68,20 @@ const StoreDescription = ({ navigation, route, props }) => {
         getDateSlot();
         getData();
         Check()
+        getStoreData()
     }, [])
+
+
+    const getStoreData = () => {
+        axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
+            .then(res => {
+                setStoreData(res.data)
+                //  console.log('res date slot', res.data.list)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
 
     const Check = () => {
         if (updatedName.fav.data == null) {
@@ -333,6 +351,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     //    alert(res.data.message)
                     //    navigation.goBack()
                     navigation.navigate('PaymentScreen')
+                    dispatch(deleteSalon(updatedName.fav))
                 })
                 .catch(e => {
                     console.log('e', e)
@@ -480,7 +499,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                 <ScrollView>
                     {
                         updatedName.fav.data == null ?
-                            null
+                            null : page == 'Home' ? null
                             :
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
                     }
@@ -511,18 +530,22 @@ const StoreDescription = ({ navigation, route, props }) => {
                     }
                     <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: updatedName.fav.data ? 23 : 10 }}>
                         {
-                            storeDetails.images.length == 0 ?
+                           !storeData || !storeData.images ||  storeData.images.length == 0 ?
                                 <Image
                                     style={{ height: 83, width: 71 }}
                                     source={require('../../Images/noImage.jpg')}
                                 />
                                 :
-                                <Image source={{
-                                    uri: storeDetails?.images[0]?.url,
-                                }} style={{ height: 83, width: 71 }} />
+                              
+                                        <Image source={{
+                                            uri:  storeData.images[0].url,
+                                        }} style={{ height: 83, width: 71 }} />
+                                    
+                                
+
                         }
                         <View style={{ marginLeft: 15 }}>
-                            <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeDetails.store_name}</Text>
+                            <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
                             <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>0.4 Miles</Text>
                             <View style={{ marginRight: 186 }}>
                                 <Rating
@@ -540,7 +563,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                             <View style={{ flexDirection: 'row' }}>
                                 <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>8-18</Text>
                                 {
-                                    storeDetails.is_available == 1 ?
+                                    storeData?.is_available == 1 ?
                                         <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#70CF2B' }}> Open</Text>
                                         :
                                         <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#E73E3E' }}> Closed</Text>
@@ -807,7 +830,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
 
                         <View style={{ flexDirection: 'row' }}>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35 }} onPress={() => { setDateModalVisible(!dateModalVisible), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => { setDateModalVisible(!dateModalVisible), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
                                 <Image
                                     style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
@@ -822,8 +845,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 />
                             </Pressable>
                         </View>
-                        <Pressable style={{ borderWidth: 1, marginLeft: 123, marginRight: 123, marginTop: 10 }}>
-                            <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 10.59, marginBottom: 10.59 }} onPress={() => _onBook()}>BOOK NOW</Text>
+                        <Pressable style={{ borderWidth: 1, marginLeft: 95.5, marginRight: 123, marginTop: 24, marginBottom: 24 }}>
+                            <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 9.5, marginBottom: 6.5, lineHeight: 19 }} onPress={() => _onBook()}>BOOK NOW</Text>
                         </Pressable>
                     </View>
                 </ScrollView>

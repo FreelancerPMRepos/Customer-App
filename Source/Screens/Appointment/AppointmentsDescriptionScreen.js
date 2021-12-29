@@ -14,6 +14,8 @@ import Header from '../../Components/Header'
 import { BASE_URL, Colors, IMAGE_URL, width } from '../../Config';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux'
+import { addSalon } from '../../Actions/PickSalon'
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -28,9 +30,12 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   const [timeModalVisible, setTimeModalVisible] = useState(false);
   const [note, setNote] = useState('');
   const [dateList, setDateList] = useState([]);
+  const [NoteData, setNoteData] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const { appointmentDetails } = route.params
+  const { type } = route.params
+  const dispatch = useDispatch()
   // Date
   const [days, setDays] = useState([]);
   const [nextDate, setNextDate] = useState(0);
@@ -46,7 +51,32 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     setNextYear(new Date().getFullYear());
     setNextDate(new Date().getMonth());
     getDateSlot();
+    getNote();
   }, [])
+
+  const getNote = () => {
+    axios.get(`${BASE_URL}/note/list/${appointmentDetails.id}`)
+      .then(res => {
+        setNoteData(res.data)
+        //  console.log('res date slot', res.data.list)
+      })
+      .catch(e => {
+        console.log('e rrr', e)
+      })
+  }
+
+  const _onRebook = () => {
+    axios.get(`${BASE_URL}/style/detail/${appointmentDetails.style.id}`)
+      .then(res => {
+        // setNoteData(res.data)
+        navigation.navigate('StoreDescription', { storeDetails: appointmentDetails.store, page: "Appointment" })
+        dispatch(addSalon(res.data))
+      })
+      .catch(e => {
+        console.log('e rrr', e)
+      })
+  }
+
 
   const getDateSlot = () => {
     axios.get(`${BASE_URL}/timeslot/list/${appointmentDetails.store.id}`)
@@ -186,7 +216,9 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
         .then(res => {
           console.log('res appointment', res.data)
           setModalVisible(!modalVisible);
+          getNote()
           setNote('');
+          alert(res.data.message)
           setLoading(false)
         })
         .catch(e => {
@@ -530,7 +562,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
         <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
       }
       {
-        <View>
+        <ScrollView>
           {renderAddNoteModal()}
           {renderRescheduleModal()}
           {renderDateModal()}
@@ -546,11 +578,11 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
                 />
                 :
                 <Image
-                style={{ marginLeft: 27, marginTop: 28, height: 127, width: 112, }}
-                source={{
-                  uri: `${IMAGE_URL}/${appointmentDetails?.style?.upload_front_photo}`,
-                }}
-              />
+                  style={{ marginLeft: 27, marginTop: 28, height: 127, width: 112, }}
+                  source={{
+                    uri: `${IMAGE_URL}/${appointmentDetails?.style?.upload_front_photo}`,
+                  }}
+                />
             }
             <View style={{ marginLeft: 32, marginTop: 20, width: width * 0.52 }}>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{appointmentDetails?.style?.name}</Text>
@@ -575,17 +607,78 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 27, marginTop: 28 }}>Description</Text>
           <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 27, marginRight: 27, marginTop: 5.09 }}>{appointmentDetails?.style?.description}</Text>
           <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 27, marginTop: 13 }}>Notes</Text>
-          <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 27, marginRight: 27, marginTop: 5.09 }}>Use only lakme products.</Text>
-          <Pressable style={[styles.button, { marginTop: 26.5 }]} onPress={() => setModalVisible(!modalVisible)}>
-            <Text style={styles.buttonText}>Add Notes</Text>
-          </Pressable>
-          <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => setRescheduleModal(!resheduleModal)}>
-            <Text style={styles.buttonText}>Reschedule</Text>
-          </Pressable>
-          <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => setCancelModal(!cancelModal)}>
-            <Text style={styles.buttonText}>Cancel Booking</Text>
-          </Pressable>
-        </View>
+          {
+            NoteData.length == 0 ?
+              null
+              :
+              NoteData?.map((res) => {
+                return (
+                  <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 27, marginRight: 27, marginTop: 5.09 }}>{res.note}</Text>
+                )
+              })
+          }
+          {
+            type == 'PASSED' ?
+              <Pressable style={[styles.button, { marginTop: 26.5 }]} onPress={() => _onRebook()}>
+                <Text style={styles.buttonText}>Re-Book</Text>
+              </Pressable>
+              :
+              <Pressable style={[styles.button, { marginTop: 26.5 }]} onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.buttonText}>Add Notes</Text>
+              </Pressable>
+          }
+
+          {
+            type == 'PASSED' ?
+              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => navigation.navigate('ReviewScreen')}>
+                <Text style={styles.buttonText}>Review</Text>
+              </Pressable>
+              :
+              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => setRescheduleModal(!resheduleModal)}>
+                <Text style={styles.buttonText}>Reschedule</Text>
+              </Pressable>
+          }
+
+          {
+            type == 'PASSED' ?
+              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.buttonText}>Add Notes</Text>
+              </Pressable>
+              :
+              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => setCancelModal(!cancelModal)}>
+                <Text style={styles.buttonText}>Cancel Booking</Text>
+              </Pressable>
+          }
+
+          {
+            type == 'PASSED' ?
+              <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginTop: 12.5 }} onPress={() => navigation.navigate("ComplaintScreen", { id: appointmentDetails.store.id})}>
+                <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, borderBottomWidth: 1 }}>File Complaint</Text>
+              </Pressable>
+              :
+              null
+          }
+
+          {
+            type == 'PASSED' ?
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 36 , marginBottom: 33}}>
+                <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19 }}>Share Your Style On</Text>
+                <View style={{flexDirection: 'row', marginTop: 9}}>
+                  <Image
+                    style={{ }}
+                    source={require('../../Images/facebook.png')}
+                  />
+                   <Image
+                    style={{ marginLeft: 12}}
+                    source={require('../../Images/instagram.png')}
+                  />
+                </View>
+              </View>
+              :
+              null
+          }
+
+        </ScrollView>
       }
     </View>
   )

@@ -94,7 +94,7 @@ const Appointments = ({navigation,props}) => {
                   <View style={{ marginTop: 23, marginLeft: 25 }}>
                     <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2, lineHeight: 19 }}>Tomorrow at 8:30 PM</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'UPCOMING'})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center',fontFamily: 'Avenir-Medium' }}>Look at booking</Text>
                     </Pressable>
                   </View>
@@ -144,7 +144,7 @@ const Appointments = ({navigation,props}) => {
                   <View style={{ marginTop: 29, marginLeft: 25 }}>
                     <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
                     <Text style={{ color: '#1A1919', marginTop: 2 , lineHeight: 19}}>Wed 11 Mar 2020</Text>
-                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res})}>
+                    <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'PASSED'})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center', fontFamily: 'Avenir-Medium'}}>Look at booking</Text>
                     </Pressable>
                   </View>

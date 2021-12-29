@@ -8,7 +8,8 @@ import {
   ScrollView,
   Pressable,
   Alert,
-  FlatList
+  FlatList,
+  Image
 } from 'react-native';
 
 import Header from '../../Components/Header';
@@ -24,6 +25,16 @@ import {
   GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import {
+  LoginManager, AccessToken,
+  GraphRequest,
+  GraphRequestManager,
+} from 'react-native-fbsdk'
+import SelectDropdown from 'react-native-select-dropdown'
+
+const sex_dropdown = ["MALE", "FEMALE"]
+const hair_length = ["SHORT", "MEDIUM", "LONG",]
+const color = ["YES", "NO",]
 
 const Settings = (props) => {
   const [isLoading, setLoading] = useState(false)
@@ -43,6 +54,23 @@ const Settings = (props) => {
     getService()
   }, [])
 
+
+  const getService = () => {
+    axios.get(`${BASE_URL}/service/all/list`)
+      .then(res => {
+        for (var i in res.data) {
+          res.data[i].isChecked = false;
+        }
+        setList(res.data)
+        setLoading(false)
+        getData(res.data)
+      })
+      .catch(e => {
+        console.log('err', e)
+        setLoading(false)
+      })
+  }
+
   const handleClick = (index) => {
     var temp = [];
     for (var i in list) {
@@ -55,28 +83,51 @@ const Settings = (props) => {
     setToggleCheckBox(temp);
   };
 
-  const getData = async () => {
+  const getData = async (data) => {
+    console.log("yaha aaya")
     try {
       const jsonValue = await AsyncStorage.getItem('@user_details')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
       axios.get(`${BASE_URL}/customer/detail/${parData.id}`)
         .then(res => {
           setUserData(res.data.user_detail)
-          console.log('res data', res.data)
+          setName(res.data.user_detail.name)
+          setEmail(res.data.user_detail.email)
+          setLocation(res.data.user_detail.address)
+          setSex(res.data.user_detail.gender)
+          setHairLength(res.data.user_detail.hair_length)
+          setHairColor(res.data.user_detail.hair_colour_is_natural)
+          setSex(res.data.user_detail.gender)
           setLoading(false)
+          console.log("new list", data)
 
           var temp = []
-          for (var i in list) {
+          //  data.map((res, i) => {
+          //     console.log("reskjnj",i)
+          //     res?.data?.user_interest?.map((res, j) => {
+          //       if (res?.data.user_interest[j].service_id == data[i].id) {
+          //         data[i].isChecked = true;
+          //       }
+          //     })
+          //     temp.push(data[i])
+          //     if (i == 0) {
+          //  //     alert(temp)
+          //       setList(temp)
+          //     }
+          //   })
+
+
+          for (var i in data) {
             if (res.data.user_interest) {
               for (var j in res.data.user_interest) {
-                if (res.data.user_interest[j].service_id == list[i].id) {
-                  list[i].isChecked = true;
+                if (res.data.user_interest[j].service_id == data[i].id) {
+                  data[i].isChecked = true;
                 }
               }
 
             }
 
-            temp.push(list[i])
+            temp.push(data[i])
             if (i == 0) {
               setList(temp)
             }
@@ -84,7 +135,7 @@ const Settings = (props) => {
 
         })
         .catch(e => {
-          console.log('e', e)
+          console.log('er', e)
           setLoading(false)
         })
     } catch (e) {
@@ -92,21 +143,7 @@ const Settings = (props) => {
     }
   }
 
-  const getService = () => {
-    axios.get(`${BASE_URL}/service/all/list`)
-      .then(res => {
-        for (var i in res.data) {
-          res.data[i].isChecked = false;
-        }
-        setList(res.data)
-        setLoading(false)
-        getData()
-      })
-      .catch(e => {
-        console.log('err', e)
-        setLoading(false)
-      })
-  }
+
 
 
   const onLogout = () => {
@@ -134,8 +171,9 @@ const Settings = (props) => {
         console.log("USER LOGOUT")
         try {
           var googleLogOut = GoogleSignin.signOut();
-          console.log("signout",googleLogOut)
-         // this.setState({ user: null }); // Remember to remove the user from your app's state as well
+          console.log("signout", googleLogOut)
+          // this.setState({ user: null }); // Remember to remove the user from your app's state as well
+          fbLogout();
         } catch (error) {
           console.error(error);
         }
@@ -147,31 +185,78 @@ const Settings = (props) => {
       })
   }
 
-  const _onSave = () => {
-    // const jsonValue = await AsyncStorage.getItem('@user_details')
-    // const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-    var temp = [];
+  const fbLogout = async () => {
+    const jsonValue = await AsyncStorage.getItem('facebook_token')
+    const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
+    console.log("sd", parData)
+    // let logout = LoginManager.logOut();
+    // // const token = await AccessToken.getCurrentAccessToken();
+    // console.log("facebook logout token",logout)
+    if (parData == null) {
 
-    for (var i = 0; i < list.length; i++) {
-       alert(i)
-      // if (list[i].isChecked == true) {
-      //   // temp[list[i].id]
-      // }
+    } else {
+      let logout =
+        new GraphRequest(
+          "me/permissions/",
+          {
+            accessToken: parData,
+            httpMethod: 'DELETE'
+          },
+          (error, result) => {
+            if (error) {
+              console.log('Error fetching data: ' + error.toString());
+            } else {
+              LoginManager.logOut();
+              remove_token();
+            }
+          });
+      new GraphRequestManager().addRequest(logout).start();
     }
-    alert("got")
+  }
+
+  const remove_token = async () => {
+    let token = await AsyncStorage.removeItem('facebook_token')
+    console.log("remove_token", token)
+  }
+
+  const _onSave = async () => {
+    const jsonValue = await AsyncStorage.getItem('@user_details')
+    const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
+    var temp = [];
+    // for (var i = 0; i < list.length; i++) {
+    //    alert(i)
+    //   // if (list[i].isChecked == true) {
+    //   //   // temp[list[i].id]
+    //   // }
+    // }
+    toggleCheckBox.map((res, index) => {
+      if (res.isChecked == true) {
+        //    alert(res.id)
+        temp.push(res.id)
+      }
+      // temp[toggleCheckBox[index].id]
+    })
+    //  alert("got")
     console.log("temp", temp)
-    // axios.put(`${BASE_URL}/customer`, {
-    // //  id: parData.id,
-    //   interest: temp
-    // })
-    //   .then(res => {
-    //     console.log('res update', res.data)
-    //     setLoading(false)
-    //   })
-    //   .catch(e => {
-    //     console.log('e', e)
-    //     setLoading(false)
-    //   })
+    axios.put(`${BASE_URL}/customer`, {
+      id: parData.id,
+      name: name,
+      email: email,
+      address: location,
+      gender: sex,
+      hair_length: hairLength,
+      hair_colour_is_natural: hairColor,
+      interest: temp
+    })
+      .then(res => {
+        console.log('res update', res.data)
+        alert(res.data.message)
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
+      })
   }
 
 
@@ -226,11 +311,71 @@ const Settings = (props) => {
             />
           </View>
           <Text style={styles.commonText}>Sex</Text>
-          <TextInput placeholder="Male" onChangeText={text => setSex(text)} value={sex} style={styles.textInputStyle} />
+          {/* <TextInput placeholder="Male" onChangeText={text => setSex(text)} value={sex} style={styles.textInputStyle} /> */}
+          <SelectDropdown
+            data={sex_dropdown}
+            renderDropdownIcon={() => {
+              return (
+                <Image
+                  style={{ marginLeft: 36, marginRight: 6.36 }}
+                  source={require('../../Images/Triangle.png')}
+                />
+              )
+            }}
+            dropdownIconPosition={"right"}
+            rowTextStyle={styles.dropdown1RowTxtStyle}
+            buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            defaultValue={sex}
+            onSelect={(selectedItem, index) => {
+              setSex(selectedItem)
+              console.log(selectedItem, index)
+            }}
+          />
           <Text style={styles.commonText}>Hair Length</Text>
-          <TextInput placeholder="Short" onChangeText={text => setHairLength(text)} value={hairLength} style={styles.textInputStyle} />
+          {/* <TextInput placeholder="Short" onChangeText={text => setHairLength(text)} value={hairLength} style={styles.textInputStyle} /> */}
+          <SelectDropdown
+            data={hair_length}
+            renderDropdownIcon={() => {
+              return (
+                <Image
+                  style={{ marginLeft: 36, marginRight: 6.36 }}
+                  source={require('../../Images/Triangle.png')}
+                />
+              )
+            }}
+            dropdownIconPosition={"right"}
+            rowTextStyle={styles.dropdown1RowTxtStyle}
+            buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            defaultValue={hairLength}
+            onSelect={(selectedItem, index) => {
+              setHairLength(selectedItem)
+              console.log(selectedItem, index)
+            }}
+          />
           <Text style={styles.commonText}>Is your hair naturally coloured?</Text>
-          <TextInput placeholder="Yes" onChangeText={text => setHairColor(text)} value={hairColor} style={styles.textInputStyle} />
+          {/* <TextInput placeholder="Yes" onChangeText={text => setHairColor(text)} value={hairColor} style={styles.textInputStyle} /> */}
+          <SelectDropdown
+            data={color}
+            renderDropdownIcon={() => {
+              return (
+                <Image
+                  style={{ marginLeft: 36, marginRight: 6.36 }}
+                  source={require('../../Images/Triangle.png')}
+                />
+              )
+            }}
+            dropdownIconPosition={"right"}
+            rowTextStyle={styles.dropdown1RowTxtStyle}
+            buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            defaultValue={hairColor}
+            onSelect={(selectedItem, index) => {
+              setHairColor(selectedItem)
+              console.log(selectedItem, index)
+            }}
+          />
           <Pressable style={{
             flexDirection: 'row',
             justifyContent: 'center',
@@ -311,5 +456,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginTop: 13,
     borderBottomWidth: 1
-  }
+  },
+  dropdown1RowTxtStyle: {
+    color: "#444",
+    textAlign: "left"
+  },
 })

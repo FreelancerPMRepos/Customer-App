@@ -75,6 +75,7 @@ const UserDetails = (props) => {
         email: email,
         social_id: id,
         type: type,
+        role: 'USER'
       })
         .then(res => {
           console.log('res', res.data)

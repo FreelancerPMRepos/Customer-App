@@ -27,6 +27,8 @@ import HairCutDescriptionScreen from '../Screens/HairCut/HairCutDescriptionScree
 // Appointments
 import Appointments from '../Screens/Appointment/Appointments';
 import AppointmentsDescriptionScreen from '../Screens/Appointment/AppointmentsDescriptionScreen';
+import ReviewScreen from '../Screens/Appointment/ReviewScreen';
+import ComplaintScreen from '../Screens/Appointment/ComplaintScreen';
 
 
 const Routes = (props) => {
@@ -37,11 +39,12 @@ const Routes = (props) => {
 
   const Tab = createBottomTabNavigator();
 
-  console.log("yu",loginType)
+  // console.log("yu",loginType)
 
   const HomeTabs = () => {
     return (
       <Tab.Navigator
+      initialRouteName='Search'
         screenOptions={{ headerShown: false, tabBarShowLabel: false, tabBarStyle: { borderTopWidth: 1, elevation: 0, }, }}
       >
         <Tab.Screen
@@ -125,6 +128,8 @@ const Routes = (props) => {
               <Stack.Screen name="StoreDescription" component={StoreDescription} />
               <Stack.Screen name="ResetPassword" component={ResetPassword} />
               <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+              <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
+              <Stack.Screen name="ComplaintScreen" component={ComplaintScreen} />
             </>
           )
             :
