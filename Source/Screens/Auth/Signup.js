@@ -9,7 +9,7 @@ import {
   Pressable
 } from 'react-native';
 
-import { isValidEmail, width } from '../../Config';
+import { doesContanisSpeacialCharecters, getCapitalLettersCount, getNumbersCount, getSmallLettersCount, getSpecialCharectersCount, isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -50,23 +50,43 @@ const Signup = (props) => {
 
   useEffect(() => {
     GoogleSignin.configure()
-}, [])
+  }, [])
 
   const _onSignUp = () => {
     if (email == '') {
-      alert('Please Enter Email Address')
+      alert('Please enter email.')
       return false
     } else if (!isValidEmail(email)) {
-      alert('Please Enter Valid Email Address')
+      alert('Please enter valid email.')
       return false
     } else if (password == '') {
-      alert('Please Enter Password')
+      alert('Please enter password.')
       return false
-    } else if (confirmPassword == '') {
-      alert('Please Enter Confirm Password')
+    }  else if (!/^(?=.*[a-z])(?=.*[0-9])(?=.{8,})/.test(password)) {
+      alert('Password should be minimum 8 characters and at least one number.')
+      return false
+    }
+    //  else if (getCapitalLettersCount(password) < 1) {
+    //   alert('Password should contain atleast 1 capital letter')
+    //   return false
+    // } 
+    // else if (getSmallLettersCount(password) < 1) {
+    //   alert('Password should contain atleast 1 small letter')
+    //   return false
+    // } 
+    // else if (getNumbersCount(password) < 1) {
+    //   alert('Password should contain atleast 1 number letter')
+    //   return false
+    // } 
+    // else if (doesContanisSpeacialCharecters(password) < 1) {
+    //   alert('Password should contain atleast 1 special character')
+    //   return false
+    // } 
+    else if (confirmPassword == '') {
+      alert('Please enter confirm password.')
       return false
     } else if (password !== confirmPassword) {
-      alert('Password and Confirm Password does not match')
+      alert('Password and confirm password does not match.')
       return false
     } else {
       const data = {
@@ -75,108 +95,111 @@ const Signup = (props) => {
       }
       dispatch(signUp(data))
     }
+
+
   }
 
   const _onGoogleSignin = async () => {
     console.log("tappedOnGoogleButton")
     try {
-        await GoogleSignin.hasPlayServices()
-        const userInfo = await GoogleSignin.signIn()
-        userInfo.social_type = 'GOOGLE'
-        console.log("User Info", userInfo.user.id)
-        const data = {
-            social_id: userInfo.user.id,
-            type: "GOOGLE"
-        }
-        try {
-            const jsonValue = JSON.stringify(data)
-            await AsyncStorage.setItem('@storage_Key', jsonValue)
-            dispatch(socialLogin(data))
-        } catch (e) {
-            // saving error
-        }
+      await GoogleSignin.hasPlayServices()
+      const userInfo = await GoogleSignin.signIn()
+      userInfo.social_type = 'GOOGLE'
+      console.log("User Info", userInfo.user.id)
+      const data = {
+        social_id: userInfo.user.id,
+        type: "GOOGLE"
+      }
+      try {
+        const jsonValue = JSON.stringify(data)
+        await AsyncStorage.setItem('@storage_Key', jsonValue)
+        await AsyncStorage.setItem('@google_email', userInfo.user.email)
+        dispatch(socialLogin(data))
+      } catch (e) {
+        // saving error
+      }
     } catch (error) {
-        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-            this.setState({
-                isGoogleLoading: false
-            })
-        } else if (error.code === statusCodes.IN_PROGRESS) {
-            // operation (f.e. sign in) is in progress already
-            this.setState({
-                isGoogleLoading: false
-            })
-        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-            // play services not available or outdated
-            alert('Google SignIn Play Services Not Available')
-            this.setState({
-                isGoogleLoading: false
-            })
-        } else {
-            // some other error happened
-            alert(error)
-        }
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        this.setState({
+          isGoogleLoading: false
+        })
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (f.e. sign in) is in progress already
+        this.setState({
+          isGoogleLoading: false
+        })
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+        alert('Google SignIn Play Services Not Available')
+        this.setState({
+          isGoogleLoading: false
+        })
+      } else {
+        // some other error happened
+        alert(error)
+      }
     }
-}
+  }
 
-const _onFacebookSignin = () => {
-  console.log("facebook login ke liye aaya")
-  // Attempt a login using the Facebook login dialog asking for default permissions.
-  let self = this
-  LoginManager.logInWithPermissions(['public_profile', 'email']).then(
+  const _onFacebookSignin = () => {
+    console.log("facebook login ke liye aaya")
+    // Attempt a login using the Facebook login dialog asking for default permissions.
+    let self = this
+    LoginManager.logInWithPermissions(['public_profile', 'email']).then(
       function (result) {
-       //   console.log("result",LoginManager)
-          if (result.isCancelled) {
-              self.setState({
-                  isFacebookLoading: false
-              })
-          } else {
-              AccessToken.getCurrentAccessToken().then(data => {
-                  let accessToken = data.accessToken
-                  const jsonValue = JSON.stringify(accessToken)
-                  AsyncStorage.setItem('facebook_token', jsonValue)
-                  const infoRequest = new GraphRequest(
-                      '/me?fields=email,name,first_name,middle_name,last_name,picture.type(large)', // { //   accessToken: accessToken, //   parameters: { //     fields: { //       string: "email"//,name,first_name,middle_name,last_name //     } //   } // },
-                      null,
-                      (error, result) => {
-                          if (error) {
-                              self.setState({
-                                  isFacebookLoading: false
-                              })
-                              alert('Error fetching data: ' + error.toString())
-                          } else {
-                              const fbdata = {
-                                  social_id: result.id,
-                                  type: "FACEBOOK"
-                              }
-                              console.log("data", fbdata)
-                              try {
-                                  const jsonValue = JSON.stringify(fbdata)
-                                  AsyncStorage.setItem('@storage_Key', jsonValue)
-                                  dispatch(socialLogin(fbdata))
-                              } catch (e) {
-                                  console.log("error", e)
-                              }
-                          }
-                      }
-                  )
-                  // Start the graph request.\
-                  new GraphRequestManager().addRequest(infoRequest).start()
-              })
-          }
+        //   console.log("result",LoginManager)
+        if (result.isCancelled) {
+          self.setState({
+            isFacebookLoading: false
+          })
+        } else {
+          AccessToken.getCurrentAccessToken().then(data => {
+            let accessToken = data.accessToken
+            const jsonValue = JSON.stringify(accessToken)
+            AsyncStorage.setItem('facebook_token', jsonValue)
+            const infoRequest = new GraphRequest(
+              '/me?fields=email,name,first_name,middle_name,last_name,picture.type(large)', // { //   accessToken: accessToken, //   parameters: { //     fields: { //       string: "email"//,name,first_name,middle_name,last_name //     } //   } // },
+              null,
+              (error, result) => {
+                if (error) {
+                  self.setState({
+                    isFacebookLoading: false
+                  })
+                  alert('Error fetching data: ' + error.toString())
+                } else {
+                  const fbdata = {
+                    social_id: result.id,
+                    type: "FACEBOOK"
+                  }
+                  console.log("data", fbdata)
+                  try {
+                    const jsonValue = JSON.stringify(fbdata)
+                    AsyncStorage.setItem('@storage_Key', jsonValue)
+                    dispatch(socialLogin(fbdata))
+                  } catch (e) {
+                    console.log("error", e)
+                  }
+                }
+              }
+            )
+            // Start the graph request.\
+            new GraphRequestManager().addRequest(infoRequest).start()
+          })
+        }
       },
       function (error) {
-          // this.setState({
-          //   btnFacebookLoading: false
-          // })
+        // this.setState({
+        //   btnFacebookLoading: false
+        // })
       }
-  )
-}
+    )
+  }
 
   const renderEmailView = () => {
     return (
       <View style={{ width: width * 0.83, marginTop: 44 }}>
         <Text style={{ color: "#FFFFFF" }}>Email</Text>
-        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email}/>
+        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} />
       </View>
     )
   }
@@ -185,7 +208,7 @@ const _onFacebookSignin = () => {
     return (
       <View style={{ width: width * 0.83, marginTop: 24.50 }}>
         <Text style={{ color: "#FFFFFF", }}>Password</Text>
-        <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setPassword(text)} value={password}/>
+        <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setPassword(text)} value={password} />
       </View>
     )
   }
@@ -194,7 +217,7 @@ const _onFacebookSignin = () => {
     return (
       <View style={{ width: width * 0.83, marginTop: 24.50 }}>
         <Text style={{ color: "#FFFFFF", }}>Confirm Password</Text>
-        <TextInput placeholder="Confirm Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setConfirmPassword(text)} value={confirmPassword}/>
+        <TextInput placeholder="Confirm Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setConfirmPassword(text)} value={confirmPassword} />
       </View>
     )
   }
@@ -220,24 +243,32 @@ const _onFacebookSignin = () => {
 
   const renderContinueView = () => {
     return (
-        <View style={{ marginTop: 15 }}>
-            <Text style={{ color: '#FFFFFF', fontFamily: 'Avenir Medium' }}>Or Continue With</Text>
-        </View>
+      <View style={{ marginTop: 15 }}>
+        <Text style={{ color: '#FFFFFF', fontFamily: 'Avenir Medium' }}>Or Continue With</Text>
+      </View>
     )
-}
+  }
 
-const renderSocialButton = () => {
+  const renderSocialButton = () => {
     return (
-        <View style={{flexDirection: 'row', marginTop: 7}}>
-            <Pressable style={{backgroundColor: '#FFFFFF'}} onPress={() => _onGoogleSignin()}>
-                <Text style={{marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4}}>Google</Text>
-            </Pressable>
-            <Pressable style={{backgroundColor: '#1976D2', marginLeft: 7}} onPress={() => _onFacebookSignin()}>
-                <Text style={{color: '#FFFFFF', marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4}}>Facebook</Text>
-            </Pressable>
-        </View>
+      <View style={{ flexDirection: 'row', marginTop: 7 }}>
+        <Pressable style={{ backgroundColor: '#FFFFFF', flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+          <Image
+            style={{ marginTop: 7 }}
+            source={require('../../Images/google.png')}
+          />
+          <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text>
+        </Pressable>
+        <Pressable style={{ backgroundColor: '#1976D2', flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
+          <Image
+            style={{ marginTop: 4 }}
+            source={require('../../Images/facebook_logo.png')}
+          />
+          <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Facebook</Text>
+        </Pressable>
+      </View>
     )
-}
+  }
   return (
     <View style={styles.container}>
       <ImageBackground source={require('../../Images/background.png')} resizeMode="cover" style={styles.image}>

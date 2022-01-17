@@ -186,6 +186,7 @@ const Settings = (props) => {
   }
 
   const fbLogout = async () => {
+    let remove_google = await AsyncStorage.removeItem('@google_email')
     const jsonValue = await AsyncStorage.getItem('facebook_token')
     const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
     console.log("sd", parData)

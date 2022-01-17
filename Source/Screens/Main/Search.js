@@ -18,6 +18,7 @@ import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
 import Loader from '../../Components/Loader';
 import { useSelector, useDispatch } from 'react-redux';
 import { setAuthToken } from '../../Utils/setHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GridViewItems = [
   { key: '1' },
@@ -45,13 +46,32 @@ const HelloWorldApp = (props) => {
         console.log("token search", auth.access_token)
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         getTopStyleList();
-
+        getUserInfo()
       }
     }
     return () => {
       isCancelled = true
     }
   }, [])
+
+  const getUserInfo = async () => {
+    setLoading(true)
+    axios.get(`${BASE_URL}/users/me`)
+      .then(res => {
+        try {
+          const jsonValue = JSON.stringify(res.data)
+          AsyncStorage.setItem('@user_details', jsonValue)
+          //     console.log('res user info', res.data)
+        } catch (e) {
+          // saving error
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        console.log('e', e)
+        setLoading(false)
+      })
+  }
 
   const getTopStyleList = () => {
     setLoading(true)
@@ -170,12 +190,12 @@ const HelloWorldApp = (props) => {
                     tagList.map((res, index) => {
                       const myArray = res.value.split('|');
                       return (
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }} >
+                        <View key={index} style={{ flexDirection: 'row', flexWrap: 'wrap' }} >
                           {
                             res.name == selectedTags ?
-                              myArray.map((res) => {
+                              myArray.map((res, index) => {
                                 return (
-                                  <Pressable style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => _addTags(res)}>
+                                  <Pressable key={index} style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => _addTags(res)}>
                                     <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21 }}>{res}</Text>
                                   </Pressable>
                                 )

@@ -11,7 +11,7 @@ import {
 
 import { BASE_URL, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, socialLogin } from '../../Actions/AuthActions'
+import { login, socialLogin, resetAuth } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
 import Loader from '../../Components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,14 +51,15 @@ const Login = (props) => {
 
     useEffect(() => {
         GoogleSignin.configure()
+   //     dispatch(resetAuth())
     }, [])
 
     const _onLogin = () => {
         if (email == '') {
-            alert('Please Enter Email Address')
+            alert('Please enter email.')
             return false
         } else if (Password == '') {
-            alert('Please Enter Password')
+            alert('Please enter password.')
             return false
         } else {
             const data = {
@@ -74,7 +75,7 @@ const Login = (props) => {
             await GoogleSignin.hasPlayServices()
             const userInfo = await GoogleSignin.signIn()
             userInfo.social_type = 'GOOGLE'
-            console.log("User Info", userInfo.user.id)
+            console.log("User Info", userInfo.user)
             const data = {
                 social_id: userInfo.user.id,
                 type: "GOOGLE"
@@ -82,6 +83,7 @@ const Login = (props) => {
             try {
                 const jsonValue = JSON.stringify(data)
                 await AsyncStorage.setItem('@storage_Key', jsonValue)
+                await AsyncStorage.setItem('@google_email', userInfo.user.email)
                 dispatch(socialLogin(data))
             } catch (e) {
                 // saving error
@@ -136,7 +138,7 @@ const Login = (props) => {
         let self = this
         LoginManager.logInWithPermissions(['public_profile', 'email']).then(
             function (result) {
-             //   console.log("result",LoginManager)
+                //   console.log("result",LoginManager)
                 if (result.isCancelled) {
                     self.setState({
                         isFacebookLoading: false
@@ -204,7 +206,7 @@ const Login = (props) => {
 
     const renderForgotPassword = () => {
         return (
-            <Pressable style={{ marginLeft: width * 0.55, marginTop: 10.59, fontSize: 14 }} onPress={() => props.navigation.navigate('ForgotPassword')}>
+            <Pressable style={{ marginTop: 10.59, fontSize: 14, alignSelf: 'flex-end', marginRight: 33 }} onPress={() => props.navigation.navigate('ForgotPassword')}>
                 <Text style={{ color: Colors.white }}>Forgot Password?</Text>
             </Pressable>
         )
@@ -240,11 +242,19 @@ const Login = (props) => {
     const renderSocialButton = () => {
         return (
             <View style={{ flexDirection: 'row', marginTop: 7 }}>
-                <Pressable style={{ backgroundColor: '#FFFFFF' }} onPress={() => _onGoogleSignin()}>
-                    <Text style={{ marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Google</Text>
+                <Pressable style={{ backgroundColor: '#FFFFFF', flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+                    <Image
+                        style={{ marginTop: 7}}
+                        source={require('../../Images/google.png')}
+                    />
+                    <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text>
                 </Pressable>
-                <Pressable style={{ backgroundColor: '#1976D2', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
-                    <Text style={{ color: '#FFFFFF', marginLeft: 35, marginRight: 35, marginTop: 4, marginBottom: 4 }}>Facebook</Text>
+                <Pressable style={{ backgroundColor: '#1976D2', flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
+                <Image
+                        style={{ marginTop: 4}}
+                        source={require('../../Images/facebook_logo.png')}
+                    />
+                    <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4 , marginLeft: 7}}>Facebook</Text>
                 </Pressable>
             </View>
         )

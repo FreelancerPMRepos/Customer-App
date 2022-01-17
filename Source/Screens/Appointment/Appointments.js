@@ -73,7 +73,7 @@ const Appointments = ({navigation,props}) => {
           {
             upcomingList.map((res, index) => {
             //   console.log("dsa",res?.style?.name)
-             // console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
+           //   console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
               return (
                 <View style={styles.row} key={index}>
                   {
@@ -87,7 +87,7 @@ const Appointments = ({navigation,props}) => {
                       <Image
                         style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
-                          uri: `${IMAGE_URL}/${res?.style?.upload_front_photo}`,
+                          uri: `${res?.style?.upload_front_photo}`,
                         }}
                       />
                   }
@@ -137,7 +137,7 @@ const Appointments = ({navigation,props}) => {
                       <Image
                         style={{ marginLeft: 26, marginTop: 14, height: 118, width: 103, }}
                         source={{
-                          uri: `${IMAGE_URL}/${res?.style?.upload_front_photo}`,
+                          uri: `${res?.style?.upload_front_photo}`,
                         }}
                       />
                   }

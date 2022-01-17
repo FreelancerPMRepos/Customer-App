@@ -23,7 +23,7 @@ const DaysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 
 const StoreDescription = ({ navigation, route, props }) => {
     const updatedName = useSelector(state => state)
-    console.log("new name andar fav", updatedName.fav)
+    // console.log("new name andar fav", updatedName.fav)
     const dispatch = useDispatch()
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
@@ -43,6 +43,8 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [hairdresserId, setHairdresserId] = useState('');
     const [hairdresserName, setHairdresserName] = useState('');
     const [userDetails, setUserDetails] = useState('');
+    const [serviceTypeDiscount, setServiceTypeDiscount] = useState('');
+    const [serviceDiscount, setServiceDiscount] = useState('');
     const { storeDetails } = route.params
     const { page } = route.params
     const [storeData, setStoreData] = useState([]);
@@ -57,7 +59,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     // Time
     const [time, setTime] = useState([]);
 
-    console.log("page",page)
+    // console.log("page", page)
 
     useEffect(() => {
         setNextYear(new Date().getFullYear());
@@ -95,7 +97,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         try {
             const jsonValue = await AsyncStorage.getItem('@user_details')
             const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-            console.log("jdfhughs", parData)
+            //   console.log("jdfhughs", parData)
             setUserDetails(parData)
         } catch (e) {
             // error reading value
@@ -122,7 +124,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                 }
 
                 while (openTime <= closeTime) {
-                    timeStops.push(new moment(openTime).format('HH:mm'));
+                    timeStops.push(new moment(openTime).format('hh:mm A'));
                     openTime.add(30, 'minutes');
                 }
             }
@@ -221,7 +223,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/favourite/${storeDetails.id}`)
             .then(res => {
                 setPickStyleList(res.data)
-                console.log('res pick style', res.data)
+                //         console.log('res pick style', res.data)
             })
             .catch(e => {
                 console.log('e', e)
@@ -253,6 +255,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const service = (data) => {
         setServiceId(data.id)
         setServiceName(data.name)
+        setServiceDiscount(data.discount)
         setModalVisible(!modalVisible)
     }
 
@@ -267,6 +270,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const _onServiceType = (res) => {
         setServiceTypeId(res.id)
         setServiceTypeName(res.name)
+        setServiceTypeDiscount(res.discount)
         setServiceTypeModal(!serviceTypeModal)
     }
 
@@ -321,22 +325,35 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onBook = () => {
+        console.log("Asd", `${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`)
         if (serviceId == '') {
-            alert('Please select service')
+            alert('Please select service.')
             return false
         } else if (serviceTypeId == '') {
-            alert('Please select service type')
+            alert('Please select service type.')
             return false
         } else if (serviceTypeId == '') {
-            alert('Please select pick style')
+            alert('Please select pick style.')
             return false
         } else if (hairdresserId == '') {
-            alert('Please select hairdresser')
+            alert('Please select hairdresser.')
             return false
-        } else if (selectedDate && selectedTime == '') {
-            alert('Please select date and time')
+        } else if (selectedDate == '') {
+            alert('Please select date.')
+            return false
+        } else if (selectedTime == '') {
+            alert('Please select time.')
             return false
         } else {
+            console.log("data post", {
+                store_id: storeDetails.id,
+                employee_id: hairdresserId,
+                customer_id: userDetails.id,
+                service_id: serviceId,
+                style_type_id: serviceTypeId,
+                style_id: pickStyleId,
+                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate}  ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
+            })
             axios.post(`${BASE_URL}/booking`, {
                 store_id: storeDetails.id,
                 employee_id: hairdresserId,
@@ -344,18 +361,18 @@ const StoreDescription = ({ navigation, route, props }) => {
                 service_id: serviceId,
                 style_type_id: serviceTypeId,
                 style_id: pickStyleId,
-                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`,
+                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
             })
                 .then(res => {
                     console.log("booking response", res.data)
                     //    alert(res.data.message)
                     //    navigation.goBack()
-                    navigation.navigate('PaymentScreen')
+                    navigation.navigate('PaymentScreen', { booking_id: res.data.id, salon_name: storeData.store_name, employee_name: hairdresserName, date_time: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}` })
                     dispatch(deleteSalon(updatedName.fav))
                 })
                 .catch(e => {
                     console.log('e', e)
-                    alert(e)
+                    alert(e.response.data.message)
                 })
         }
     }
@@ -367,16 +384,30 @@ const StoreDescription = ({ navigation, route, props }) => {
             <View>
                 <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => onService()}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{serviceName == '' ? 'Select' : serviceName}</Text>
+                    <View style={{flexDirection: 'row'}}>
+                    {
+                        serviceDiscount === true ?
+                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>Available Discount</Text> : null
+                    }
                     <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    </View>
                 </Pressable>
                 {
                     modalVisible == true ?
-                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                        <View style={{ borderWidth: 1, marginRight: 27, }}>
                             {
-                                serviceList.map((res) => {
+                                serviceList.map((res, index) => {
                                     return (
-                                        <Pressable onPress={() => service(res)}>
-                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                        <Pressable key={index} onPress={() => service(res)}>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
+                                                {
+                                                    res.discount === true ?
+                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 46.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125 }}>Available Discount</Text>
+                                                        :
+                                                        null
+                                                }
+                                            </View>
                                             <View
                                                 style={{
                                                     borderBottomColor: '#979797',
@@ -399,16 +430,29 @@ const StoreDescription = ({ navigation, route, props }) => {
             <View>
                 <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => getServiceTypeList()}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{serviceTypeName == '' ? 'Select' : serviceTypeName}</Text>
-                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    <View style={{flexDirection: 'row'}}>
+                        {
+                            serviceTypeDiscount ?
+                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>{serviceTypeDiscount}% Discount</Text> : null
+                        }
+                        <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    </View>
                 </Pressable>
                 {
                     serviceTypeModal == true ?
                         <View style={{ borderWidth: 1, marginRight: 27 }}>
                             {
-                                serviceTypeList.map((res) => {
+                                serviceTypeList.map((res, index) => {
                                     return (
-                                        <Pressable onPress={() => _onServiceType(res)}>
-                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                        <Pressable key={index} onPress={() => _onServiceType(res)}>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                                {
+                                                    res.discount === false ? null
+                                                        :
+                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 46.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125 }}>{res.discount}% Discount</Text>
+                                                }
+                                            </View>
                                             <View
                                                 style={{
                                                     borderBottomColor: '#979797',
@@ -437,9 +481,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                     pickStyleModal == true ?
                         <View style={{ borderWidth: 1, marginRight: 27 }}>
                             {
-                                pickStyleList.map((res) => {
+                                pickStyleList.map((res, index) => {
                                     return (
-                                        <Pressable onPress={() => _onPickStyle(res)}>
+                                        <Pressable key={index} onPress={() => _onPickStyle(res)}>
                                             <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.style.name}</Text>
                                             <View
                                                 style={{
@@ -469,9 +513,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                     hairdresserModal == true ?
                         <View style={{ borderWidth: 1, marginRight: 27 }}>
                             {
-                                hairdresserList.map((res) => {
+                                hairdresserList.map((res, index) => {
                                     return (
-                                        <Pressable onPress={() => _onHairdresser(res)}>
+                                        <Pressable key={index} onPress={() => _onHairdresser(res)}>
                                             <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
                                             <View
                                                 style={{
@@ -490,6 +534,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
+
     return (
         <View style={styles.container}>
             {
@@ -500,8 +545,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                     {
                         updatedName.fav.data == null ?
                             null : page == 'Home' ? null
-                            :
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
+                                :
+                                <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
                     }
                     {
                         updatedName.fav.data == null ?
@@ -530,18 +575,18 @@ const StoreDescription = ({ navigation, route, props }) => {
                     }
                     <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: updatedName.fav.data ? 23 : 10 }}>
                         {
-                           !storeData || !storeData.images ||  storeData.images.length == 0 ?
+                            !storeData || !storeData.images || storeData.images.length == 0 ?
                                 <Image
                                     style={{ height: 83, width: 71 }}
                                     source={require('../../Images/noImage.jpg')}
                                 />
                                 :
-                              
-                                        <Image source={{
-                                            uri:  storeData.images[0].url,
-                                        }} style={{ height: 83, width: 71 }} />
-                                    
-                                
+
+                                <Image source={{
+                                    uri: storeData.images[0].url,
+                                }} style={{ height: 83, width: 71 }} />
+
+
 
                         }
                         <View style={{ marginLeft: 15 }}>
@@ -613,27 +658,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Hairdresser</Text>
                         {renderHairDresser()}
                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -646,6 +670,12 @@ const StoreDescription = ({ navigation, route, props }) => {
                             <View style={[styles.centeredView, { justifyContent: 'center' }]}>
                                 <View style={styles.modalView}>
                                     <View style={{ marginTop: 15, marginLeft: 10, marginRight: 10, marginBottom: 20 }}>
+                                        <Pressable onPress={() => setDateModalVisible(!dateModalVisible)}>
+                                            <Image
+                                                style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginBottom: 10 }}
+                                                source={require('../../Images/cross.png')}
+                                            />
+                                        </Pressable>
                                         <View style={{ backgroundColor: 'black', justifyContent: 'space-between', flexDirection: 'row' }}>
                                             <Pressable onPress={() => _onCalendarLeft()}>
                                                 <Image
@@ -654,7 +684,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                 />
                                             </Pressable>
                                             <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 9, marginBottom: 10, lineHeight: 22 }}>
-                                                {nextDate == 0 ? 'January' : nextDate == 1 ? 'February' : nextDate == 2 ? "March" : nextDate == 3 ? "April" : nextDate == 4 ? "May" : nextDate == 5 ? "June" : nextDate == 6 ? "July" : nextDate == 7 ? "August" : nextDate == 8 ? "September" : nextDate == 9 ? "Octomber" : nextDate == 10 ? "November" : "December"}
+                                                {nextDate == 0 ? 'January' : nextDate == 1 ? 'February' : nextDate == 2 ? "March" : nextDate == 3 ? "April" : nextDate == 4 ? "May" : nextDate == 5 ? "June" : nextDate == 6 ? "July" : nextDate == 7 ? "August" : nextDate == 8 ? "September" : nextDate == 9 ? "Octomber" : nextDate == 10 ? "November" : "December"} {nextYear}
                                             </Text>
                                             <Pressable onPress={() => _onCalendarRight()}>
                                                 <Image
@@ -665,10 +695,10 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         </View>
                                         <View style={{ borderColor: '#979797', flexDirection: 'row', borderBottomWidth: 1 }}>
                                             {
-                                                Days.map((res) => {
+                                                Days.map((res, index) => {
                                                     //     console.log("dhf", res)
                                                     return (
-                                                        <Text style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 45 }}>{res}</Text>
+                                                        <Text key={index} style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 45 }}>{res}</Text>
                                                     )
                                                 })
                                             }
@@ -679,70 +709,77 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     days.map((res, i) => {
                                                         //    console.log("Asddsa", dateList[5]?.is_open)
                                                         return (
-                                                            <View style={{ flexDirection: 'row' }}>
-                                                                <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? null : setDateModalVisible(!dateModalVisible), getTime(res.date, 0) }}>
-                                                                    {
-                                                                        res.is_open == 0 ?
+                                                            <View key={i} style={{ flexDirection: 'row' }}>
+                                                                {
+                                                                    res.is_open == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? null : setDateModalVisible(!dateModalVisible), getTime(res.date, 0) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date1, 1) }}>
-                                                                    {
-                                                                        res.is_open1 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open1 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date1} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date1, 1) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date1} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date2, 2) }}>
-                                                                    {
-                                                                        res.is_open2 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open2 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date2} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date2, 2) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date2} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date3, 3) }}>
-                                                                    {
-                                                                        res.is_open3 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open3 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date3} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date3, 3) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date3} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date4, 4) }}>
-                                                                    {
-                                                                        res.is_open4 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open4 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date4} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date4, 4) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date4} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date5, 5) }}>
-                                                                    {
-                                                                        res.is_open5 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open5 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date5} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date5, 5) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date5} </Text>
-                                                                    }
-
-                                                                </Pressable>
-                                                                <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date6, 6) }}>
-                                                                    {
-                                                                        res.is_open6 == 0 ?
+                                                                        </Pressable>
+                                                                }
+                                                                {
+                                                                    res.is_open6 == 0 ?
+                                                                        <Pressable>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1, color: '#979797' }}>{res.date6} </Text>
-                                                                            :
+                                                                        </Pressable>
+                                                                        :
+                                                                        <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date6, 6) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1 }}>{res.date6} </Text>
-                                                                    }
-
-                                                                </Pressable>
+                                                                        </Pressable>
+                                                                }
                                                             </View>
                                                         )
                                                     })
@@ -754,15 +791,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 </View>
                             </View>
                         </Modal>
-
-
-
-
-
-
                         {/* Time Modal */}
-
-
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -772,16 +801,13 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 setTimeModalVisible(!timeModalVisible);
                             }}
                         >
-                            <View style={{ flex: 1, position: 'absolute', bottom: 0, left: 160 }}>
+                            <View style={{ flex: 1, position: 'absolute', bottom: 0, left: 160, top: 500 }}>
                                 <View style={{
                                     width: 145,
-                                    height: 229,
+                                    //  height: 229,
                                     margin: 20,
                                     alignItems: 'center',
                                     backgroundColor: "white",
-                                    //  borderRadius: 20,
-                                    //    padding: 35,
-                                    //    alignItems: "center",
                                     shadowColor: "#000",
                                     shadowOffset: {
                                         width: 0,
@@ -791,11 +817,18 @@ const StoreDescription = ({ navigation, route, props }) => {
                                     shadowRadius: 4,
                                     elevation: 5
                                 }}>
+                                    <Pressable onPress={() => setTimeModalVisible(!timeModalVisible)}>
+                                        <Image
+                                            style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 10, left: 40 }}
+                                            source={require('../../Images/cross.png')}
+                                        />
+                                    </Pressable>
                                     <ScrollView showsVerticalScrollIndicator={false}>
                                         {
-                                            time.map((res) => {
+                                            time.map((res, index) => {
                                                 return (
                                                     <Pressable
+                                                        key={index}
                                                         style={[styles.button, styles.buttonClose]}
                                                         onPress={() => _onTime(res)}
                                                     >
@@ -809,26 +842,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 </View>
                             </View>
                         </Modal>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         <View style={{ flexDirection: 'row' }}>
                             <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => { setDateModalVisible(!dateModalVisible), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
@@ -863,16 +876,12 @@ const styles = StyleSheet.create({
     },
     centeredView: {
         flex: 1,
-        //     justifyContent: "center",
         alignItems: "center",
     },
     modalView: {
         width: 336,
         margin: 20,
         backgroundColor: "white",
-        //  borderRadius: 20,
-        //    padding: 35,
-        //    alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
             width: 0,

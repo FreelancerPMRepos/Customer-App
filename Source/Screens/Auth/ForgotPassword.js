@@ -9,29 +9,39 @@ import {
     Image
 } from 'react-native';
 import Header from '../../Components/Header'
-import { BASE_URL } from '../../Config';
+import { BASE_URL, isValidEmail } from '../../Config';
 import Loader from '../../Components/Loader';
 
 const ForgotPassword = (props) => {
     const [isLoading, setLoading] = useState(false)
+    const [email, setEmail] = useState('');
 
     const _onBack = () => props.navigation.goBack()
 
     const _onSend = () => {
-        setLoading(true)
-        axios.post(`${BASE_URL}/forgot/password`, {
-            mobile_number: "98997979496"
-        })
-            .then(res => {
-                console.log('res', res.data)
-                props.navigation.navigate('OtpVerification')
-                setLoading(false)
+        if (email == '') {
+            alert('Please enter email.')
+            return false
+        } else if (!isValidEmail(email)) {
+            alert('Please enter valid email.')
+            return false
+        } else {
+            setLoading(true)
+            axios.post(`${BASE_URL}/forgot/password`, {
+                email: email
             })
-            .catch(e => {
-                console.log('e', e)
-                props.navigation.navigate('OtpVerification')
-                setLoading(false)
-            })
+                .then(res => {
+                    console.log('res', res.data)
+                    props.navigation.navigate('OtpVerification', { data: email })
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log(e)
+                    // console.log('e', e.response.data.message)
+                    alert(`${e.response.data.message}.`)
+                    setLoading(false)
+                })
+        }
     }
 
 
@@ -51,7 +61,7 @@ const ForgotPassword = (props) => {
                         source={require('../../Images/forgot.png')}
                     />
                     <Text style={styles.titleText}>Please enter your registered Email.</Text>
-                    <TextInput placeholder="Registered Email" style={styles.emailTextinput} />
+                    <TextInput placeholder="Registered Email" style={styles.emailTextinput} onChangeText={text => setEmail(text)} value={email} />
                     <Text style={styles.subtitleText}>We will send verification code on your registered Email.</Text>
                     <Pressable style={styles.sendButton} onPress={() => _onSend()}>
                         <Text style={styles.buttonText}>Send</Text>

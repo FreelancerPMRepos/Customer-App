@@ -68,11 +68,10 @@ const Home = (props) => {
   }
 
   const getPickSalon = async () => {
-    console.log("yaha aaya")
     try {
       const jsonValue = await AsyncStorage.getItem('@pick_salon')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-      console.log("jdfhughs", parData)
+      console.log("getting async storage data", parData)
       setPickSalonData(parData)
       console.log("data", pickSalonData)
     } catch (e) {
@@ -117,7 +116,6 @@ const Home = (props) => {
         alignItems: 'center',
       }}>
         <MapView
-          //  provider={PROVIDER_GOOGLE} // remove if not using Google Maps
           style={styles.map}
           region={{
             latitude: 37.78825,
@@ -159,7 +157,7 @@ const Home = (props) => {
 
       </View>
       <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? height * 0.52 : height * 0.38, position: 'absolute', width: width * 1 }}>
-        <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? 380 : height * 0.34, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
+        <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? height * 0.49 : height * 0.35, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
           {
             viewHideShow == true ?
               <Image source={require('../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />

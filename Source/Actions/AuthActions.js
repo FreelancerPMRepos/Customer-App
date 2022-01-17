@@ -1,4 +1,4 @@
-import { AUTH_SERVICE_RUNNING, AUTH_ERROR, SET_USER, SET_LOGIN_SUCCESS, RESET_AUTH, SET_LOGIN_TYPE } from './Types'
+import { AUTH_SERVICE_RUNNING, AUTH_ERROR, SET_USER, SET_LOGIN_SUCCESS, RESET_AUTH, SET_LOGIN_TYPE, RESET_LOGIN_TYPE } from './Types'
 import axios from "axios";
 import { BASE_URL } from '../Config';
 
@@ -31,7 +31,7 @@ export const login = (payload) => {
                                     dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
                                     dispatch({ type: SET_LOGIN_SUCCESS })
                                 } else {
-                                    alert("You do not have access")
+                                    alert("You do not have access.")
                                 }
                             } else {
                                 console.log("error", error)
@@ -39,13 +39,13 @@ export const login = (payload) => {
                         })
                         .catch(error => {
                             console.log('error unit', error)
-                            alert(error)
+                           // alert(error)
                         })
                 }
             })
             .catch(e => {
-                console.log("asd", e.message)
-                alert(e.message)
+              console.log("er",e.response.data.message)
+                alert(`${e.response.data.message}.`)
                 dispatch({ type: AUTH_ERROR, payload: { error: e } })
             })
     }
@@ -72,7 +72,7 @@ export const socialLogin = (payload) => {
         })
         .catch(e => {
             console.log("asd", e.message)
-            alert(e.message)
+            alert(`${e.message}.`)
             dispatch({ type: AUTH_ERROR, payload: { error: e } })
         })
     }
@@ -89,13 +89,40 @@ export const signUp = (payload) => {
                     dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                     console.log("err", res.data)
                 } else {
-                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
-                    dispatch({ type: SET_LOGIN_SUCCESS })
+                   fetch(`${BASE_URL}/users/me`, {
+                       method: 'GET',
+                       headers: {
+                           Accept: 'application/json',
+                           'Content-Type': 'application/json',
+                           'Authorization': `Bearer ${res.data.access_token}`
+                       },
+                   })
+                   .then(response => { return Promise.all([response.status, response.json()]) })
+                   .then(resp => {
+                       let statusCode = resp[0]
+                       let data = resp[1]
+
+                       if (statusCode == 200) {
+                           console.log("sdf",data)
+                           if (data.role == 'USER') {
+                            dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
+                            dispatch({ type: SET_LOGIN_SUCCESS })
+                           } else {
+                            alert("You do not have access.")  
+                           }
+                       } else {
+                        console.log("error", error)
+                       }
+                   })
+                   .catch(error => {
+                    console.log('error unit', error)
+                   // alert(error)
+                })
                 }
             })
             .catch(e => {
                 console.log("payload", payload)
-                alert("error", e)
+                alert(`${e.response.data.message}.`)
                 dispatch({ type: AUTH_ERROR, payload: { error: e } })
             })
     }
@@ -108,3 +135,5 @@ export const setLoginSuccess = () => ({ type: SET_LOGIN_SUCCESS })
 export const resetAuth = () => ({ type: RESET_AUTH })
 
 export const loginType = () => ({ type: SET_LOGIN_TYPE })
+
+export const resetLoginType = () => ({ type: RESET_LOGIN_TYPE })

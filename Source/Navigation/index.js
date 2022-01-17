@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { resetLoginType } from '../Actions/AuthActions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Auth
 import Login from '../Screens/Auth/Login';
@@ -19,6 +21,7 @@ import Search from '../Screens/Main/Search';
 import Settings from '../Screens/Main/Settings';
 import StoreDescription from '../Screens/Main/StoreDescription';
 import PaymentScreen from '../Screens/Main/PaymentScreen';
+import BookingSuccessfullScreen from '../Screens/Main/BookingSuccessfullScreen';
 
 // HairCut
 import HairCuts from '../Screens/HairCut/HairCuts';
@@ -32,19 +35,31 @@ import ComplaintScreen from '../Screens/Appointment/ComplaintScreen';
 
 
 const Routes = (props) => {
+  const dispatch = useDispatch()
   const loginSuccess = useSelector(state => state.auth.loginSuccess)
   const loginType = useSelector(state => state.auth.loginType)
+  console.log("navigation me", loginType)
 
   const Stack = createStackNavigator();
 
   const Tab = createBottomTabNavigator();
+
+  useEffect(() => {
+    _onAppClose()
+  }, [])
+
+  const _onAppClose = async () => {
+    dispatch(resetLoginType())
+    const value = await AsyncStorage.removeItem('@google_email')
+    console.log("new", value)
+  }
 
   // console.log("yu",loginType)
 
   const HomeTabs = () => {
     return (
       <Tab.Navigator
-      initialRouteName='Search'
+        initialRouteName='Search'
         screenOptions={{ headerShown: false, tabBarShowLabel: false, tabBarStyle: { borderTopWidth: 1, elevation: 0, }, }}
       >
         <Tab.Screen
@@ -109,14 +124,14 @@ const Routes = (props) => {
         {
           loginSuccess ? (
             <>
-            {
-              loginType ? (
-                 <Stack.Screen name="UserDetails" component={UserDetails} />
-              )
-              :
-              null
-            }
-             
+              {
+                loginType ? (
+                  <Stack.Screen name="UserDetails" component={UserDetails} />
+                )
+                  :
+                  null
+              }
+
               <Stack.Screen name="HomeTabs" component={HomeTabs} />
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="HairCuts" component={HairCuts} />
@@ -130,6 +145,7 @@ const Routes = (props) => {
               <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
               <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
               <Stack.Screen name="ComplaintScreen" component={ComplaintScreen} />
+              <Stack.Screen name="BookingSuccessfullScreen" component={BookingSuccessfullScreen} />
             </>
           )
             :

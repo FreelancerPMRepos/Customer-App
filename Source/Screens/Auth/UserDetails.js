@@ -27,6 +27,7 @@ import {
 } from 'react-native-fbsdk-next'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { resetAuth } from '../../Actions/AuthActions';
 
 
 GoogleSignin.configure({
@@ -51,7 +52,12 @@ const UserDetails = (props) => {
   useEffect(() => {
     GoogleSignin.configure()
     getData()
+    getEmail()
+    setEmail('')
+  //  dispatch(resetAuth())
   }, [])
+
+  console.log("type",type)
 
   const getData = async () => {
     try {
@@ -65,10 +71,25 @@ const UserDetails = (props) => {
     }
   }
 
+  const getEmail = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@google_email')
+      console.log("jdfhughs new",value)
+      setEmail(value)
+     // setId(parData.social_id)
+     // setType(parData.type)
+    } catch (e) {
+      // error reading value
+    }
+  }
+
   const _onSignUp = () => {
     console.log("d",id)
     if (email == '') {
       alert('Please Enter Email Address')
+      return false
+    } else if (!isValidEmail(email)) {
+      alert('Please Enter valid Email')
       return false
     } else {
       axios.post(`${BASE_URL}/social/signup`, {
@@ -93,7 +114,7 @@ const UserDetails = (props) => {
     return (
       <View style={{ width: width * 0.83, marginTop: 44 }}>
         <Text style={{ color: "#FFFFFF" }}>Email</Text>
-        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} />
+        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} editable={type == 'GOOGLE' ? false : true}/>
       </View>
     )
   }
