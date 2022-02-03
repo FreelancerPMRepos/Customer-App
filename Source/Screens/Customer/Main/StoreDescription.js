@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteSalon } from '../../../Actions/PickSalon'
 import Loader from '../../../Components/Loader';
+import { getPreciseDistance } from 'geolib';
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -54,12 +55,12 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [serviceDiscount, setServiceDiscount] = useState('');
     const { storeDetails } = route.params
     const { page } = route.params
-    const { miles } = route.params
     const [storeData, setStoreData] = useState([]);
     const [dateModalVisible, setDateModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedTime, setSelectedTime] = useState('');
+    const [overallDistance, setOverallDistance] = useState('');
     const [bookingData, setBookingData] = useState([]);
     // Date
     const [days, setDays] = useState([]);
@@ -75,9 +76,8 @@ const StoreDescription = ({ navigation, route, props }) => {
         getHairdresserList();
         getDateSlot();
         getData();
-        Check()
-        getStoreData()
-        console.log("..................",global.CurrentLongitude)
+        Check();
+        getStoreData();
     }, [])
 
 
@@ -86,6 +86,12 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
             .then(res => {
                 setStoreData(res.data)
+                var pdis = getPreciseDistance(
+                    { latitude: res.data.latitude, longitude: res.data.longitude },
+                    { latitude: global.CurrentLatitude, longitude: global.CurrentLongitude },
+                );
+                let distance = (pdis / 1609).toFixed(2)
+                setOverallDistance(distance)
                 setLoading(false)
             })
             .catch(e => {
@@ -98,7 +104,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (updatedName.fav.data == null) {
             null
         } else {
-         //   console.log("dssa",updatedName.fav.data.service.id)
+            //   console.log("dssa",updatedName.fav.data.service.id)
             setServiceId(updatedName?.fav?.data?.service?.id)
         }
     }
@@ -403,7 +409,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             alert('Please select pick style.')
             setLoading(false)
             return false
-        }  else if (selectedDate == '') {
+        } else if (selectedDate == '') {
             alert('Please select date.')
             setLoading(false)
             return false
@@ -412,13 +418,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             setLoading(false)
             return false
         } else {
-            console.log("sd", {store_id: storeDetails.id,
-                employee_id: hairdresserId,
-                customer_id: userDetails.id,
-                service_id: serviceId,
-                style_type_id: serviceTypeId,
-                style_id: pickStyleId,
-                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`})
             axios.post(`${BASE_URL}/booking`, {
                 store_id: storeDetails.id,
                 employee_id: hairdresserId,
@@ -469,7 +468,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                 <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
                                                 {
                                                     res.discount === false ? null :
-                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5}}>Available Discount</Text>
+                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>Available Discount</Text>
 
                                                 }
                                             </View>
@@ -683,6 +682,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
+
     return (
         <View style={styles.container}>
             {
@@ -742,7 +742,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         }
                         <View style={{ marginLeft: 15 }}>
                             <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
-                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{miles} Miles</Text>
+                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{overallDistance} Miles</Text>
                             <View style={{ marginRight: 186 }}>
                                 <Rating
                                     type='custom'

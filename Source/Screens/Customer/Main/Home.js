@@ -9,7 +9,6 @@ import {
   ScrollView,
   TextInput,
   PixelRatio,
-  PermissionsAndroid
 } from 'react-native';
 
 import { BASE_URL } from '../../../Config';
@@ -22,9 +21,8 @@ import { Rating } from 'react-native-ratings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { deleteSalon } from '../../../Actions/PickSalon';
-import {getDistance, getPreciseDistance} from 'geolib';
-import Geolocation from '@react-native-community/geolocation';
 import moment from 'moment';
+import {getDistance, getPreciseDistance} from 'geolib';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -36,9 +34,6 @@ const Home = (props) => {
   const [storeList, setStoreList] = useState([]);
   const [isLoading, setLoading] = useState(false)
   const [pickSalonData, setPickSalonData] = useState('');
-  const [currentLongitude,setCurrentLongitude] = useState('...');
-  const [currentLatitude,setCurrentLatitude] = useState('...');
-  const [locationStatus,setLocationStatus] = useState('');
   const updatedName = useSelector(state => state)
   const dispatch = useDispatch()
 
@@ -50,73 +45,12 @@ const Home = (props) => {
         getStoreList()
         getUserInfo()
         getPickSalon()
-        locationPermission()
       }
     }
     return () => {
       isCancelled = true
     }
   }, [])
-
-  const locationPermission = async () => {
-    if (Platform.OS === 'ios') {
-      getOneTimeLocation();
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Access Required',
-            message: 'This App needs to Access your location',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          //To Check, If Permission is granted
-          getOneTimeLocation();
-          getStoreList();
-        } else {
-          setLocationStatus('Permission Denied');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    }
-  }
-
-  const getOneTimeLocation = () => {
-    setLocationStatus('Getting Location ...');
-    Geolocation.getCurrentPosition(
-      //Will give you the current location
-      (position) => {
-        setLocationStatus('You are Here');
-
-        //getting the Longitude from the location json
-        const currentLongitude = 
-          JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
-        const currentLatitude = 
-          JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
-        setCurrentLongitude(currentLongitude);
-        
-        //Setting Longitude state
-        setCurrentLatitude(currentLatitude);
-        global.CurrentLongitude = currentLongitude
-        global.CurrentLatitude = currentLongitude
-      },
-      (error) => {
-        setLocationStatus(error.message);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 1000
-      },
-    );
-  };
-
 
   const getStoreList = () => {
     setLoading(true)
@@ -251,13 +185,13 @@ const Home = (props) => {
               </View>
               :
               storeList.map((res, index) => {
-                // var pdis = getPreciseDistance(
-                //   {latitude: res.latitude, longitude: res.longitude},
-                //   {latitude: currentLatitude, longitude: currentLongitude},
-                // );
-                // let distance = (pdis / 1609).toFixed(2)
+                var pdis = getPreciseDistance(
+                  {latitude: res.latitude, longitude: res.longitude},
+                  {latitude: global.CurrentLatitude, longitude: global.CurrentLongitude},
+                );
+                let distance = (pdis / 1609).toFixed(2)
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: distance})}>
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10})}>
                     {
                       res.images.length == 0 ?
                         <Image
@@ -284,7 +218,7 @@ const Home = (props) => {
                           }
                         </View>
                       </View>
-                      {/* <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{distance} Miles</Text> */}
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{distance} Miles</Text>
                       <View style={{ flexDirection: 'row' }}>
                         <View style={{ marginTop: 3 }}>
                           <Rating

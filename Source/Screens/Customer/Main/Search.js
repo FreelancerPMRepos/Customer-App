@@ -11,7 +11,8 @@ import {
   ScrollView,
   Modal,
   ImageBackground,
-  LogBox
+  LogBox,
+  PermissionsAndroid
 } from 'react-native';
 import Header from '../../../Components/Header'
 import { BASE_URL, height, IMAGE_URL, width } from '../../../Config';
@@ -19,6 +20,7 @@ import Loader from '../../../Components/Loader';
 import { useSelector, useDispatch } from 'react-redux';
 import { setAuthToken } from '../../../Utils/setHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from '@react-native-community/geolocation';
 
 const GridViewItems = [
   { key: '1' },
@@ -35,6 +37,9 @@ const HelloWorldApp = (props) => {
   const [selectedSubTags, setSelectedSubTags] = useState('');
   const [isLoading, setLoading] = useState(false)
   const auth = useSelector(state => state.auth)
+  const [currentLongitude,setCurrentLongitude] = useState('...');
+  const [currentLatitude,setCurrentLatitude] = useState('...');
+  const [locationStatus,setLocationStatus] = useState('');
 
 
   useEffect(() => {
@@ -42,10 +47,10 @@ const HelloWorldApp = (props) => {
     if (!isCancelled) {
       if (auth.access_token) {
         setAuthToken(auth.access_token)
-        console.log("token search", auth.access_token)
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         getTopStyleList();
         getUserInfo()
+        locationPermission()
       }
     }
     return () => {
@@ -77,7 +82,6 @@ const HelloWorldApp = (props) => {
     axios.get(`${BASE_URL}/top/cuts/styles`)
       .then(res => {
         setList(res.data)
-        console.log('res Top style', res.data.top_cuts)
         getTags(res.data.service_id)
         setLoading(false)
       })
@@ -87,8 +91,65 @@ const HelloWorldApp = (props) => {
       })
   }
 
+  const locationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      getOneTimeLocation();
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This App needs to Access your location',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          //To Check, If Permission is granted
+          getOneTimeLocation();
+        } else {
+          setLocationStatus('Permission Denied');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  }
+
+  const getOneTimeLocation = () => {
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      (position) => {
+        setLocationStatus('You are Here');
+
+        //getting the Longitude from the location json
+        const currentLongitude = 
+          JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude = 
+          JSON.stringify(position.coords.latitude);
+
+        //Setting Longitude state
+        setCurrentLongitude(currentLongitude);
+        
+        //Setting Longitude state
+        setCurrentLatitude(currentLatitude);
+        global.CurrentLongitude = currentLongitude
+        global.CurrentLatitude = currentLongitude
+      },
+      (error) => {
+        setLocationStatus(error.message);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 1000
+      },
+    );
+  };
+
   const getTags = (id) => {
-    console.log("sd", id)
     setLoading(true)
     axios.get(`${BASE_URL}/service-tag/list/${id}`)
       .then(res => {

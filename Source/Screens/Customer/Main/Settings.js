@@ -192,7 +192,6 @@ const Settings = (props) => {
     let remove_google = await AsyncStorage.removeItem('@google_email')
     const jsonValue = await AsyncStorage.getItem('facebook_token')
     const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-    console.log("sd", parData)
     // let logout = LoginManager.logOut();
     // // const token = await AccessToken.getCurrentAccessToken();
     // console.log("facebook logout token",logout)
