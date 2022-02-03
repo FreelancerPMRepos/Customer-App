@@ -12,12 +12,12 @@ import {
   Image
 } from 'react-native';
 
-import Header from '../../Components/Header';
+import Header from '../../../Components/Header';
 import { useDispatch } from 'react-redux';
-import { resetAuth } from '../../Actions/AuthActions';
+import { resetAuth } from '../../../Actions/AuthActions';
 import axios from 'axios';
-import { BASE_URL } from '../../Config';
-import Loader from '../../Components/Loader';
+import { BASE_URL } from '../../../Config';
+import Loader from '../../../Components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from '@react-native-community/checkbox';
 import {
@@ -56,6 +56,7 @@ const Settings = (props) => {
 
 
   const getService = () => {
+    setLoading(true)
     axios.get(`${BASE_URL}/service/all/list`)
       .then(res => {
         for (var i in res.data) {
@@ -84,6 +85,7 @@ const Settings = (props) => {
   };
 
   const getData = async (data) => {
+    setLoading(true)
     console.log("yaha aaya")
     try {
       const jsonValue = await AsyncStorage.getItem('@user_details')
@@ -140,6 +142,7 @@ const Settings = (props) => {
         })
     } catch (e) {
       // error reading value
+      setLoading(false)
     }
   }
 
@@ -319,7 +322,7 @@ const Settings = (props) => {
               return (
                 <Image
                   style={{ marginLeft: 36, marginRight: 6.36 }}
-                  source={require('../../Images/Triangle.png')}
+                  source={require('../../../Images/Triangle.png')}
                 />
               )
             }}
@@ -341,7 +344,7 @@ const Settings = (props) => {
               return (
                 <Image
                   style={{ marginLeft: 36, marginRight: 6.36 }}
-                  source={require('../../Images/Triangle.png')}
+                  source={require('../../../Images/Triangle.png')}
                 />
               )
             }}
@@ -363,7 +366,7 @@ const Settings = (props) => {
               return (
                 <Image
                   style={{ marginLeft: 36, marginRight: 6.36 }}
-                  source={require('../../Images/Triangle.png')}
+                  source={require('../../../Images/Triangle.png')}
                 />
               )
             }}
@@ -385,8 +388,12 @@ const Settings = (props) => {
             <Text style={styles.logoutText}>Save</Text>
           </Pressable>
           <View style={styles.bottomButtonView}>
+            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'privacy'})}>
             <Text style={styles.privacyPolicyText}>Privacy Policy</Text>
+            </Pressable>
+            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'terms'})}>
             <Text style={styles.termsServiceText}>Terms Of Service</Text>
+            </Pressable>
             <Pressable onPress={() => onLogout()}>
               <Text style={styles.logoutText}>Logout</Text>
             </Pressable>

@@ -14,6 +14,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login, socialLogin } from '../../Actions/AuthActions'
+import SelectDropdown from 'react-native-select-dropdown'
+import Loader from '../../Components/Loader';
 
 import {
   GoogleSignin,
@@ -41,19 +43,23 @@ GoogleSignin.configure({
 });
 
 const Signup = (props) => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch()
   const auth = useSelector(state => state.auth)
   const { isError } = auth
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
     GoogleSignin.configure()
   }, [])
 
   const _onSignUp = () => {
-    if (email == '') {
+    if (name == '') {
+      alert('Please enter name.')
+    } else if (email == '') {
       alert('Please enter email.')
       return false
     } else if (!isValidEmail(email)) {
@@ -62,7 +68,7 @@ const Signup = (props) => {
     } else if (password == '') {
       alert('Please enter password.')
       return false
-    }  else if (!/^(?=.*[a-z])(?=.*[0-9])(?=.{8,})/.test(password)) {
+    } else if (!/^(?=.*[a-z])(?=.*[0-9])(?=.{8,})/.test(password)) {
       alert('Password should be minimum 8 characters and at least one number.')
       return false
     }
@@ -90,6 +96,7 @@ const Signup = (props) => {
       return false
     } else {
       const data = {
+        name: name,
         email: email,
         password: password
       }
@@ -100,12 +107,10 @@ const Signup = (props) => {
   }
 
   const _onGoogleSignin = async () => {
-    console.log("tappedOnGoogleButton")
     try {
       await GoogleSignin.hasPlayServices()
       const userInfo = await GoogleSignin.signIn()
       userInfo.social_type = 'GOOGLE'
-      console.log("User Info", userInfo.user.id)
       const data = {
         social_id: userInfo.user.id,
         type: "GOOGLE"
@@ -142,12 +147,10 @@ const Signup = (props) => {
   }
 
   const _onFacebookSignin = () => {
-    console.log("facebook login ke liye aaya")
     // Attempt a login using the Facebook login dialog asking for default permissions.
     let self = this
     LoginManager.logInWithPermissions(['public_profile', 'email']).then(
       function (result) {
-        //   console.log("result",LoginManager)
         if (result.isCancelled) {
           self.setState({
             isFacebookLoading: false
@@ -171,7 +174,6 @@ const Signup = (props) => {
                     social_id: result.id,
                     type: "FACEBOOK"
                   }
-                  console.log("data", fbdata)
                   try {
                     const jsonValue = JSON.stringify(fbdata)
                     AsyncStorage.setItem('@storage_Key', jsonValue)
@@ -195,9 +197,18 @@ const Signup = (props) => {
     )
   }
 
+  const renderNameView = () => {
+    return (
+      <View style={{ width: width * 0.83, marginTop: 20 }}>
+        <Text style={{ color: "#FFFFFF" }}>Name</Text>
+        <TextInput placeholder="Enter Name" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setName(text)} value={name} />
+      </View>
+    )
+  }
+
   const renderEmailView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 44 }}>
+      <View style={{ width: width * 0.83, marginTop: 24.50 }}>
         <Text style={{ color: "#FFFFFF" }}>Email</Text>
         <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} />
       </View>
@@ -224,7 +235,7 @@ const Signup = (props) => {
 
   const renderLoginButton = () => {
     return (
-      <Pressable style={{ backgroundColor: '#FFFFFF', marginTop: 33, }} onPress={() => _onSignUp()}>
+      <Pressable style={{ backgroundColor: 'rgba(52, 52, 52, alpha)', marginTop: 33, opacity: 0.6}} onPress={() => _onSignUp()}>
         <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir Medium' }}>SIGN UP</Text>
       </Pressable>
     )
@@ -252,32 +263,36 @@ const Signup = (props) => {
   const renderSocialButton = () => {
     return (
       <View style={{ flexDirection: 'row', marginTop: 7 }}>
-        <Pressable style={{ backgroundColor: '#FFFFFF', flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+        <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
           <Image
             style={{ marginTop: 7 }}
-            source={require('../../Images/google.png')}
+            source={require('../../Images/Google_transparent.png')}
           />
-          <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text>
+          {/* <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text> */}
         </Pressable>
-        <Pressable style={{ backgroundColor: '#1976D2', flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
+        <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
           <Image
-            style={{ marginTop: 4 }}
-            source={require('../../Images/facebook_logo.png')}
+            style={{ marginTop: 7 }}
+            source={require('../../Images/facebook_transparent.png')}
           />
-          <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Facebook</Text>
+          {/* <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Facebook</Text> */}
         </Pressable>
       </View>
     )
   }
   return (
     <View style={styles.container}>
+      {
+        (auth.isLoading || isLoading) && <Loader />
+      }
       <ImageBackground source={require('../../Images/background.png')} resizeMode="cover" style={styles.image}>
         <Image
           style={styles.tinyLogo}
           source={require('../../Images/logo.png')}
         />
         <Text style={{ color: "#FFFFFF", fontSize: 16, fontFamily: 'Avenir Heavy' }}>Your Way. Every Time.</Text>
-        <Text style={{ color: "#FFFFFF", fontSize: 18, marginTop: 33, fontFamily: 'Avenir Heavy' }}>Sign Up</Text>
+        {/* <Text style={{ color: "#FFFFFF", fontSize: 18, marginTop: 33, fontFamily: 'Avenir Heavy' }}>Sign Up</Text> */}
+        {renderNameView()}
         {renderEmailView()}
         {renderPasswordView()}
         {renderConfirmPasswordView()}

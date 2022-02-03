@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import Header from '../../Components/Header'
+import Header from '../../../Components/Header'
 import { Rating, AirbnbRating } from 'react-native-ratings';
 
 const ReviewScreen = (props) => {

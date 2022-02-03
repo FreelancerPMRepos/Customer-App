@@ -17,10 +17,8 @@ const IMAGE_URL = `https://haircut.winayak.com/img`
 const isValidEmail = value => {
   let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   if (reg.test(value) == false) {
-    //console.log("Email is Not Correct");
     return false;
   } else {
-    //console.log("Email is Correct");
     return true;
   }
 };
@@ -75,7 +73,6 @@ export const getNumbersCount = str => {
 
 export const getSpecialCharectersCount = str => {
   var allFoundCharacters = str.match(/[@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g);
-  console.log("allFoundCharacters >>> ", allFoundCharacters.length);
 
   return allFoundCharacters
 }

@@ -13,11 +13,11 @@ import {
   ImageBackground,
   LogBox
 } from 'react-native';
-import Header from '../../Components/Header'
-import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
-import Loader from '../../Components/Loader';
+import Header from '../../../Components/Header'
+import { BASE_URL, height, IMAGE_URL, width } from '../../../Config';
+import Loader from '../../../Components/Loader';
 import { useSelector, useDispatch } from 'react-redux';
-import { setAuthToken } from '../../Utils/setHeader';
+import { setAuthToken } from '../../../Utils/setHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GridViewItems = [
@@ -36,7 +36,6 @@ const HelloWorldApp = (props) => {
   const [isLoading, setLoading] = useState(false)
   const auth = useSelector(state => state.auth)
 
-  console.log("tags uppar", tags)
 
   useEffect(() => {
     let isCancelled = false;
@@ -93,8 +92,22 @@ const HelloWorldApp = (props) => {
     setLoading(true)
     axios.get(`${BASE_URL}/service-tag/list/${id}`)
       .then(res => {
-        setTagList(res.data)
-        console.log('res Tags', res.data)
+        var data = []
+        for (var i in res.data) {
+          var obj = {}
+          obj.name = res.data[i].name;
+          obj.values = [];
+          if (res.data[i].value) {
+            var temp = res.data[i].value.split('|');
+            for (var j in temp) {
+              obj.values.push({ isSelected: false, value: temp[j] });
+            }
+
+            data.push(obj);
+          }
+        }
+
+        setTagList(data)
         setSelectedTags(res.data[0].name)
         setLoading(false)
       })
@@ -121,14 +134,29 @@ const HelloWorldApp = (props) => {
       })
   }
 
-  const _addTags = (name) => {
-    setTags([...tags, name]);
-    console.log("tags", tags)
+  const _addTags = (i, j) => {
+    // setTags([...tags, name]);
+    var temp = [];
+    for (var index in tagList[i].values) {
+      console.log(index)
+      if (index == j) { tagList[i].values[index].isSelected = true; }
+      temp.push(tagList[i])
+    }
+    console.log(">>>>>>>>>>>>" + temp)
+    setTags(temp)
+
   }
 
-  const removeTags = index => {
-    setTags([...tags.filter(tag => tags.indexOf(tag) !== index)]);
-};
+  const removeTags = (i, j) => {
+    var temp = [];
+    for (var index in tagList[i].values) {
+      console.log(index)
+      if (index == j) { tagList[i].values[index].isSelected = false; }
+      temp.push(tagList[i])
+    }
+    console.log(">>>>>>>>>>>>" + temp)
+    setTags(temp)
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -156,7 +184,7 @@ const HelloWorldApp = (props) => {
                   <Pressable onPress={() => setModalVisible(!modalVisible)}>
                     <Image
                       style={{ marginRight: 13.45, marginTop: 16.5 }}
-                      source={require('../../Images/cross.png')}
+                      source={require('../../../Images/cross.png')}
                     />
                   </Pressable>
                 </View>
@@ -187,17 +215,25 @@ const HelloWorldApp = (props) => {
                     <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>Bald</Text>
                   </View> */}
                   {
-                    tagList.map((res, index) => {
-                      const myArray = res.value.split('|');
+                    tagList.map((res, i) => {
                       return (
-                        <View key={index} style={{ flexDirection: 'row', flexWrap: 'wrap' }} >
+                        <View key={i} style={{ flexDirection: 'row', flexWrap: 'wrap' }} >
                           {
                             res.name == selectedTags ?
-                              myArray.map((res, index) => {
+                              res.values.map((val, j) => {
                                 return (
-                                  <Pressable key={index} style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => _addTags(res)}>
-                                    <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21 }}>{res}</Text>
-                                  </Pressable>
+                                  <View key={j}>
+                                    {
+                                      val.isSelected == true ?
+                                        <Pressable key={j} style={{ backgroundColor: '#4D4C4C', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => removeTags(i,j)}>
+                                          <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21, color: '#FFFFFF' }}>{val.value}</Text>
+                                        </Pressable>
+                                        :
+                                        <Pressable key={j} style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => _addTags(i,j)}>
+                                          <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21 }}>{val.value}</Text>
+                                        </Pressable>
+                                    }
+                                  </View>
                                 )
                               })
 
@@ -238,12 +274,12 @@ const HelloWorldApp = (props) => {
                       item.is_fav == 1 ?
                         <Image
                           style={{ marginTop: 7, marginRight: 7.51 }}
-                          source={require('../../Images/heart.png')}
+                          source={require('../../../Images/heart.png')}
                         />
                         :
                         <Image
                           style={{ marginTop: 7, marginRight: 7.51 }}
-                          source={require('../../Images/empty_heart.png')}
+                          source={require('../../../Images/empty_heart.png')}
                         />
                     }
 
@@ -262,7 +298,7 @@ const HelloWorldApp = (props) => {
               <Pressable style={styles.GridViewBlockStyle} key={index} onPress={() => _onFavourite(item.style_id)}>
                 <ImageBackground
                   style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
-                  //   source={require('../../Images/upcoming.png')}
+                  //   source={require('../../../Images/upcoming.png')}
                   source={{
                     uri: `${item.upload_front_photo}`,
                   }}
@@ -271,12 +307,12 @@ const HelloWorldApp = (props) => {
                     item.is_fav == 1 ?
                       <Image
                         style={{ marginTop: 7, marginRight: 7.51 }}
-                        source={require('../../Images/heart.png')}
+                        source={require('../../../Images/heart.png')}
                       />
                       :
                       <Image
                         style={{ marginTop: 7, marginRight: 7.51 }}
-                        source={require('../../Images/empty_heart.png')}
+                        source={require('../../../Images/empty_heart.png')}
                       />
                   }
                 </ImageBackground>

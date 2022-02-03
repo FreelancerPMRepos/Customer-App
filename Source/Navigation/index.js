@@ -16,29 +16,29 @@ import ResetPassword from '../Screens/Auth/ResetPassword';
 import UserDetails from '../Screens/Auth/UserDetails';
 
 // Main
-import Home from '../Screens/Main/Home';
-import Search from '../Screens/Main/Search';
-import Settings from '../Screens/Main/Settings';
-import StoreDescription from '../Screens/Main/StoreDescription';
-import PaymentScreen from '../Screens/Main/PaymentScreen';
-import BookingSuccessfullScreen from '../Screens/Main/BookingSuccessfullScreen';
+import Home from '../Screens/Customer/Main/Home';
+import Search from '../Screens/Customer/Main/Search';
+import Settings from '../Screens/Customer/Main/Settings';
+import StoreDescription from '../Screens/Customer/Main/StoreDescription';
+import PaymentScreen from '../Screens/Customer/Main/PaymentScreen';
+import BookingSuccessfullScreen from '../Screens/Customer/Main/BookingSuccessfullScreen';
+import PrivacyPolicy from '../Screens/Customer/Main/PrivacyPolicy';
 
 // HairCut
-import HairCuts from '../Screens/HairCut/HairCuts';
-import HairCutDescriptionScreen from '../Screens/HairCut/HairCutDescriptionScreen';
+import HairCuts from '../Screens/Customer/HairCut/HairCuts';
+import HairCutDescriptionScreen from '../Screens/Customer/HairCut/HairCutDescriptionScreen';
 
 // Appointments
-import Appointments from '../Screens/Appointment/Appointments';
-import AppointmentsDescriptionScreen from '../Screens/Appointment/AppointmentsDescriptionScreen';
-import ReviewScreen from '../Screens/Appointment/ReviewScreen';
-import ComplaintScreen from '../Screens/Appointment/ComplaintScreen';
+import Appointments from '../Screens/Customer/Appointment/Appointments';
+import AppointmentsDescriptionScreen from '../Screens/Customer/Appointment/AppointmentsDescriptionScreen';
+import ReviewScreen from '../Screens/Customer/Appointment/ReviewScreen';
+import ComplaintScreen from '../Screens/Customer/Appointment/ComplaintScreen';
 
 
 const Routes = (props) => {
   const dispatch = useDispatch()
   const loginSuccess = useSelector(state => state.auth.loginSuccess)
   const loginType = useSelector(state => state.auth.loginType)
-  console.log("navigation me", loginType)
 
   const Stack = createStackNavigator();
 
@@ -51,10 +51,7 @@ const Routes = (props) => {
   const _onAppClose = async () => {
     dispatch(resetLoginType())
     const value = await AsyncStorage.removeItem('@google_email')
-    console.log("new", value)
   }
-
-  // console.log("yu",loginType)
 
   const HomeTabs = () => {
     return (
@@ -146,6 +143,7 @@ const Routes = (props) => {
               <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
               <Stack.Screen name="ComplaintScreen" component={ComplaintScreen} />
               <Stack.Screen name="BookingSuccessfullScreen" component={BookingSuccessfullScreen} />
+              <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             </>
           )
             :

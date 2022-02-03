@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TextInput, Pressable } from 'react-native';
-import Header from '../../Components/Header';
+import Header from '../../../Components/Header';
 import RadioForm, { RadioButton, RadioButtonInput, RadioButtonLabel } from 'react-native-simple-radio-button';
 import axios from 'axios';
-import { BASE_URL } from '../../Config';
+import { BASE_URL } from '../../../Config';
 
 
 const ComplaintScreen = ({ navigation, route, props }) => {
@@ -49,12 +49,12 @@ const ComplaintScreen = ({ navigation, route, props }) => {
                                 radioButton == 'HairKut' ?
                                     <Image
                                         style={{}}
-                                        source={require('../../Images/button_fill.png')}
+                                        source={require('../../../Images/button_fill.png')}
                                     />
                                     :
                                     <Image
                                         style={{}}
-                                        source={require('../../Images/button_unfill.png')}
+                                        source={require('../../../Images/button_unfill.png')}
                                     />
                             }
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 6, lineHeight: 22 }}>Hairkut</Text>
@@ -64,12 +64,12 @@ const ComplaintScreen = ({ navigation, route, props }) => {
                                 radioButton == 'Store' ?
                                 <Image
                                 style={{ marginLeft: 38 }}
-                                source={require('../../Images/button_fill.png')}
+                                source={require('../../../Images/button_fill.png')}
                             />
                             :
                             <Image
                                 style={{ marginLeft: 38 }}
-                                source={require('../../Images/button_unfill.png')}
+                                source={require('../../../Images/button_unfill.png')}
                             />
                             }
                             {/* <Image

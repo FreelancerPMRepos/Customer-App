@@ -26,13 +26,10 @@ const OtpVerification = ({ navigation, route, props }) => {
             token: otp
         })
             .then(res => {
-                console.log('res', res.data)
                 navigation.navigate('ResetPassword', { email: data, token: otp })
                 setLoading(false)
             })
             .catch(e => {
-                console.log(e)
-                console.log('e', e.response.data.message)
                  alert(`${e.response.data.message}.`)
                 setLoading(false)
             })
@@ -45,13 +42,10 @@ const OtpVerification = ({ navigation, route, props }) => {
             email: data,
         })
             .then(res => {
-                console.log('res', res.data)
                 alert(res.data.message)
                 setLoading(false)
             })
             .catch(e => {
-               // console.log(e)
-                // console.log('e', e.response.data.message)
                  alert(`${e.response.data.message}.`)
                 setLoading(false)
             })

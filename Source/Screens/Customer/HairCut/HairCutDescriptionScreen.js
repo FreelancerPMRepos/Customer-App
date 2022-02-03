@@ -11,10 +11,10 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import Header from '../../Components/Header'
-import { BASE_URL, Colors, height, width } from '../../Config';
+import Header from '../../../Components/Header'
+import { BASE_URL, Colors, height, width } from '../../../Config';
 import { useDispatch, useSelector } from 'react-redux'
-import { addSalon } from '../../Actions/PickSalon'
+import { addSalon } from '../../../Actions/PickSalon'
 
 
 const HairCutDescriptionScreen = ({ navigation, route, props }) => {
@@ -95,7 +95,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
             <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setModalVisible(!modalVisible)}>
               <Image
                 style={{ marginRight: 14.49, marginTop: 18.5 }}
-                source={require('../../Images/cross.png')}
+                source={require('../../../Images/cross.png')}
               />
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
@@ -121,7 +121,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
             <Text style={styles.afroHairTextStyle}>{list.name}</Text>
             <Image
               style={{ marginTop: 5, marginRight: 29 }}
-              source={require('../../Images/black_heart.png')}
+              source={require('../../../Images/black_heart.png')}
             />
           </View>
           <View style={{ flexDirection: 'row' }}>
@@ -171,7 +171,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
           <Pressable onPress={() => setModalVisible(true)}>
             <Image
               style={{ marginLeft: 27, marginTop: 14 }}
-              source={require('../../Images/plus.png')}
+              source={require('../../../Images/plus.png')}
             />
           </Pressable>
           <Pressable style={styles.button} onPress={() => _onPick()}>

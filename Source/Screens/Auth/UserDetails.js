@@ -57,13 +57,10 @@ const UserDetails = (props) => {
   //  dispatch(resetAuth())
   }, [])
 
-  console.log("type",type)
-
   const getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem('@storage_Key')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-      console.log("jdfhughs",parData.social_id)
       setId(parData.social_id)
       setType(parData.type)
     } catch (e) {
@@ -74,7 +71,6 @@ const UserDetails = (props) => {
   const getEmail = async () => {
     try {
       const value = await AsyncStorage.getItem('@google_email')
-      console.log("jdfhughs new",value)
       setEmail(value)
      // setId(parData.social_id)
      // setType(parData.type)
@@ -84,7 +80,6 @@ const UserDetails = (props) => {
   }
 
   const _onSignUp = () => {
-    console.log("d",id)
     if (email == '') {
       alert('Please Enter Email Address')
       return false
@@ -99,7 +94,6 @@ const UserDetails = (props) => {
         role: 'USER'
       })
         .then(res => {
-          console.log('res', res.data)
           dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
            props.navigation.navigate('HomeTabs')
         })

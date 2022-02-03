@@ -49,6 +49,7 @@ const Login = (props) => {
     const [Password, setPassword] = useState('')
     const [isLoading, setLoading] = useState(false)
 
+
     useEffect(() => {
         GoogleSignin.configure()
    //     dispatch(resetAuth())
@@ -75,7 +76,6 @@ const Login = (props) => {
             await GoogleSignin.hasPlayServices()
             const userInfo = await GoogleSignin.signIn()
             userInfo.social_type = 'GOOGLE'
-            console.log("User Info", userInfo.user)
             const data = {
                 social_id: userInfo.user.id,
                 type: "GOOGLE"
@@ -111,34 +111,11 @@ const Login = (props) => {
         }
     }
 
-    // const _onFacebookSignin = async () => {
-    //     const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
-    //     if (result.isCancelled) {
-    //         throw 'User cancelled the login process';
-    //     }
-    //     const data = await AccessToken.getCurrentAccessToken();
-    //     console.log("fb", data.userID)
-    //     const fbdata = {
-    //         social_id: data.userID,
-    //         type: "FACEBOOK"
-    //     }
-    //     console.log("data", fbdata)
-    //     try {
-    //         const jsonValue = JSON.stringify(fbdata)
-    //         AsyncStorage.setItem('@storage_Key', jsonValue)
-    //         dispatch(socialLogin(fbdata))
-    //     } catch (e) {
-    //         console.log("error", e)
-    //     }
-    // }
-
     const _onFacebookSignin = () => {
-        console.log("facebook login ke liye aaya")
         // Attempt a login using the Facebook login dialog asking for default permissions.
         let self = this
         LoginManager.logInWithPermissions(['public_profile', 'email']).then(
             function (result) {
-                //   console.log("result",LoginManager)
                 if (result.isCancelled) {
                     self.setState({
                         isFacebookLoading: false
@@ -162,7 +139,6 @@ const Login = (props) => {
                                         social_id: result.id,
                                         type: "FACEBOOK"
                                     }
-                                    console.log("data", fbdata)
                                     try {
                                         const jsonValue = JSON.stringify(fbdata)
                                         AsyncStorage.setItem('@storage_Key', jsonValue)
@@ -214,7 +190,7 @@ const Login = (props) => {
 
     const renderLoginButton = () => {
         return (
-            <Pressable style={{ backgroundColor: Colors.white, marginTop: 33, }} onPress={() => _onLogin()}>
+            <Pressable style={{ backgroundColor: 'rgba(52, 52, 52, alpha)', marginTop: 33,opacity: 0.6 }} onPress={() => _onLogin()}>
                 <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir-Medium' }}>LOG IN</Text>
             </Pressable>
         )
@@ -242,19 +218,19 @@ const Login = (props) => {
     const renderSocialButton = () => {
         return (
             <View style={{ flexDirection: 'row', marginTop: 7 }}>
-                <Pressable style={{ backgroundColor: '#FFFFFF', flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+                <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
                     <Image
                         style={{ marginTop: 7}}
-                        source={require('../../Images/google.png')}
+                        source={require('../../Images/Google_transparent.png')}
                     />
-                    <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text>
+                    {/* <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text> */}
                 </Pressable>
-                <Pressable style={{ backgroundColor: '#1976D2', flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
+                <Pressable style={{flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
                 <Image
-                        style={{ marginTop: 4}}
-                        source={require('../../Images/facebook_logo.png')}
+                        style={{ marginTop: 7}}
+                        source={require('../../Images/facebook_transparent.png')}
                     />
-                    <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4 , marginLeft: 7}}>Facebook</Text>
+                    {/* <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4 , marginLeft: 7}}>Facebook</Text> */}
                 </Pressable>
             </View>
         )
@@ -262,14 +238,14 @@ const Login = (props) => {
     return (
         <View style={styles.container}>
             {
-                (auth.isLoading && isLoading) && <Loader />
+                (auth.isLoading || isLoading) && <Loader />
             }
             <ImageBackground source={require('../../Images/background.png')} resizeMode="cover" style={styles.image}>
                 <Image
                     source={require('../../Images/logo.png')}
                 />
                 <Text style={styles.quoteText}>Your Way. Every Time.</Text>
-                <Text style={styles.loginText}>Log In</Text>
+                {/* <Text style={styles.loginText}>Log In</Text> */}
                 {renderEmailView()}
                 {renderPasswordView()}
                 {renderForgotPassword()}

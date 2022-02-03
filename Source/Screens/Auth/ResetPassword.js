@@ -6,7 +6,8 @@ import {
     StyleSheet,
     Image,
     TextInput,
-    Pressable
+    Pressable,
+    ScrollView
 } from 'react-native';
 import Header from '../../Components/Header';
 import { BASE_URL, width } from '../../Config/index'
@@ -41,7 +42,6 @@ const ResetPassword = ({ navigation, route, props }) => {
                     password: newPassword
                 })
                     .then(res => {
-                        console.log("res password", res.data)
                         alert(`${res.data.message}.`)
                         navigation.navigate('Login')
                         setNewPassword('')
@@ -60,7 +60,6 @@ const ResetPassword = ({ navigation, route, props }) => {
                     new_password: newPassword
                 })
                     .then(res => {
-                        console.log("res reset password", res.data)
                         alert(`${res.data.message}.`)
                         setOldPassword('')
                         setNewPassword('')
@@ -77,7 +76,7 @@ const ResetPassword = ({ navigation, route, props }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
             }
@@ -99,7 +98,7 @@ const ResetPassword = ({ navigation, route, props }) => {
                     </Pressable>
                 </View>
             }
-        </View>
+        </ScrollView>
     )
 }
 export default ResetPassword;
@@ -133,8 +132,8 @@ const styles = StyleSheet.create({
         paddingLeft: 10.5
     },
     resetButton: {
-        position: 'relative',
-        top: 80,
+    //    position: 'relative',
+        marginTop: 80,
         //  bottom: 89.5,
         borderWidth: 1,
         borderColor: '#504E4E',

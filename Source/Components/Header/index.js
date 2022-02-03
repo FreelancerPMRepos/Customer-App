@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, View, Image, StyleSheet, StatusBar } from 'react-native';
+import { width } from '../../Config';
 
 const Header = ({ leftIcon, onLeftIconPress, ...props }) => {
     return (
@@ -13,7 +14,7 @@ const Header = ({ leftIcon, onLeftIconPress, ...props }) => {
                         }
                     </Pressable>
                 </View>
-                <View style={ leftIcon == 'back' ? [styles.titleView,{marginLeft: 70}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
+                <View style={ leftIcon == 'back' ? [styles.titleView,{marginLeft: width * 0.14, marginBottom: 0.01}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
                     <Image source={require('../../Images/hairkut.png')} style={{resizeMode :'contain'}}/>
                 </View>
             </View>
@@ -34,13 +35,13 @@ const styles = StyleSheet.create({
         height: 68,
     },
     column: {
-        marginRight: 23
+        marginRight: width * 0.06
     },
     titleView: {
         flex: 1,
         
     },
     tinyLogo: {
-        marginLeft: 23
+        marginLeft: width * 0.06
     }
 })

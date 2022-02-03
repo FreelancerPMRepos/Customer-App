@@ -31,13 +31,11 @@ const ForgotPassword = (props) => {
                 email: email
             })
                 .then(res => {
-                    console.log('res', res.data)
                     props.navigation.navigate('OtpVerification', { data: email })
                     setLoading(false)
                 })
                 .catch(e => {
                     console.log(e)
-                    // console.log('e', e.response.data.message)
                     alert(`${e.response.data.message}.`)
                     setLoading(false)
                 })

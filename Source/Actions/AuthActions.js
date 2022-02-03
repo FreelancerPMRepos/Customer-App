@@ -5,14 +5,13 @@ import { BASE_URL } from '../Config';
 
 export const login = (payload) => {
     return async (dispatch) => {
-        dispatch({ type: AUTH_SERVICE_RUNNING })
         axios.post(`${BASE_URL}/login`, payload)
 
             .then(res => {
-                console.log("res", res.data)
                 if (res.data.error) {
                     dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                 } else {
+                    dispatch({ type: AUTH_SERVICE_RUNNING })
                     fetch(`${BASE_URL}/users/me`, {
                         method: 'GET',
                         headers: {
@@ -35,18 +34,21 @@ export const login = (payload) => {
                                 }
                             } else {
                                 console.log("error", error)
+                                dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                             }
                         })
                         .catch(error => {
                             console.log('error unit', error)
+                            dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                            // alert(error)
                         })
                 }
             })
             .catch(e => {
               console.log("er",e.response.data.message)
-                alert(`${e.response.data.message}.`)
-                dispatch({ type: AUTH_ERROR, payload: { error: e } })
+              dispatch({ type: RESET_AUTH, payload: { error: e.error } })
+                alert(`${e.response.data.message}`)
+                
             })
     }
 }
@@ -57,7 +59,6 @@ export const socialLogin = (payload) => {
         axios.post(`${BASE_URL}/social/login`, payload)
 
         .then(res => {
-            console.log("res", res.data)
             if (res.data.error) {
                 dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
             } else {
@@ -80,15 +81,13 @@ export const socialLogin = (payload) => {
 
 export const signUp = (payload) => {
     return async (dispatch) => {
-        dispatch({ type: AUTH_SERVICE_RUNNING })
         axios.post(`${BASE_URL}/signup/customer`, payload)
 
             .then(res => {
-                console.log("Res", res.data)
                 if (res.data.error) {
                     dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
-                    console.log("err", res.data)
                 } else {
+                    dispatch({ type: AUTH_SERVICE_RUNNING })
                    fetch(`${BASE_URL}/users/me`, {
                        method: 'GET',
                        headers: {
@@ -103,7 +102,6 @@ export const signUp = (payload) => {
                        let data = resp[1]
 
                        if (statusCode == 200) {
-                           console.log("sdf",data)
                            if (data.role == 'USER') {
                             dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
                             dispatch({ type: SET_LOGIN_SUCCESS })
@@ -115,13 +113,11 @@ export const signUp = (payload) => {
                        }
                    })
                    .catch(error => {
-                    console.log('error unit', error)
-                   // alert(error)
+                    alert(error)
                 })
                 }
             })
             .catch(e => {
-                console.log("payload", payload)
                 alert(`${e.response.data.message}.`)
                 dispatch({ type: AUTH_ERROR, payload: { error: e } })
             })

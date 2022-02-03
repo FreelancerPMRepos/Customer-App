@@ -7,11 +7,12 @@ import {
   Pressable,
   ScrollView
 } from 'react-native';
-import Header from '../../Components/Header'
+import Header from '../../../Components/Header'
 import SelectDropdown from 'react-native-select-dropdown'
 import axios from 'axios';
-import { BASE_URL, IMAGE_URL, width } from '../../Config';
-import Loader from '../../Components/Loader';
+import { BASE_URL, IMAGE_URL, width } from '../../../Config';
+import Loader from '../../../Components/Loader';
+import moment from 'moment';
 
 
 const countries = ["Chronological"]
@@ -20,6 +21,7 @@ const Appointments = ({navigation,props}) => {
   const [list, setList] = useState([]);
   const [upcomingList, setUpcomingList] = useState([]);
   const [isLoading, setLoading] = useState(false)
+
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -36,7 +38,6 @@ const Appointments = ({navigation,props}) => {
     axios.get(`${BASE_URL}/booking/customer/list?type=UPCOMING`)
       .then(res => {
         setUpcomingList(res.data)
-        console.log('res appointment', res.data)
         setLoading(false)
       })
       .catch(e => {
@@ -50,7 +51,6 @@ const Appointments = ({navigation,props}) => {
     axios.get(`${BASE_URL}/booking/customer/list?type=PAST`)
       .then(res => {
         setList(res.data)
-        console.log('res appointment', res.data)
         setLoading(false)
       })
       .catch(e => {
@@ -72,8 +72,7 @@ const Appointments = ({navigation,props}) => {
           <Text style={styles.upcomingTextStyle}>Upcoming</Text>
           {
             upcomingList.map((res, index) => {
-            //   console.log("dsa",res?.style?.name)
-           //   console.log("Sdf", `${IMAGE_URL}/${res.style.upload_front_photo}`)
+            let fhg = moment.utc(res?.booking_date) == moment(new Date()).add(1,'days');
               return (
                 <View style={styles.row} key={index}>
                   {
@@ -81,7 +80,7 @@ const Appointments = ({navigation,props}) => {
                       ?
                       <Image
                         style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
-                        source={require('../../Images/noImage.jpg')}
+                        source={require('../../../Images/noImage.jpg')}
                       />
                       :
                       <Image
@@ -92,8 +91,8 @@ const Appointments = ({navigation,props}) => {
                       />
                   }
                   <View style={{ marginTop: 23, marginLeft: 25 }}>
-                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
-                    <Text style={{ color: '#1A1919', marginTop: 2, lineHeight: 19 }}>Tomorrow at 8:30 PM</Text>
+                    <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name == undefined ? res?.styletype?.name : res?.style?.name}</Text>
+                    <Text style={{ color: '#1A1919', marginTop: 2, lineHeight: 19, fontFamily: 'Avenir-Medium', }}>{moment(res?.booking_date,).add(0, 'days').calendar(null, {sameElse: 'DD MMM YYYY hh:mm A'})}</Text>
                     <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'UPCOMING'})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center',fontFamily: 'Avenir-Medium' }}>Look at booking</Text>
                     </Pressable>
@@ -117,13 +116,11 @@ const Appointments = ({navigation,props}) => {
               data={countries}
               buttonStyle={{ backgroundColor: 'white', borderWidth: 1, borderColor: '#171717', height: 35, marginTop: 30, width: 166 }}
               onSelect={(selectedItem, index) => {
-                console.log(selectedItem, index)
               }}
             />
           </View>
           {
             list.map((res, index) => {
-           //   console.log("tye", res)
               return (
                 <View style={{ flexDirection: 'row' }} key={index}>
                   {
@@ -131,7 +128,7 @@ const Appointments = ({navigation,props}) => {
                       ?
                       <Image
                         style={{ height: 118, width: 103, marginLeft: 26, marginTop: 14, resizeMode: 'contain' }}
-                        source={require('../../Images/noImage.jpg')}
+                        source={require('../../../Images/noImage.jpg')}
                       />
                       :
                       <Image
@@ -143,7 +140,7 @@ const Appointments = ({navigation,props}) => {
                   }
                   <View style={{ marginTop: 29, marginLeft: 25 }}>
                     <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{res?.style?.name}</Text>
-                    <Text style={{ color: '#1A1919', marginTop: 2 , lineHeight: 19}}>Wed 11 Mar 2020</Text>
+                    <Text style={{ color: '#1A1919', marginTop: 2 , lineHeight: 19}}>{moment(res?.booking_date,).format("DD MMM YYYY hh:mm a")}</Text>
                     <Pressable style={{ borderWidth: 1, marginTop: 10.5, width: width * 0.4 }} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'PASSED'})}>
                       <Text style={{ color: '#1A1919', marginTop: 8.5, marginBottom: 8.5, textAlign: 'center', fontFamily: 'Avenir-Medium'}}>Look at booking</Text>
                     </Pressable>

@@ -10,14 +10,14 @@ import {
   ImageBackground,
   ScrollView
 } from 'react-native';
-import Header from '../../Components/Header'
-import { BASE_URL, height, IMAGE_URL, width } from '../../Config';
-import Loader from '../../Components/Loader';
+import Header from '../../../Components/Header'
+import { BASE_URL, height, IMAGE_URL, width } from '../../../Config';
+import Loader from '../../../Components/Loader';
 
 const GridViewItems = [
-  { key: '../../Images/cut1.png' },
-  { key: '../../Images/cut2.png' },
-  { key: '../../Images/upcoming.png' },
+  { key: '../../../Images/cut1.png' },
+  { key: '../../../Images/cut2.png' },
+  { key: '../../../Images/upcoming.png' },
 ]
 
 const HelloWorldApp = (props) => {
@@ -75,7 +75,7 @@ const HelloWorldApp = (props) => {
                             >
                               <Image
                                 style={{ marginTop: 7, marginRight: 7.51 }}
-                                source={require('../../Images/heart.png')}
+                                source={require('../../../Images/heart.png')}
                               />
                             </ImageBackground>
                           </Pressable>

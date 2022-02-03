@@ -8,32 +8,38 @@ import {
     Modal,
     ScrollView,
 } from 'react-native';
-import Header from '../../Components/Header';
-import { BASE_URL, width, height } from '../../Config';
+import Header from '../../../Components/Header';
+import { BASE_URL, width, height } from '../../../Config';
 import axios from 'axios';
 import { Rating } from 'react-native-ratings';
-import moment from 'moment';
+import moment, { now } from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteSalon } from '../../Actions/PickSalon'
+import { deleteSalon } from '../../../Actions/PickSalon'
+import Loader from '../../../Components/Loader';
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 const DaysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
+const DayShortCapsName = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+
+
 const StoreDescription = ({ navigation, route, props }) => {
     const updatedName = useSelector(state => state)
-    // console.log("new name andar fav", updatedName.fav)
+    const [isLoading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
     const [hairdresserList, setHairdresserList] = useState([]);
     const [dateList, setDateList] = useState([]);
     const [pickStyleList, setPickStyleList] = useState([]);
+    const [promotionTime, setPromotionTime] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
     const [pickStyleModal, setPickStyleModal] = useState(false);
     const [hairdresserModal, setHairdresserModal] = useState(false);
+    const [bookingDone, setBookingDone] = useState(false);
     const [serviceId, setServiceId] = useState('');
     const [serviceName, setServiceName] = useState('');
     const [serviceTypeId, setServiceTypeId] = useState('');
@@ -43,15 +49,18 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [hairdresserId, setHairdresserId] = useState('');
     const [hairdresserName, setHairdresserName] = useState('');
     const [userDetails, setUserDetails] = useState('');
+    const [timeInterval, setTimeInterval] = useState('');
     const [serviceTypeDiscount, setServiceTypeDiscount] = useState('');
     const [serviceDiscount, setServiceDiscount] = useState('');
     const { storeDetails } = route.params
     const { page } = route.params
+    const { miles } = route.params
     const [storeData, setStoreData] = useState([]);
     const [dateModalVisible, setDateModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedTime, setSelectedTime] = useState('');
+    const [bookingData, setBookingData] = useState([]);
     // Date
     const [days, setDays] = useState([]);
     const [nextDate, setNextDate] = useState(0);
@@ -59,29 +68,29 @@ const StoreDescription = ({ navigation, route, props }) => {
     // Time
     const [time, setTime] = useState([]);
 
-    // console.log("page", page)
-
     useEffect(() => {
         setNextYear(new Date().getFullYear());
         setNextDate(new Date().getMonth());
         getServiceList();
         getHairdresserList();
-        getPickStyleList();
         getDateSlot();
         getData();
         Check()
         getStoreData()
+        console.log("..................",global.CurrentLongitude)
     }, [])
 
 
     const getStoreData = () => {
+        setLoading(true)
         axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
             .then(res => {
                 setStoreData(res.data)
-                //  console.log('res date slot', res.data.list)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
             })
     }
 
@@ -89,7 +98,8 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (updatedName.fav.data == null) {
             null
         } else {
-            setServiceId(updatedName.fav.data.service.id)
+         //   console.log("dssa",updatedName.fav.data.service.id)
+            setServiceId(updatedName?.fav?.data?.service?.id)
         }
     }
 
@@ -97,7 +107,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         try {
             const jsonValue = await AsyncStorage.getItem('@user_details')
             const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-            //   console.log("jdfhughs", parData)
             setUserDetails(parData)
         } catch (e) {
             // error reading value
@@ -106,7 +115,16 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const getTime = (date, day) => {
         setSelectedDate(date)
-        console.log("akjsadhgu", date)
+        var proOpenTime = "";
+        var proCloseTime = "";
+        for (var i in promotionTime) {
+            if (promotionTime[i].day == DayShortCapsName[day]) {
+                var startTime = promotionTime[i].open_time;
+                var endTime = promotionTime[i].close_time;
+                proOpenTime = moment(startTime, 'HH:mm').add(-1, 'minutes');
+                proCloseTime = moment(endTime, 'HH:mm').add(1, 'minutes');;
+            }
+        }
         var startTime = "";
         var endTime = "";
         var timeStops = [];
@@ -116,28 +134,35 @@ const StoreDescription = ({ navigation, route, props }) => {
                 endTime = dateList[i].close_time;
                 var openTime = moment(startTime, 'HH:mm');
                 var closeTime = moment(endTime, 'HH:mm');
-                console.log("start time", openTime)
-                console.log("End time", closeTime)
 
                 if (closeTime.isBefore(openTime)) {
                     closeTime.add(1, 'day');
                 }
 
                 while (openTime <= closeTime) {
-                    timeStops.push(new moment(openTime).format('hh:mm A'));
-                    openTime.add(30, 'minutes');
+                    var obj = {
+                        date: moment(openTime).format('hh:mm A'),
+                        temp: moment(openTime, 'HH:mm'),
+                        isOffer: false
+                    }
+
+                    if (proCloseTime != "" && proOpenTime != "") {
+                        if (obj.temp.isBefore(proCloseTime) && obj.temp.isAfter(proOpenTime)) {
+                            obj.isOffer = true;
+                        }
+                    }
+
+                    timeStops.push(obj);
+                    openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
                 }
             }
         }
-
-        console.log(timeStops)
         setTime(timeStops)
     }
 
     const getMonthDateDay = (year, date) => {
         var year = year;
         var month = date;
-        //  console.log("object", year, date)
         var date = new Date(year, month, 1);
         var days = [];
         var newObj = {};
@@ -146,25 +171,25 @@ const StoreDescription = ({ navigation, route, props }) => {
                 days.push(newObj);
                 newObj = {};
                 newObj.date = date.getDate();
-                newObj.is_open = getIsopen(date.getDay());
+                newObj.is_open = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 1) {
                 newObj.date1 = date.getDate();
-                newObj.is_open1 = getIsopen(date.getDay());
+                newObj.is_open1 = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 2) {
                 newObj.date2 = date.getDate();
-                newObj.is_open2 = getIsopen(date.getDay());
+                newObj.is_open2 = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 3) {
                 newObj.date3 = date.getDate();
-                newObj.is_open3 = getIsopen(date.getDay());
+                newObj.is_open3 = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 4) {
                 newObj.date4 = date.getDate();
-                newObj.is_open4 = getIsopen(date.getDay());
+                newObj.is_open4 = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 5) {
                 newObj.date5 = date.getDate();
-                newObj.is_open5 = getIsopen(date.getDay());
+                newObj.is_open5 = getIsopen(date.getDay(), date);
             } else if (date.getDay() == 6) {
                 newObj.date6 = date.getDate();
-                newObj.is_open6 = getIsopen(date.getDay());
+                newObj.is_open6 = getIsopen(date.getDay(), date);
             }
 
             date.setDate(date.getDate() + 1);
@@ -174,10 +199,12 @@ const StoreDescription = ({ navigation, route, props }) => {
         setDays(days);
     }
 
-    const getIsopen = (day) => {
-        for (var i in dateList) {
-            if (dateList[i].day == DaysName[day]) {
-                return dateList[i].is_open;
+    const getIsopen = (day, date) => {
+        if (date >= new Date()) {
+            for (var i in dateList) {
+                if (dateList[i].day == DaysName[day]) {
+                    return dateList[i].is_open;
+                }
             }
         }
 
@@ -185,100 +212,144 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const getDateSlot = () => {
+        setLoading(true)
         axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
             .then(res => {
                 setDateList(res.data.list)
-                //  console.log('res date slot', res.data.list)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
+            })
+    }
+
+    const getPromotionTimeList = (id) => {
+        setLoading(true)
+        axios.get(`${BASE_URL}/promotion/timeslot/list/${id}`)
+            .then(res => {
+                setPromotionTime(res.data)
+                setLoading(false)
+            })
+            .catch(e => {
+                console.log('e', e)
+                setLoading(false)
             })
     }
 
 
     const getServiceList = () => {
-        // axios.get(`${BASE_URL}/style/list/${storeDetails.id}`)
-        axios.get(`${BASE_URL}/service/all/list`)
+        setLoading(true)
+        axios.get(`${BASE_URL}/service/all/list?store_id=${storeDetails.id}`)
             .then(res => {
                 setServiceList(res.data)
-                //    console.log('res', res.data)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
             })
     }
 
     const getHairdresserList = () => {
+        setLoading(true)
         axios.get(`${BASE_URL}/employee/list/${storeDetails.id}`)
             .then(res => {
                 setHairdresserList(res.data.list)
-                //    console.log('res', res.data)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
             })
     }
 
-    const getPickStyleList = () => {
-        axios.get(`${BASE_URL}/favourite/${storeDetails.id}`)
+    const getPickStyleList = (id) => {
+        setLoading(true)
+        axios.get(`${BASE_URL}/all/favourite/service/?service_id=${id}&store_id=${storeDetails.id}`)
             .then(res => {
                 setPickStyleList(res.data)
-                //         console.log('res pick style', res.data)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
             })
     }
 
     const getServiceTypeList = () => {
         if (serviceId == '') {
-            //   console.log("Please Select Service First")
-            alert('Please Select Service First')
+            alert('Please select service first.')
         } else {
-            axios.get(`${BASE_URL}/style/type/list/${serviceId}`)
+            axios.get(`${BASE_URL}/style/type/list/?store_id=${storeDetails.id}&service_id=${serviceId}`)
                 .then(res => {
                     setServiceTypeList(res.data)
-                    //    console.log('res', res.data)
                     if (res.data.length == 0) {
-                        alert('No Service Type available')
+                        alert('No service type available.')
                     } else {
                         setServiceTypeModal(!serviceTypeModal)
                     }
                 })
                 .catch(e => {
                     console.log('e', e)
-                    alert('No Service Type available')
+                    alert('No service type available.')
                 })
         }
     }
 
     const service = (data) => {
         setServiceId(data.id)
+        getPickStyleList(data.id);
         setServiceName(data.name)
-        setServiceDiscount(data.discount)
+        setServiceTypeDiscount('')
+        setServiceTypeName('')
+        setServiceTypeId('')
+        setPickStyleId('')
+        setPickStyleName('')
         setModalVisible(!modalVisible)
+        if (data.discount === false) {
+
+        } else {
+            getPromotionTimeList()
+            setServiceDiscount(data.discount)
+        }
     }
 
     const onService = () => {
         if (serviceList.length == 0) {
-            alert('No Service available')
+            alert('No service available.')
         } else {
             setModalVisible(!modalVisible)
+
         }
     }
 
     const _onServiceType = (res) => {
         setServiceTypeId(res.id)
         setServiceTypeName(res.name)
-        setServiceTypeDiscount(res.discount)
+        if (res.discount === false) {
+
+        } else {
+            setServiceTypeDiscount(res.discount)
+        }
+        setTimeInterval(res.time)
         setServiceTypeModal(!serviceTypeModal)
+        getPromotionTimeList(res.promotion_id)
+        setSelectedDate('')
     }
 
     const _onPickStyle = (res) => {
-        console.log("sd", res)
         setPickStyleId(res.style.id)
         setPickStyleName(res.style.name)
         setPickStyleModal(!pickStyleModal)
+    }
+
+    const _onFavouriteStyle = () => {
+        if (serviceId == '') {
+            alert('Please select service first.')
+        } else {
+            setPickStyleModal(!pickStyleModal)
+        }
     }
 
     const _onHairdresser = (res) => {
@@ -304,20 +375,14 @@ const StoreDescription = ({ navigation, route, props }) => {
             setNextYear(nextYear)
             getMonthDateDay(nextYear, parseInt(nextDate) - 1)
         }
-        // setNextDate(nextDate - 1)
-        // getMonthDateDay()
     }
 
     const _onCalendarRight = () => {
-        console.log("das", nextDate)
-        console.log("fsdg", nextYear)
         if (nextDate == 11) {
-            //    console.log("As")
             setNextDate('0')
             setNextYear(nextYear + 1)
             getMonthDateDay(nextYear + 1, 0)
         } else {
-            //   console.log(nextDate + 1)
             setNextDate(parseInt(nextDate) + 1)
             setNextYear(nextYear)
             getMonthDateDay(nextYear, parseInt(nextDate) + 1)
@@ -325,35 +390,35 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onBook = () => {
-        console.log("Asd", `${nextYear}-${nextDate + 1}-${selectedDate} ${selectedTime}`)
+        setLoading(true)
         if (serviceId == '') {
             alert('Please select service.')
+            setLoading(false)
             return false
         } else if (serviceTypeId == '') {
             alert('Please select service type.')
+            setLoading(false)
             return false
         } else if (serviceTypeId == '') {
             alert('Please select pick style.')
+            setLoading(false)
             return false
-        } else if (hairdresserId == '') {
-            alert('Please select hairdresser.')
-            return false
-        } else if (selectedDate == '') {
+        }  else if (selectedDate == '') {
             alert('Please select date.')
+            setLoading(false)
             return false
         } else if (selectedTime == '') {
             alert('Please select time.')
+            setLoading(false)
             return false
         } else {
-            console.log("data post", {
-                store_id: storeDetails.id,
+            console.log("sd", {store_id: storeDetails.id,
                 employee_id: hairdresserId,
                 customer_id: userDetails.id,
                 service_id: serviceId,
                 style_type_id: serviceTypeId,
                 style_id: pickStyleId,
-                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate}  ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
-            })
+                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`})
             axios.post(`${BASE_URL}/booking`, {
                 store_id: storeDetails.id,
                 employee_id: hairdresserId,
@@ -365,14 +430,15 @@ const StoreDescription = ({ navigation, route, props }) => {
             })
                 .then(res => {
                     console.log("booking response", res.data)
-                    //    alert(res.data.message)
-                    //    navigation.goBack()
-                    navigation.navigate('PaymentScreen', { booking_id: res.data.id, salon_name: storeData.store_name, employee_name: hairdresserName, date_time: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}` })
                     dispatch(deleteSalon(updatedName.fav))
+                    setBookingData(res.data)
+                    setBookingDone(!bookingDone)
+                    setLoading(false)
                 })
                 .catch(e => {
                     console.log('e', e)
                     alert(e.response.data.message)
+                    setLoading(false)
                 })
         }
     }
@@ -384,12 +450,12 @@ const StoreDescription = ({ navigation, route, props }) => {
             <View>
                 <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => onService()}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{serviceName == '' ? 'Select' : serviceName}</Text>
-                    <View style={{flexDirection: 'row'}}>
-                    {
-                        serviceDiscount === true ?
-                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>Available Discount</Text> : null
-                    }
-                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    <View style={{ flexDirection: 'row' }}>
+                        {
+                            serviceDiscount ?
+                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>Available Discount</Text> : null
+                        }
+                        <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
                 </Pressable>
                 {
@@ -402,10 +468,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                 <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
                                                 {
-                                                    res.discount === true ?
-                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 46.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125 }}>Available Discount</Text>
-                                                        :
-                                                        null
+                                                    res.discount === false ? null :
+                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5}}>Available Discount</Text>
+
                                                 }
                                             </View>
                                             <View
@@ -430,12 +495,12 @@ const StoreDescription = ({ navigation, route, props }) => {
             <View>
                 <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => getServiceTypeList()}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{serviceTypeName == '' ? 'Select' : serviceTypeName}</Text>
-                    <View style={{flexDirection: 'row'}}>
+                    <View style={{ flexDirection: 'row' }}>
                         {
                             serviceTypeDiscount ?
                                 <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>{serviceTypeDiscount}% Discount</Text> : null
                         }
-                        <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                        <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
                 </Pressable>
                 {
@@ -450,7 +515,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                 {
                                                     res.discount === false ? null
                                                         :
-                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 46.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125 }}>{res.discount}% Discount</Text>
+                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.discount}% Discount</Text>
                                                 }
                                             </View>
                                             <View
@@ -473,9 +538,9 @@ const StoreDescription = ({ navigation, route, props }) => {
     const renderPickStyle = () => {
         return (
             <View>
-                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setPickStyleModal(!pickStyleModal)}>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => _onFavouriteStyle()}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{pickStyleName == '' ? 'Select' : pickStyleName}</Text>
-                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                 </Pressable>
                 {
                     pickStyleModal == true ?
@@ -484,7 +549,13 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 pickStyleList.map((res, index) => {
                                     return (
                                         <Pressable key={index} onPress={() => _onPickStyle(res)}>
-                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.style.name}</Text>
+                                            {
+                                                pickStyleList ?
+                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.style.name}</Text>
+                                                    :
+                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>No Data Available</Text>
+                                            }
+
                                             <View
                                                 style={{
                                                     borderBottomColor: '#979797',
@@ -507,7 +578,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             <View>
                 <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setHairdresserModal(!hairdresserModal)}>
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{hairdresserName == '' ? 'Select' : hairdresserName}</Text>
-                    <Image source={require('../../Images/arrowDown.png')} style={{ marginTop: 5, marginRight: 9.36 }} />
+                    <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                 </Pressable>
                 {
                     hairdresserModal == true ?
@@ -534,11 +605,91 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
+    const onContinePay = () => {
+        setBookingDone(!bookingDone)
+        navigation.navigate('PaymentScreen', { booking_id: bookingData.id, salon_name: storeData.store_name, employee_name: hairdresserName, date_time: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}` })
+    }
+
+    const renderBookingDone = () => {
+
+        return (
+            <Modal
+                animationType='slide'
+                transparent={true}
+                visible={bookingDone}
+                onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");
+                    setBookingDone(!bookingDone);
+                }}
+            >
+                <View style={[styles.centeredView, { justifyContent: 'center' }]}>
+                    <View style={styles.modalView}>
+                        <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 15, marginRight: 12.5 }} onPress={() => setBookingDone(!bookingDone)}>
+                            <Image
+                                style={{}}
+                                source={require('../../../Images/cross.png')}
+                            />
+                        </Pressable>
+                        <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 111, marginTop: 0.75 }}>Booking Details</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Name</Text>
+                            <Text style={{ fontSize: 16 }}>{serviceName}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Type</Text>
+                            <Text style={{ fontSize: 16 }}>{serviceTypeName}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Price</Text>
+                            <Text style={{ fontSize: 16 }}>{bookingData.service_price} USD</Text>
+                        </View>
+                        {
+                            bookingData.experience_charges === 0 ?
+                                null
+                                :
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Experience Charges</Text>
+                                    <Text style={{ fontSize: 16 }}>{bookingData.experience_charges} USD</Text>
+                                </View>
+                        }
+                        {
+                            bookingData.senior_charges === 0 ?
+                                null
+                                :
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Senior Charges</Text>
+                                    <Text style={{ fontSize: 16 }}>{bookingData.senior_charges} USD</Text>
+                                </View>
+                        }
+                        {
+                            bookingData.discount === 0 ?
+                                null
+                                :
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Discount</Text>
+                                    <Text style={{ fontSize: 16 }}>{bookingData.discount} USD</Text>
+                                </View>
+                        }
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium', fontFamily: 'Avenir-Heavy' }}>Total Charges</Text>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{bookingData.paid_amount} USD</Text>
+                        </View>
+                        <Pressable style={{ borderWidth: 1, marginLeft: 80, marginRight: 80, marginTop: 26.5, marginBottom: 30 }} onPress={() => onContinePay()}>
+                            <Text style={{ textAlign: 'center', marginTop: 12.59, marginBottom: 12.59, fontFamily: 'Avenir-Medium' }}>Continue and Pay</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+        )
+    }
 
     return (
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
+            }
+            {
+                isLoading && <Loader />
             }
             {
                 <ScrollView>
@@ -578,7 +729,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                             !storeData || !storeData.images || storeData.images.length == 0 ?
                                 <Image
                                     style={{ height: 83, width: 71 }}
-                                    source={require('../../Images/noImage.jpg')}
+                                    source={require('../../../Images/noImage.jpg')}
                                 />
                                 :
 
@@ -591,7 +742,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         }
                         <View style={{ marginLeft: 15 }}>
                             <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
-                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>0.4 Miles</Text>
+                            <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{miles} Miles</Text>
                             <View style={{ marginRight: 186 }}>
                                 <Rating
                                     type='custom'
@@ -600,13 +751,13 @@ const StoreDescription = ({ navigation, route, props }) => {
                                     ratingBackgroundColor='#c8c7c8'
                                     tintColor="#FFFFFF"
                                     readonly={true}
-                                    startingValue={4}
+                                    startingValue={storeData.rating}
                                     imageSize={16}
                                 //   onFinishRating={this.ratingCompleted}
                                 />
                             </View>
                             <View style={{ flexDirection: 'row' }}>
-                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>8-18</Text>
+                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>{moment(storeData.opentime, "H").format('h')}-{moment(storeData.closetime, "H").format('h')}</Text>
                                 {
                                     storeData?.is_available == 1 ?
                                         <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#70CF2B' }}> Open</Text>
@@ -622,10 +773,22 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 26, marginTop: 10 }}>Reviews</Text>
                                 <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, marginTop: 3 }}
                                 />
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Brilliant and professional, I was in and out before the end of my lunch break.”</Text>
-                                <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“Had a stop over in town tonight and needed a haircut before a meeting tomorrow. Last minute lifesaver.”</Text>
-                                <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                                {
+                                    storeData?.reviews?.length == 0 ?
+                                        <View>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>No Reviews</Text>
+                                            <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                                        </View>
+                                        :
+                                        storeData?.reviews?.map((res) => {
+                                            return (
+                                                <View>
+                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“{res.review}”</Text>
+                                                    <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
+                                                </View>
+                                            )
+                                        })
+                                }
                             </View>
                             :
                             null
@@ -635,7 +798,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         {
                             updatedName.fav.data == null ?
                                 <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7 }}>Service</Text>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Service</Text>
                                     {renderService()}
 
                                 </View>
@@ -643,21 +806,21 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 null
 
                         }
-                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Service Type</Text>
+                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type</Text>
                         {renderServiceType()}
                         {
                             updatedName.fav.data == null ?
                                 <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Pick Style</Text>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Pick Style</Text>
                                     {renderPickStyle()}
                                 </View>
                                 :
                                 null
                         }
 
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Hairdresser</Text>
+                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Hairdresser</Text>
                         {renderHairDresser()}
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5 }}>Date & Time</Text>
+                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Date & Time</Text>
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -673,14 +836,14 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         <Pressable onPress={() => setDateModalVisible(!dateModalVisible)}>
                                             <Image
                                                 style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginBottom: 10 }}
-                                                source={require('../../Images/cross.png')}
+                                                source={require('../../../Images/cross.png')}
                                             />
                                         </Pressable>
                                         <View style={{ backgroundColor: 'black', justifyContent: 'space-between', flexDirection: 'row' }}>
                                             <Pressable onPress={() => _onCalendarLeft()}>
                                                 <Image
                                                     style={{ marginLeft: 15, marginRight: 4.5, marginTop: 10.5 }}
-                                                    source={require('../../Images/left-arrow.png')}
+                                                    source={require('../../../Images/left-arrow.png')}
                                                 />
                                             </Pressable>
                                             <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 9, marginBottom: 10, lineHeight: 22 }}>
@@ -689,14 +852,13 @@ const StoreDescription = ({ navigation, route, props }) => {
                                             <Pressable onPress={() => _onCalendarRight()}>
                                                 <Image
                                                     style={{ marginRight: 15, marginTop: 10.5 }}
-                                                    source={require('../../Images/right-arrow.png')}
+                                                    source={require('../../../Images/right-arrow.png')}
                                                 />
                                             </Pressable>
                                         </View>
                                         <View style={{ borderColor: '#979797', flexDirection: 'row', borderBottomWidth: 1 }}>
                                             {
                                                 Days.map((res, index) => {
-                                                    //     console.log("dhf", res)
                                                     return (
                                                         <Text key={index} style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 45 }}>{res}</Text>
                                                     )
@@ -707,7 +869,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                                             <View style={{}}>
                                                 {
                                                     days.map((res, i) => {
-                                                        //    console.log("Asddsa", dateList[5]?.is_open)
                                                         return (
                                                             <View key={i} style={{ flexDirection: 'row' }}>
                                                                 {
@@ -716,7 +877,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? null : setDateModalVisible(!dateModalVisible), getTime(res.date, 0) }}>
+                                                                        <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date} </Text>
                                                                         </Pressable>
                                                                 }
@@ -726,7 +887,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date1} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date1, 1) }}>
+                                                                        <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date1} </Text>
                                                                         </Pressable>
                                                                 }
@@ -736,7 +897,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date2} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date2, 2) }}>
+                                                                        <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date2} </Text>
                                                                         </Pressable>
                                                                 }
@@ -746,7 +907,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date3} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date3, 3) }}>
+                                                                        <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date3} </Text>
                                                                         </Pressable>
                                                                 }
@@ -756,7 +917,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date4} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date4, 4) }}>
+                                                                        <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date4} </Text>
                                                                         </Pressable>
                                                                 }
@@ -766,7 +927,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date5} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date5, 5) }}>
+                                                                        <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date5} </Text>
                                                                         </Pressable>
                                                                 }
@@ -776,7 +937,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1, color: '#979797' }}>{res.date6} </Text>
                                                                         </Pressable>
                                                                         :
-                                                                        <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : setDateModalVisible(!dateModalVisible), getTime(res.date6, 6) }}>
+                                                                        <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
                                                                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1 }}>{res.date6} </Text>
                                                                         </Pressable>
                                                                 }
@@ -801,9 +962,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 setTimeModalVisible(!timeModalVisible);
                             }}
                         >
-                            <View style={{ flex: 1, position: 'absolute', bottom: 0, left: 160, top: 500 }}>
+                            <View style={{ flex: 1, position: 'absolute', bottom: 15, left: 140, top: 500 }}>
                                 <View style={{
-                                    width: 145,
+                                    width: 200,
                                     //  height: 229,
                                     margin: 20,
                                     alignItems: 'center',
@@ -817,44 +978,50 @@ const StoreDescription = ({ navigation, route, props }) => {
                                     shadowRadius: 4,
                                     elevation: 5
                                 }}>
-                                    <Pressable onPress={() => setTimeModalVisible(!timeModalVisible)}>
+                                    <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 10, right: 20 }} onPress={() => setTimeModalVisible(!timeModalVisible)}>
                                         <Image
-                                            style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 10, left: 40 }}
-                                            source={require('../../Images/cross.png')}
+                                            style={{}}
+                                            source={require('../../../Images/cross.png')}
                                         />
                                     </Pressable>
                                     <ScrollView showsVerticalScrollIndicator={false}>
                                         {
                                             time.map((res, index) => {
                                                 return (
-                                                    <Pressable
-                                                        key={index}
-                                                        style={[styles.button, styles.buttonClose]}
-                                                        onPress={() => _onTime(res)}
-                                                    >
-                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13 }}>{res}</Text>
-                                                    </Pressable>
+                                                    <View key={index}>
+                                                        {
+                                                            res.isOffer == true ?
+                                                                <Pressable style={{ flexDirection: 'row' }} onPress={() => _onTime(res.date)}>
+                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13, color: '#EB2C47' }}>{res.date}</Text>
+                                                                    <Text style={{ marginTop: 20, marginLeft: 4, fontSize: 10, fontFamily: 'Avenir-Medium', lineHeight: 14, color: '#EB2C47' }}>{serviceTypeDiscount}% Discount</Text>
+                                                                </Pressable>
+                                                                :
+                                                                <Pressable onPress={() => _onTime(res.date)}>
+                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13 }}>{res.date}</Text>
+                                                                </Pressable>
+                                                        }
+                                                    </View>
                                                 )
                                             })
                                         }
-
                                     </ScrollView>
                                 </View>
                             </View>
                         </Modal>
+                        {renderBookingDone()}
                         <View style={{ flexDirection: 'row' }}>
                             <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => { setDateModalVisible(!dateModalVisible), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
                                 <Image
                                     style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
-                                    source={require('../../Images/storeCalendar.png')}
+                                    source={require('../../../Images/storeCalendar.png')}
                                 />
                             </Pressable>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible) }}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 || selectedDate == '' ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible) }}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
                                 <Image
                                     style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
-                                    source={require('../../Images/Triangle.png')}
+                                    source={require('../../../Images/Triangle.png')}
                                 />
                             </Pressable>
                         </View>
