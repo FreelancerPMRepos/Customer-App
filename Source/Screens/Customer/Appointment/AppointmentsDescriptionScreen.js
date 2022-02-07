@@ -530,7 +530,6 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             <ScrollView showsVerticalScrollIndicator={false}>
               {
                 time.map((res, index) => {
-                  console.log("time >>>>>>>>>>>>>>>>>>>>>>>>>", time)
                   return (
                     <Pressable
                       key={index}

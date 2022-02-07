@@ -1,4 +1,4 @@
-import { AUTH_SERVICE_RUNNING, AUTH_ERROR, SET_USER, SET_LOGIN_SUCCESS, RESET_AUTH, SET_LOGIN_TYPE, RESET_LOGIN_TYPE } from './Types'
+import { AUTH_SERVICE_RUNNING, AUTH_ERROR, SET_USER, SET_LOGIN_SUCCESS, RESET_AUTH, SET_LOGIN_TYPE, RESET_LOGIN_TYPE, LOGIN_ERROR } from './Types'
 import axios from "axios";
 import { BASE_URL } from '../Config';
 
@@ -27,10 +27,14 @@ export const login = (payload) => {
 
                             if (statusCode == 200) {
                                 if (data.role == 'USER') {
-                                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
+                                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token, type: 'USER' } })
+                                    dispatch({ type: SET_LOGIN_SUCCESS })
+                                } else if (data.role == 'EMPLOYEE') {
+                                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token, type: 'EMPLOYEE' } })
                                     dispatch({ type: SET_LOGIN_SUCCESS })
                                 } else {
                                     alert("You do not have access.")
+                                    dispatch({ type: LOGIN_ERROR })
                                 }
                             } else {
                                 console.log("error", error)
@@ -133,3 +137,5 @@ export const resetAuth = () => ({ type: RESET_AUTH })
 export const loginType = () => ({ type: SET_LOGIN_TYPE })
 
 export const resetLoginType = () => ({ type: RESET_LOGIN_TYPE })
+
+export const loginError = () => ({ type: LOGIN_ERROR })

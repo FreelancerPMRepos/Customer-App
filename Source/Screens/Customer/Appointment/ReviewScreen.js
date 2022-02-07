@@ -7,6 +7,10 @@ const ReviewScreen = (props) => {
 
     const _onBack = () => props.navigation.goBack()
 
+   const ratingCompleted = (rating) => {
+        console.log("Rating is: " + rating)
+      }
+
     return (
         <View style={styles.container}>
             {
@@ -23,10 +27,10 @@ const ReviewScreen = (props) => {
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            readonly={true}
+                        //    readonly={true}
                             startingValue={3}
                             imageSize={28}
-                        //   onFinishRating={this.ratingCompleted}
+                           onFinishRating={ratingCompleted}
                         />
                     </View>
                     <TextInput
@@ -42,7 +46,7 @@ const ReviewScreen = (props) => {
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            readonly={true}
+                        //    readonly={true}
                             startingValue={3}
                             imageSize={28}
                         //   onFinishRating={this.ratingCompleted}

@@ -22,10 +22,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { deleteSalon } from '../../../Actions/PickSalon';
 import moment from 'moment';
-import {getDistance, getPreciseDistance} from 'geolib';
+import { getDistance, getPreciseDistance } from 'geolib';
+import Slider from '@react-native-community/slider';
+import SelectDropdown from 'react-native-select-dropdown'
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
+
+const dropDownData = ["Haircut", 'Salon']
 
 const Home = (props) => {
   const auth = useSelector(state => state.auth)
@@ -145,15 +149,44 @@ const Home = (props) => {
         {
           showFilter == true ?
             <View style={{ top: 95, flexDirection: 'row' }}>
-              <Pressable style={{ backgroundColor: 'white', width: 163 }} onPress={() => setShowFilter(!showFilter)}>
-                <Text style={{ color: '#A9A8A8', marginTop: 12, marginBottom: 10, marginLeft: 18, fontSize: 16, fontFamily: 'Avenir-Book' }}>Haircut</Text>
-              </Pressable>
-              <View>
-                 
+              <View style={{}}>
+                <SelectDropdown
+                  data={dropDownData}
+                  defaultButtonText={'Haircut'}
+                  buttonTextStyle={{ color: '#1A1919', textAlign: 'left' }}
+                  buttonStyle={{ backgroundColor: 'white', width: 160 }}
+                  renderDropdownIcon={() => {
+                    return (
+                      <Image
+                        style={{ marginLeft: 36, marginRight: 6.36 }}
+                        source={require('../../../Images/Triangle.png')}
+                      />
+                    )
+                  }}
+                  onSelect={(selectedItem, index) => {
+                  }}
+                />
+              </View>
+              <View style={{ backgroundColor: 'white', marginLeft: 20, flexDirection: 'row' }}>
+                <Text style={{ width: 54, textAlign: 'center', paddingTop: 11.5, borderRightWidth: 1 }}>£</Text>
+                <Text style={{ width: 54, textAlign: 'center', paddingTop: 11.5, borderRightWidth: 1 }}>££</Text>
+                <Text style={{ width: 54, textAlign: 'center', paddingTop: 11.5 }}>£££</Text>
               </View>
             </View>
             :
             null
+        }
+        {
+          showFilter == true ?
+            <View style={{ top: 110, backgroundColor: 'white' }}>
+              <Slider
+                style={{ width: 350, height: 40 }}
+                minimumValue={0}
+                maximumValue={1}
+                minimumTrackTintColor="#A9A8A8"
+                maximumTrackTintColor="#A9A8A8"
+              />
+            </View> : null
         }
         {
           updatedName.fav.data == null ?
@@ -186,12 +219,12 @@ const Home = (props) => {
               :
               storeList.map((res, index) => {
                 var pdis = getPreciseDistance(
-                  {latitude: res.latitude, longitude: res.longitude},
-                  {latitude: global.CurrentLatitude, longitude: global.CurrentLongitude},
+                  { latitude: res.latitude, longitude: res.longitude },
+                  { latitude: global.CurrentLatitude, longitude: global.CurrentLongitude },
                 );
                 let distance = (pdis / 1609).toFixed(2)
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10})}>
+                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: width * 0.07, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
                     {
                       res.images.length == 0 ?
                         <Image
@@ -204,12 +237,12 @@ const Home = (props) => {
                         }} style={{ height: 83, width: 71 }} />
                     }
                     <View style={{ marginLeft: 23, flex: 1 }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between',}}>
-                        <View style={{width: width * 0.35}}>
-                        <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium', lineHeight: 20,  }}>{res.store_name}</Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                        <View style={{ width: width * 0.35 }}>
+                          <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium', lineHeight: 20, }}>{res.store_name}</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{moment(res.opentime, "H").format('h')}-{moment(res.closetime,"H").format('h')}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{moment(res.opentime, "H").format('h')}-{moment(res.closetime, "H").format('h')}</Text>
                           {
                             res.is_available == 1 ?
                               <Text style={{ color: '#70CF2B', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Open</Text>

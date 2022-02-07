@@ -780,9 +780,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                                             <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
                                         </View>
                                         :
-                                        storeData?.reviews?.map((res) => {
+                                        storeData?.reviews?.map((res, index) => {
                                             return (
-                                                <View>
+                                                <View key={index}>
                                                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 6, marginBottom: 7 }}>“{res.review}”</Text>
                                                     <View style={{ borderBottomColor: '#979797', borderBottomWidth: 1, marginLeft: 27, marginRight: 27, }} />
                                                 </View>

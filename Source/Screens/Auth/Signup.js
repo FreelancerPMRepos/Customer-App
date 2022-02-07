@@ -235,7 +235,7 @@ const Signup = (props) => {
 
   const renderLoginButton = () => {
     return (
-      <Pressable style={{ backgroundColor: 'rgba(52, 52, 52, alpha)', marginTop: 33, opacity: 0.6}} onPress={() => _onSignUp()}>
+      <Pressable style={{ backgroundColor: 'white', marginTop: 33, opacity: 0.6}} onPress={() => _onSignUp()}>
         <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir Medium' }}>SIGN UP</Text>
       </Pressable>
     )

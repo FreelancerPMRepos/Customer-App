@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import {
   Text,
@@ -15,12 +14,13 @@ import {
   PermissionsAndroid
 } from 'react-native';
 import Header from '../../../Components/Header'
-import { BASE_URL, height, IMAGE_URL, width } from '../../../Config';
+import { BASE_URL, height, width } from '../../../Config';
 import Loader from '../../../Components/Loader';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { setAuthToken } from '../../../Utils/setHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Geolocation from '@react-native-community/geolocation';
+import axios from 'axios';
 
 const GridViewItems = [
   { key: '1' },
@@ -37,9 +37,9 @@ const HelloWorldApp = (props) => {
   const [selectedSubTags, setSelectedSubTags] = useState('');
   const [isLoading, setLoading] = useState(false)
   const auth = useSelector(state => state.auth)
-  const [currentLongitude,setCurrentLongitude] = useState('...');
-  const [currentLatitude,setCurrentLatitude] = useState('...');
-  const [locationStatus,setLocationStatus] = useState('');
+  const [currentLongitude, setCurrentLongitude] = useState('...');
+  const [currentLatitude, setCurrentLatitude] = useState('...');
+  const [locationStatus, setLocationStatus] = useState('');
 
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const HelloWorldApp = (props) => {
     if (!isCancelled) {
       if (auth.access_token) {
         setAuthToken(auth.access_token)
-        LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+        //    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
         getTopStyleList();
         getUserInfo()
         locationPermission()
@@ -123,16 +123,16 @@ const HelloWorldApp = (props) => {
         setLocationStatus('You are Here');
 
         //getting the Longitude from the location json
-        const currentLongitude = 
+        const currentLongitude =
           JSON.stringify(position.coords.longitude);
 
         //getting the Latitude from the location json
-        const currentLatitude = 
+        const currentLatitude =
           JSON.stringify(position.coords.latitude);
 
         //Setting Longitude state
         setCurrentLongitude(currentLongitude);
-        
+
         //Setting Longitude state
         setCurrentLatitude(currentLatitude);
         global.CurrentLongitude = currentLongitude
@@ -220,7 +220,7 @@ const HelloWorldApp = (props) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {
         <Header {...props} />
       }
@@ -229,160 +229,88 @@ const HelloWorldApp = (props) => {
       }
       {
         <View>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              Alert.alert("Modal has been closed.");
-              setModalVisible(!modalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text style={{ color: '#1A1919', fontSize: 18, marginLeft: 130, marginTop: 14.5, fontFamily: 'Avenir-Heavy' }}>Select Tags</Text>
-                  <Pressable onPress={() => setModalVisible(!modalVisible)}>
-                    <Image
-                      style={{ marginRight: 13.45, marginTop: 16.5 }}
-                      source={require('../../../Images/cross.png')}
-                    />
-                  </Pressable>
-                </View>
-                <View style={{ backgroundColor: '#D8D8D8', marginLeft: 7.5, marginTop: 8, borderRadius: 5, flexDirection: 'row' }}>
-                  {
-                    tagList.map((res, index) => {
-                      return (
-                        <View key={index}>
-                          {
-                            res.name == selectedTags ?
-                              <Pressable style={{ backgroundColor: '#141313', marginTop: 11, marginLeft: 10, marginBottom: 11, width: 75, borderRadius: 5 }} onPress={() => setSelectedTags('Cut')}>
-                                <Text style={{ color: '#FFFFFF', textAlign: 'center', marginTop: 8, marginBottom: 7 }}>{res.name}</Text>
-                              </Pressable>
-                              :
-                              <Pressable onPress={() => setSelectedTags(res.name)}>
-                                <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>{res.name}</Text>
-                              </Pressable>
-                          }
-                        </View>
-                      )
-                    })
-                  }
-                  {/* <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Blowout</Text>
-                  <Text style={{ color: '#000000', fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 25, marginTop: 15 }}>Dyes</Text> */}
-                </View>
-                <View style={{ flexDirection: 'row', marginLeft: 17.5, marginTop: 18, marginBottom: 44.5 }}>
-                  {/* <View style={{ backgroundColor: '#4D4C4C', borderRadius: 17 }}>
-                    <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', marginLeft: 19, marginTop: 8, marginBottom: 7, marginRight: 20 }}>Bald</Text>
-                  </View> */}
-                  {
-                    tagList.map((res, i) => {
-                      return (
-                        <View key={i} style={{ flexDirection: 'row', flexWrap: 'wrap' }} >
-                          {
-                            res.name == selectedTags ?
-                              res.values.map((val, j) => {
-                                return (
-                                  <View key={j}>
-                                    {
-                                      val.isSelected == true ?
-                                        <Pressable key={j} style={{ backgroundColor: '#4D4C4C', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => removeTags(i,j)}>
-                                          <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21, color: '#FFFFFF' }}>{val.value}</Text>
-                                        </Pressable>
-                                        :
-                                        <Pressable key={j} style={{ backgroundColor: '#D8D8D8', borderRadius: 17, marginLeft: 4, justifyContent: 'center', marginTop: 8 }} onPress={() => _addTags(i,j)}>
-                                          <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Heavy', textAlign: 'center', paddingTop: 8, paddingBottom: 7, paddingLeft: 22, paddingRight: 21 }}>{val.value}</Text>
-                                        </Pressable>
-                                    }
-                                  </View>
-                                )
-                              })
-
-                              :
-                              null
-                          }
-                        </View>
-                      )
-                    })
-                  }
-
-                </View>
-              </View>
-            </View>
-          </Modal>
-
-
-
           <TextInput placeholder="Search By Styles" style={{ borderWidth: 1, marginLeft: 26.5, marginRight: 26.5, paddingLeft: 18.5 }} />
           <Pressable style={{ backgroundColor: '#010101', marginLeft: 27, marginTop: 16.5, marginRight: 27 }} onPress={() => setModalVisible(true)}>
             <Text style={{ color: '#FFFFFF', fontSize: 16, marginLeft: 18, marginTop: 15.50, marginBottom: 17 }}>Tags</Text>
           </Pressable>
-          <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 26.67 }}>Top Cuts</Text>
-          <FlatList
-            data={list.top_cuts}
-            renderItem={({ item, index }) => {
-              //  console.log("item", item.upload_front_photo)
-              return (
-                <Pressable style={styles.GridViewBlockStyle} key={index} onPress={() => _onFavourite(item.style_id)}>
-                  <ImageBackground
-                    style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
-                    //   source={require('../../Images/upcoming.png')}
-                    source={{
-                      uri: `${item.upload_front_photo}`,
-                    }}
-                  >
-                    {
-                      item.is_fav == 1 ?
-                        <Image
-                          style={{ marginTop: 7, marginRight: 7.51 }}
-                          source={require('../../../Images/heart.png')}
-                        />
-                        :
-                        <Image
-                          style={{ marginTop: 7, marginRight: 7.51 }}
-                          source={require('../../../Images/empty_heart.png')}
-                        />
-                    }
-
-                  </ImageBackground>
-                </Pressable>
-              )
-            }
-            }
-            numColumns={3}
-            columnWrapperStyle={{ flex: 1, }}
-          />
-          <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
-          <FlatList
-            data={list.top_styles}
-            renderItem={({ item, index }) =>
-              <Pressable style={styles.GridViewBlockStyle} key={index} onPress={() => _onFavourite(item.style_id)}>
-                <ImageBackground
-                  style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
-                  //   source={require('../../../Images/upcoming.png')}
-                  source={{
-                    uri: `${item.upload_front_photo}`,
-                  }}
-                >
-                  {
-                    item.is_fav == 1 ?
-                      <Image
-                        style={{ marginTop: 7, marginRight: 7.51 }}
-                        source={require('../../../Images/heart.png')}
-                      />
-                      :
-                      <Image
-                        style={{ marginTop: 7, marginRight: 7.51 }}
-                        source={require('../../../Images/empty_heart.png')}
-                      />
-                  }
-                </ImageBackground>
-              </Pressable>}
-            numColumns={3}
-          />
         </View>
       }
-    </ScrollView>
+      {
+        <ScrollView>
+          {
+            <View>
+              <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 26.67 }}>Top Cuts</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {
+                  list?.top_cuts?.map((item, index) => {
+                    return (
+                      <Pressable style={styles.GridViewBlockStyle} key={index} onPress={() => _onFavourite(item.style_id)}>
+                        <ImageBackground
+                          style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
+                          //   source={require('../../Images/upcoming.png')}
+                          source={{
+                            uri: `${item.upload_front_photo}`,
+                          }}
+                        >
+                          {
+                            item.is_fav == 1 ?
+                              <Image
+                                style={{ marginTop: 7, marginRight: 7.51 }}
+                                source={require('../../../Images/heart.png')}
+                              />
+                              :
+                              <Image
+                                style={{ marginTop: 7, marginRight: 7.51 }}
+                                source={require('../../../Images/empty_heart.png')}
+                              />
+                          }
+
+                        </ImageBackground>
+                      </Pressable>
+                    )
+                  })
+                }
+              </View>
+            </View>
+          }
+          {
+            <View style={{marginBottom: 20}}>
+              <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 28, marginTop: 25 }}>Popular Styles</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {
+                  list?.top_styles?.map((item, index) => {
+                    return (
+                      <Pressable style={styles.GridViewBlockStyle} key={index} onPress={() => _onFavourite(item.style_id)}>
+                        <ImageBackground
+                          style={{ marginLeft: 20, marginTop: 14, height: height * 0.15, width: width * 0.27, alignItems: 'flex-end' }}
+                          //   source={require('../../../Images/upcoming.png')}
+                          source={{
+                            uri: `${item.upload_front_photo}`,
+                          }}
+                        >
+                          {
+                            item.is_fav == 1 ?
+                              <Image
+                                style={{ marginTop: 7, marginRight: 7.51 }}
+                                source={require('../../../Images/heart.png')}
+                              />
+                              :
+                              <Image
+                                style={{ marginTop: 7, marginRight: 7.51 }}
+                                source={require('../../../Images/empty_heart.png')}
+                              />
+                          }
+                        </ImageBackground>
+                      </Pressable>
+                    )
+                  })
+                }
+              </View>
+            </View>
+          }
+        </ScrollView>
+      }
+    </View>
   )
 }
 export default HelloWorldApp;

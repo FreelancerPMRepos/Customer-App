@@ -1,4 +1,4 @@
-import { AUTH_SERVICE_RUNNING, RESET_AUTH, SET_LOGIN_SUCCESS, SET_USER, SET_LOGIN_TYPE, RESET_LOGIN_TYPE } from "../Actions/Types"
+import { AUTH_SERVICE_RUNNING, RESET_AUTH, SET_LOGIN_SUCCESS, SET_USER, SET_LOGIN_TYPE, RESET_LOGIN_TYPE, LOGIN_ERROR } from "../Actions/Types"
 
 const initialState = {
     isLoading: false,
@@ -6,6 +6,7 @@ const initialState = {
     error: null,
     token: null,
     loginType: false,
+    userType: null,
 }
 
 export default (state = initialState, action) => {
@@ -21,6 +22,7 @@ export default (state = initialState, action) => {
                 isLoading: false,
                 access_token: action.payload.access_token ?? null,
                 error: null,
+                userType: action.payload.type ?? null,
             }
         case SET_LOGIN_SUCCESS:
             return {
@@ -32,6 +34,11 @@ export default (state = initialState, action) => {
                 ...state,
                 loginType: true,
             }
+        case LOGIN_ERROR:
+            return {
+                ...state,
+                isLoading: false,
+            }    
             case RESET_LOGIN_TYPE:
                 return {
                     ...state,

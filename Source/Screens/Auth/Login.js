@@ -190,7 +190,7 @@ const Login = (props) => {
 
     const renderLoginButton = () => {
         return (
-            <Pressable style={{ backgroundColor: 'rgba(52, 52, 52, alpha)', marginTop: 33,opacity: 0.6 }} onPress={() => _onLogin()}>
+            <Pressable style={{ backgroundColor: 'white', marginTop: 33,opacity: 0.6 }} onPress={() => _onLogin()}>
                 <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir-Medium' }}>LOG IN</Text>
             </Pressable>
         )

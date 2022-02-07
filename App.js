@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React from 'react';
 import Routes from './Source/Navigation/index';
 import { Provider } from 'react-redux';
