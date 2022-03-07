@@ -14,7 +14,7 @@ const Header = ({ leftIcon, onLeftIconPress, ...props }) => {
                         }
                     </Pressable>
                 </View>
-                <View style={ leftIcon == 'back' ? [styles.titleView,{marginLeft: width * 0.14, marginBottom: 0.01}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
+                <View style={ leftIcon == 'back' ? [styles.titleView,{alignItems: 'center'}] : [styles.titleView,{justifyContent: 'center', alignItems: 'center'}]}>
                     <Image source={require('../../Images/hairkut.png')} style={{resizeMode :'contain'}}/>
                 </View>
             </View>
@@ -35,13 +35,12 @@ const styles = StyleSheet.create({
         height: 68,
     },
     column: {
-        marginRight: width * 0.06
     },
     titleView: {
         flex: 1,
         
     },
     tinyLogo: {
-        marginLeft: width * 0.06
+        left: width * 0.06
     }
 })

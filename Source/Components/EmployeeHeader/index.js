@@ -14,7 +14,7 @@ const Header = ({ leftIcon, onLeftIconPress, rightIcon, onRightIconPress, title,
                             leftIcon === 'menu' && <FastImage resizeMode={FastImage.resizeMode.contain} source={require('../../Images/menu.png')} style={styles.tinyLogo} />
                         }
                         {
-                            leftIcon === 'back' && <FastImage resizeMode={FastImage.resizeMode.contain} style={styles.tinyLogo} source={require('../../Images/back-arrow.png')} />
+                            leftIcon === 'back' && <FastImage resizeMode={FastImage.resizeMode.contain} style={styles.tinyLogo} source={require('../../Images/back-arrow_white.png')} />
                         }
                     </Pressable>
                 </View>

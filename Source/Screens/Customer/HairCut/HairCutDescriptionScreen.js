@@ -25,8 +25,6 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   const [note, setNote] = useState('');
   const dispatch = useDispatch()
 
-  // console.log("id", id)
-
   const _onBack = () => navigation.goBack()
 
   useEffect(() => {
@@ -35,10 +33,10 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   }, [])
 
   const getDetails = () => {
+    console.log("Asd",id)
     axios.get(`${BASE_URL}/style/detail/${id}`)
       .then(res => {
         setList(res.data)
-        console.log('res details', res.data)
       })
       .catch(e => {
         console.log('e', e)
@@ -49,7 +47,6 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
     axios.get(`${BASE_URL}/note/style/list/${id}`)
       .then(res => {
         setNoteData(res.data)
-        console.log('res details', res.data)
       })
       .catch(e => {
         console.log('e', e)
@@ -57,26 +54,32 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   }
 
   const _onNoteSave = () => {
-    axios.post(`${BASE_URL}/note/style`, {
-      style_id: id,
-      note: note,
-    })
-      .then(res => {
-        console.log('res details', res.data)
-        alert(res.data.message)
-        getNote()
-        setNote('')
-        setModalVisible(!modalVisible)
+    if (note == '') {
+      alert('Please enter note')
+    } else {
+      axios.post(`${BASE_URL}/note/style`, {
+        style_id: id,
+        note: note,
       })
-      .catch(e => {
-        console.log('e', e)
-      })
+        .then(res => {
+          alert(res.data.message)
+          getNote()
+          setNote('')
+          setModalVisible(!modalVisible)
+        })
+        .catch(e => {
+          console.log('e', e)
+        })
+    }
   }
 
   const _onPick = () => {
     const user = list
     dispatch(addSalon(user))
-    alert('Salon Picked!')
+    alert('Salon Picked')
+    navigation.navigate('HomeTabs', {
+      screen: 'Home'
+    })
   }
 
   const renderAddNoteModal = () => {
@@ -99,9 +102,11 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               />
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
-            <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} onChangeText={text => setNote(text)} value={note} />
-            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginLeft: 55.5, marginRight: 53.5, marginTop: 8.5, marginBottom: 7.5 }} onPress={() => _onNoteSave()}>SAVE</Text>
+            <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 120 }}>
+              <TextInput placeholder="Type your note" style={{}} multiline={true} onChangeText={text => setNote(text)} value={note} />
+            </View>
+            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => _onNoteSave()}>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 8.5, marginBottom: 7.5 }} >SAVE</Text>
             </Pressable>
           </View>
         </View>
@@ -124,40 +129,65 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               source={require('../../../Images/black_heart.png')}
             />
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Image
-              style={{ marginLeft: 26, marginTop: 15, height: height * 0.16, width: width * 0.28, }}
-              source={{
-                uri: list.upload_front_photo,
-              }}
-            />
-            <Image
-              style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.28, }}
-              source={{
-                uri: list.upload_back_photo,
-              }}
-            />
-            <Image
-              style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.28, marginRight: 26 }}
-              source={{
-                uri: list.upload_right_photo,
-              }}
-            />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {
+              list.upload_front_photo == null ?
+                null
+                :
+                <Image
+                  style={{ marginLeft: 26, marginTop: 15, height: height * 0.16, width: width * 0.26, }}
+                  source={{
+                    uri: list.upload_front_photo,
+                  }}
+                />
+            }
+            {
+              list.upload_back_photo == null ?
+                null
+                :
+                <Image
+                  style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.26, }}
+                  source={{
+                    uri: list.upload_back_photo,
+                  }}
+                />
+            }
+            {
+              list.upload_right_photo == null ?
+                null
+                :
+                <Image
+                  style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.26, marginRight: 26 }}
+                  source={{
+                    uri: list.upload_right_photo,
+                  }}
+                />
+            }
+            {
+              list.upload_left_photo == null ?
+                null
+                :
+                <Image
+                  style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.26, }}
+                  source={{
+                    uri: list.upload_left_photo,
+                  }}
+                />
+            }
+            {
+              list.upload_top_photo === null ?
+                null
+                :
+                <Image
+                  style={{ marginLeft: 12, marginTop: 14, height: height * 0.16, width: width * 0.26, }}
+                  source={{
+                    uri: list.upload_top_photo,
+                  }}
+                />
+            }
           </View>
-          <View style={{ flexDirection: 'row' }}>
-            <Image
-              style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, }}
-              source={{
-                uri: list.upload_left_photo,
-              }}
-            />
-            <Image
-              style={{ marginLeft: 12, marginTop: 14, height: height * 0.16, width: width * 0.28, }}
-              source={{
-                uri: list.upload_top_photo,
-              }}
-            />
-          </View>
+
+
           <Text style={[styles.title, { marginTop: 25 }]}>DESCRIPTION</Text>
           <Text style={styles.subTitle}>{list.description}</Text>
           <Text style={[styles.title, { marginTop: 15 }]}>NOTES</Text>
@@ -246,9 +276,10 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontSize: 14,
     fontFamily: 'Avenir-Medium',
-    marginLeft: 29.5,
+    // marginLeft: 29.5,
     marginTop: 9.5,
     marginBottom: 6.5,
-    marginRight: 28.5
+    textAlign: 'center'
+    //   marginRight: 28.5
   }
 })

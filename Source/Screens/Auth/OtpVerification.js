@@ -26,7 +26,7 @@ const OtpVerification = ({ navigation, route, props }) => {
             token: otp
         })
             .then(res => {
-                navigation.navigate('ResetPassword', { email: data, token: otp })
+                navigation.navigate('ResetPassword', { email: data, token: res.data.token })
                 setLoading(false)
             })
             .catch(e => {

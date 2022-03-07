@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, TextInput, Image, ScrollView, Pressable, Dimensions } from 'react-native';
-import { Colors } from '../../../Config';
+import { BASE_URL, Colors } from '../../../Config';
 import Header from '../../../Components/EmployeeHeader';
 import CheckBox from '@react-native-community/checkbox';
 import TagInput from 'react-native-tags-input';
+import axios from 'axios';
 
 const mainColor = '#3ca897';
 
@@ -11,9 +12,30 @@ const AddStyle = ({ navigation, route, props }) => {
     const [toggleCheckBox, setToggleCheckBox] = useState(false)
     const [tags, setTags] = useState('')
     const [tagsArray, setTagsArray] = useState([])
+    const [serviceTagData, setServiceTagData] = useState([])
     const { service_name } = route.params
+    const { service_id } = route.params
 
     const _onBack = () => navigation.goBack()
+
+    useEffect(() => {
+        getServiceTag()
+    }, [])
+
+    const getServiceTag = () => {
+        axios.get(`${BASE_URL}/service-tag/list/${service_id}`)
+            .then(res => {
+            //    console.log("response tag list", res.data)
+                setServiceTagData(res.data)
+                for (var i in res.data) {
+                    var temp = res.data[i].value.split('|');
+                    console.log("temp", temp)
+                }
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
 
     const updateTagState = (state) => {
         setTags(state)
@@ -89,6 +111,33 @@ const AddStyle = ({ navigation, route, props }) => {
                             marginTop: 13
                         }}
                     />
+                    {
+                        serviceTagData.map((res) => {
+                            var temp = res.value.split('|');
+                            return (
+                                <View>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Black', color: '#1A1919', marginLeft: 16, marginTop: 9, lineHeight: 22 }}>{res.name}</Text>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                        {
+                                            temp.map((val, j) => {
+                                                return (
+                                                    <View style={{ flexDirection: 'row', marginLeft: 15 }}>
+                                                        <CheckBox
+                                                            key={j}
+                                                            disabled={false}
+                                                            value={toggleCheckBox}
+                                                            onValueChange={(newValue) => setToggleCheckBox(newValue)}
+                                                        />
+                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>{val}</Text>
+                                                    </View>
+                                                )
+                                            })
+                                        }
+                                    </View>
+                                </View>
+                            )
+                        })
+                    }
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginLeft: 16, marginTop: 10 }}>Name of Service</Text>
                     <TextInput
                         placeholder='Enter Name Of Haircut'

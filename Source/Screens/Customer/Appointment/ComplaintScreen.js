@@ -9,9 +9,9 @@ import { BASE_URL } from '../../../Config';
 const ComplaintScreen = ({ navigation, route, props }) => {
     const [radioButton, setRadioButton] = useState('HairKut');
     const [complaint, setComplaint] = useState('');
-    const { id } = route.params
+    const { data } = route.params
 
-    console.log("id",id)
+    console.log("id",data)
 
     const _onBack = () => navigation.goBack()
 
@@ -21,7 +21,8 @@ const ComplaintScreen = ({ navigation, route, props }) => {
             alert('Please Enter Complaint')
         } else {
             axios.post(`${BASE_URL}/complaint`, {
-                store_id: id,
+                booking_id: data.id,
+                store_id: data.store.id,
                 complaint: complaint,
                 type: radioButton
             })
@@ -88,7 +89,7 @@ const ComplaintScreen = ({ navigation, route, props }) => {
                     <Pressable style={{ justifyContent: 'center', alignSelf: 'center', borderWidth: 1, marginTop: 23 }} onPress={() => _onSubmit()}>
                         <Text style={{ fontFamily: 'Avenir-Medium', paddingTop: 8.5, paddingBottom: 7.5, paddingLeft: 49.5, paddingRight: 48.5, lineHeight: 19 }}>Submit</Text>
                     </Pressable>
-                    <Pressable style={{ justifyContent: 'center', alignSelf: 'center', borderBottomWidth: 1, marginTop: 19 }}>
+                    <Pressable style={{ justifyContent: 'center', alignSelf: 'center', borderBottomWidth: 1, marginTop: 19 }} onPress={() => navigation.navigate('PastComplaint', { data: data})}>
                         <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19 }}>See Pass Complaints</Text>
                     </Pressable>
                 </View>

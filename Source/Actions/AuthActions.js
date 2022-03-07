@@ -44,42 +44,44 @@ export const login = (payload) => {
                         .catch(error => {
                             console.log('error unit', error)
                             dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
-                           // alert(error)
+                            // alert(error)
                         })
                 }
             })
             .catch(e => {
-              console.log("er",e.response.data.message)
-              dispatch({ type: RESET_AUTH, payload: { error: e.error } })
+                console.log("er", e.response.data.message)
+                dispatch({ type: RESET_AUTH, payload: { error: e.error } })
                 alert(`${e.response.data.message}`)
-                
+
             })
     }
 }
 
-export const socialLogin = (payload) => {
+export const socialLogin = (token) => {
     return async (dispatch) => {
-        dispatch({ type: AUTH_SERVICE_RUNNING })
-        axios.post(`${BASE_URL}/social/login`, payload)
+        dispatch({ type: SET_USER, payload: { access_token: token, type: 'USER' } })
+        dispatch({ type: SET_LOGIN_SUCCESS })
+    }
+}
 
-        .then(res => {
-            if (res.data.error) {
-                dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
-            } else {
-                if (res.data.user_status == '0') {
-                    dispatch({ type: SET_LOGIN_TYPE})
-                     dispatch({ type: SET_LOGIN_SUCCESS })
+export const SocialSignup = (payload) => {
+    console.log("ASdf")
+    return async (dispatch) => {
+        axios.post(`${BASE_URL}/social/signup`, payload)
+            .then(res => {
+                if (res.data.error) {
+                    dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                 } else {
-                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
+                    console.log("response",res.data)
+                   // dispatch({ type: SET_LOGIN_TYPE })
+                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token, type: 'USER' } })
                     dispatch({ type: SET_LOGIN_SUCCESS })
                 }
-            }
-        })
-        .catch(e => {
-            console.log("asd", e.message)
-            alert(`${e.message}.`)
-            dispatch({ type: AUTH_ERROR, payload: { error: e } })
-        })
+            })
+            .catch(e => {
+                alert(`${e.message}.`)
+                dispatch({ type: AUTH_ERROR, payload: { error: e } })
+            })
     }
 }
 
@@ -92,33 +94,33 @@ export const signUp = (payload) => {
                     dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                 } else {
                     dispatch({ type: AUTH_SERVICE_RUNNING })
-                   fetch(`${BASE_URL}/users/me`, {
-                       method: 'GET',
-                       headers: {
-                           Accept: 'application/json',
-                           'Content-Type': 'application/json',
-                           'Authorization': `Bearer ${res.data.access_token}`
-                       },
-                   })
-                   .then(response => { return Promise.all([response.status, response.json()]) })
-                   .then(resp => {
-                       let statusCode = resp[0]
-                       let data = resp[1]
+                    fetch(`${BASE_URL}/users/me`, {
+                        method: 'GET',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${res.data.access_token}`
+                        },
+                    })
+                        .then(response => { return Promise.all([response.status, response.json()]) })
+                        .then(resp => {
+                            let statusCode = resp[0]
+                            let data = resp[1]
 
-                       if (statusCode == 200) {
-                           if (data.role == 'USER') {
-                            dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
-                            dispatch({ type: SET_LOGIN_SUCCESS })
-                           } else {
-                            alert("You do not have access.")  
-                           }
-                       } else {
-                        console.log("error", error)
-                       }
-                   })
-                   .catch(error => {
-                    alert(error)
-                })
+                            if (statusCode == 200) {
+                                if (data.role == 'USER') {
+                                    dispatch({ type: SET_USER, payload: { access_token: res.data.access_token, type: 'USER' } })
+                                    dispatch({ type: SET_LOGIN_SUCCESS })
+                                } else {
+                                    alert("You do not have access.")
+                                }
+                            } else {
+                                console.log("error", error)
+                            }
+                        })
+                        .catch(error => {
+                            alert(error)
+                        })
                 }
             })
             .catch(e => {

@@ -9,17 +9,15 @@ import {
   Pressable
 } from 'react-native';
 
-import { doesContanisSpeacialCharecters, getCapitalLettersCount, getNumbersCount, getSmallLettersCount, getSpecialCharectersCount, isValidEmail, width } from '../../Config';
+import { BASE_URL, Colors, isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login, socialLogin } from '../../Actions/AuthActions'
-import SelectDropdown from 'react-native-select-dropdown'
+import { socialLogin } from '../../Actions/AuthActions'
 import Loader from '../../Components/Loader';
 
 import {
   GoogleSignin,
-  GoogleSigninButton,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
@@ -27,8 +25,10 @@ import {
   AccessToken,
   GraphRequest,
   GraphRequestManager,
-  Profile
 } from 'react-native-fbsdk'
+import axios from 'axios';
+import strings from '../../Localization/strings';
+import { showMessageAlert } from '../../Utils/Utility';
 
 
 GoogleSignin.configure({
@@ -49,7 +49,6 @@ const Signup = (props) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch()
   const auth = useSelector(state => state.auth)
-  const { isError } = auth
   const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -58,41 +57,25 @@ const Signup = (props) => {
 
   const _onSignUp = () => {
     if (name == '') {
-      alert('Please enter name.')
+      showMessageAlert(strings.please_enter_name)
+      return false
     } else if (email == '') {
-      alert('Please enter email.')
+      showMessageAlert(strings.please_enter_email)
       return false
     } else if (!isValidEmail(email)) {
-      alert('Please enter valid email.')
+      showMessageAlert(strings.please_enter_valid_email)
       return false
     } else if (password == '') {
-      alert('Please enter password.')
+      showMessageAlert(strings.please_enter_password)
       return false
     } else if (!/^(?=.*[a-z])(?=.*[0-9])(?=.{8,})/.test(password)) {
-      alert('Password should be minimum 8 characters and at least one number.')
+      showMessageAlert(strings.password_should_be_minimum)
       return false
-    }
-    //  else if (getCapitalLettersCount(password) < 1) {
-    //   alert('Password should contain atleast 1 capital letter')
-    //   return false
-    // } 
-    // else if (getSmallLettersCount(password) < 1) {
-    //   alert('Password should contain atleast 1 small letter')
-    //   return false
-    // } 
-    // else if (getNumbersCount(password) < 1) {
-    //   alert('Password should contain atleast 1 number letter')
-    //   return false
-    // } 
-    // else if (doesContanisSpeacialCharecters(password) < 1) {
-    //   alert('Password should contain atleast 1 special character')
-    //   return false
-    // } 
-    else if (confirmPassword == '') {
-      alert('Please enter confirm password.')
+    } else if (confirmPassword == '') {
+      showMessageAlert(strings.please_enter_confirm_password)
       return false
     } else if (password !== confirmPassword) {
-      alert('Password and confirm password does not match.')
+      showMessageAlert(strings.password_and_confirm_password_does_not_match)
       return false
     } else {
       const data = {
@@ -102,8 +85,6 @@ const Signup = (props) => {
       }
       dispatch(signUp(data))
     }
-
-
   }
 
   const _onGoogleSignin = async () => {
@@ -119,35 +100,28 @@ const Signup = (props) => {
         const jsonValue = JSON.stringify(data)
         await AsyncStorage.setItem('@storage_Key', jsonValue)
         await AsyncStorage.setItem('@google_email', userInfo.user.email)
-        dispatch(socialLogin(data))
+        axios.post(`${BASE_URL}/social/login`, data)
+          .then(res => {
+            if (res.data.user_status == '0') {
+              props.navigation.navigate('UserDetails')
+            } else {
+              dispatch(socialLogin(res.data.access_token))
+            }
+          })
+          .catch(e => {
+            console.log("error", e.message)
+            alert(`${e.message}.`)
+            dispatch({ type: AUTH_ERROR, payload: { error: e } })
+          })
       } catch (e) {
         // saving error
       }
     } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        this.setState({
-          isGoogleLoading: false
-        })
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (f.e. sign in) is in progress already
-        this.setState({
-          isGoogleLoading: false
-        })
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-        alert('Google SignIn Play Services Not Available')
-        this.setState({
-          isGoogleLoading: false
-        })
-      } else {
-        // some other error happened
-        alert(error)
-      }
+      console.log("error", error)
     }
   }
 
   const _onFacebookSignin = () => {
-    // Attempt a login using the Facebook login dialog asking for default permissions.
     let self = this
     LoginManager.logInWithPermissions(['public_profile', 'email']).then(
       function (result) {
@@ -177,7 +151,19 @@ const Signup = (props) => {
                   try {
                     const jsonValue = JSON.stringify(fbdata)
                     AsyncStorage.setItem('@storage_Key', jsonValue)
-                    dispatch(socialLogin(fbdata))
+                    axios.post(`${BASE_URL}/social/login`, fbdata)
+                      .then(res => {
+                        if (res.data.user_status == '0') {
+                          props.navigation.navigate('UserDetails')
+                        } else {
+                          dispatch(socialLogin(res.data.access_token))
+                        }
+                      })
+                      .catch(e => {
+                        console.log("error", e.message)
+                        alert(`${e.message}.`)
+                        dispatch({ type: AUTH_ERROR, payload: { error: e } })
+                      })
                   } catch (e) {
                     console.log("error", e)
                   }
@@ -199,54 +185,54 @@ const Signup = (props) => {
 
   const renderNameView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 20 }}>
-        <Text style={{ color: "#FFFFFF" }}>Name</Text>
-        <TextInput placeholder="Enter Name" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setName(text)} value={name} />
+      <View style={styles.nameView}>
+        <Text style={styles.white}>{strings.name}</Text>
+        <TextInput placeholder={strings.enter_name} style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setName(text)} value={name} />
       </View>
     )
   }
 
   const renderEmailView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 24.50 }}>
-        <Text style={{ color: "#FFFFFF" }}>Email</Text>
-        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} />
+      <View style={styles.emailView}>
+        <Text style={styles.white}>{strings.email}</Text>
+        <TextInput placeholder={strings.enter_email} style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} />
       </View>
     )
   }
 
   const renderPasswordView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 24.50 }}>
-        <Text style={{ color: "#FFFFFF", }}>Password</Text>
-        <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setPassword(text)} value={password} />
+      <View style={styles.emailView}>
+        <Text style={styles.white}>{strings.password}</Text>
+        <TextInput placeholder={strings.enter_password} style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setPassword(text)} value={password} />
       </View>
     )
   }
 
   const renderConfirmPasswordView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 24.50 }}>
-        <Text style={{ color: "#FFFFFF", }}>Confirm Password</Text>
-        <TextInput placeholder="Confirm Password" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setConfirmPassword(text)} value={confirmPassword} />
+      <View style={styles.emailView}>
+        <Text style={styles.white}>{strings.confirm_password}</Text>
+        <TextInput placeholder={strings.enter_confirm_password} style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setConfirmPassword(text)} value={confirmPassword} />
       </View>
     )
   }
 
-  const renderLoginButton = () => {
+  const renderSignupButton = () => {
     return (
-      <Pressable style={{ backgroundColor: 'white', marginTop: 33, opacity: 0.6}} onPress={() => _onSignUp()}>
-        <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir Medium' }}>SIGN UP</Text>
+      <Pressable style={styles.signUpButton} onPress={() => _onSignUp()}>
+        <Text style={styles.signUpButtonText}>{strings.sign_up.toUpperCase()}</Text>
       </Pressable>
     )
   }
 
   const renderLoginView = () => {
     return (
-      <View style={{ marginTop: 15, flexDirection: 'row' }}>
-        <Text style={{ color: '#FFFFFF', fontFamily: 'Avenir Black' }}>Already Have An Account?</Text>
+      <View style={styles.alreadyAccountView}>
+        <Text style={styles.alreadyAccountText}>{strings.already_have_an_account}</Text>
         <Pressable onPress={() => props.navigation.navigate('Login')}>
-          <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>  Log In.</Text>
+          <Text style={styles.loginText}>  {strings.signup_log_in}</Text>
         </Pressable>
       </View>
     )
@@ -255,27 +241,25 @@ const Signup = (props) => {
   const renderContinueView = () => {
     return (
       <View style={{ marginTop: 15 }}>
-        <Text style={{ color: '#FFFFFF', fontFamily: 'Avenir Medium' }}>Or Continue With</Text>
+        <Text style={styles.continueText}>{strings.or_continue_with}</Text>
       </View>
     )
   }
 
   const renderSocialButton = () => {
     return (
-      <View style={{ flexDirection: 'row', marginTop: 7 }}>
-        <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+      <View style={styles.socialButtonView}>
+        <Pressable style={styles.googleButton} onPress={() => _onGoogleSignin()}>
           <Image
             style={{ marginTop: 7 }}
             source={require('../../Images/Google_transparent.png')}
           />
-          {/* <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text> */}
         </Pressable>
-        <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
+        <Pressable style={styles.facebookButton} onPress={() => _onFacebookSignin()}>
           <Image
             style={{ marginTop: 7 }}
             source={require('../../Images/facebook_transparent.png')}
           />
-          {/* <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Facebook</Text> */}
         </Pressable>
       </View>
     )
@@ -290,13 +274,12 @@ const Signup = (props) => {
           style={styles.tinyLogo}
           source={require('../../Images/logo.png')}
         />
-        <Text style={{ color: "#FFFFFF", fontSize: 16, fontFamily: 'Avenir Heavy' }}>Your Way. Every Time.</Text>
-        {/* <Text style={{ color: "#FFFFFF", fontSize: 18, marginTop: 33, fontFamily: 'Avenir Heavy' }}>Sign Up</Text> */}
+        <Text style={styles.yourWayText}>{strings.your_way_every_time}</Text>
         {renderNameView()}
         {renderEmailView()}
         {renderPasswordView()}
         {renderConfirmPasswordView()}
-        {renderLoginButton()}
+        {renderSignupButton()}
         {renderLoginView()}
         {renderContinueView()}
         {renderSocialButton()}
@@ -310,6 +293,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
+  white: {
+    color: Colors.white
+  },
   image: {
     flex: 1,
     justifyContent: 'center',
@@ -320,5 +306,62 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 11.5,
     color: '#FFFFFF'
+  },
+  nameView: {
+    width: width * 0.83, 
+    marginTop: 20
+  },
+  emailView: {
+    width: width * 0.83, 
+    marginTop: 24.50
+  },
+  signUpButton: {
+    backgroundColor: 'white', 
+    marginTop: 33, 
+    opacity: 0.6
+  },
+  signUpButtonText: {
+    marginLeft: 44, 
+    marginRight: 44, 
+    marginTop: 8, 
+    marginBottom: 8, 
+    fontFamily: 'Avenir Medium'
+  },
+  alreadyAccountView: {
+    marginTop: 15, 
+    flexDirection: 'row'
+  },
+  alreadyAccountText: {
+    color: '#FFFFFF', 
+    fontFamily: 'Avenir Black'
+  },
+  loginText: {
+    color: '#FFFFFF', 
+    fontWeight: 'bold'
+  },
+  continueText: {
+    color: '#FFFFFF', 
+    fontFamily: 'Avenir Medium'
+  },
+  socialButtonView: {
+    flexDirection: 'row', 
+    marginTop: 7
+  },
+  googleButton: {
+    flexDirection: 'row', 
+    width: 155, 
+    justifyContent: 'center', 
+    height: 29
+  },
+  facebookButton: {
+    flexDirection: 'row', 
+    width: 155, 
+    justifyContent: 'center', 
+    marginLeft: 7
+  },
+  yourWayText: {
+    color: "#FFFFFF", 
+    fontSize: 16, 
+    fontFamily: 'Avenir Heavy'
   }
 })

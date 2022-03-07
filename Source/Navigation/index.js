@@ -8,6 +8,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector, useDispatch } from 'react-redux';
 import { resetLoginType } from '../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { resetAuth } from '../Actions/AuthActions';
 
 // Auth
 import Login from '../Screens/Auth/Login';
@@ -28,6 +29,8 @@ import StoreDescription from '../Screens/Customer/Main/StoreDescription';
 import PaymentScreen from '../Screens/Customer/Main/PaymentScreen';
 import BookingSuccessfullScreen from '../Screens/Customer/Main/BookingSuccessfullScreen';
 import PrivacyPolicy from '../Screens/Customer/Main/PrivacyPolicy';
+import StyleScreen from '../Screens/Customer/Main/StyleScreen';
+import TagSearchScreen from '../Screens/Customer/Main/TagSearchScreen';
 
 // HairCut
 import HairCuts from '../Screens/Customer/HairCut/HairCuts';
@@ -38,9 +41,11 @@ import Appointments from '../Screens/Customer/Appointment/Appointments';
 import AppointmentsDescriptionScreen from '../Screens/Customer/Appointment/AppointmentsDescriptionScreen';
 import ReviewScreen from '../Screens/Customer/Appointment/ReviewScreen';
 import ComplaintScreen from '../Screens/Customer/Appointment/ComplaintScreen';
+import PastComplaint from '../Screens/Customer/Appointment/PastComplaint';
 
 // Employee Home
 import EmployeeHome from '../Screens/Employee/Home/EmployeeHome';
+import AppointmentDetails from '../Screens/Employee/Home/AppointmentDetails';
 
 // Performance & Rating
 import PerformanceScreen from '../Screens/Employee/Performance/PerformanceScreen';
@@ -62,6 +67,7 @@ const Routes = (props) => {
   const loginSuccess = useSelector(state => state.auth.loginSuccess)
   const loginType = useSelector(state => state.auth.loginType)
   const loginUser = useSelector(state => state.auth.userType)
+  const log = useSelector(state => state.auth)
 
 
   const Stack = createStackNavigator();
@@ -75,7 +81,6 @@ const Routes = (props) => {
   }, [])
 
   const _onAppClose = async () => {
-    dispatch(resetLoginType())
     const value = await AsyncStorage.removeItem('@google_email')
   }
 
@@ -160,13 +165,6 @@ const Routes = (props) => {
           loginSuccess ? (
             <>
               {
-                loginType ? (
-                  <Stack.Screen name="UserDetails" component={UserDetails} />
-                )
-                  :
-                  null
-              }
-              {
                 loginUser == 'USER' ?
                   <>
                     <Stack.Screen name="HomeTabs" component={HomeTabs} />
@@ -184,6 +182,9 @@ const Routes = (props) => {
                     <Stack.Screen name="ComplaintScreen" component={ComplaintScreen} />
                     <Stack.Screen name="BookingSuccessfullScreen" component={BookingSuccessfullScreen} />
                     <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+                    <Stack.Screen name="PastComplaint" component={PastComplaint} />
+                    <Stack.Screen name="StyleScreen" component={StyleScreen} />
+                    <Stack.Screen name="TagSearchScreen" component={TagSearchScreen} />
                   </>
                   :
                   <>
@@ -191,7 +192,7 @@ const Routes = (props) => {
                     <Stack.Screen name="Home" component={Home} />
                     <Stack.Screen name="PerformanceScreen" component={PerformanceScreen} />
                     <Stack.Screen name="Notification" component={Notification} />
-                    {/* <Stack.Screen name="AppointmentDetails" component={AppointmentDetails} /> */}
+                    <Stack.Screen name="AppointmentDetails" component={AppointmentDetails} />
                     <Stack.Screen name="Styles" component={Styles} />
                     <Stack.Screen name="StylesDescription" component={StylesDescription} />
                     <Stack.Screen name="AddStyle" component={AddStyle} />
@@ -211,6 +212,7 @@ const Routes = (props) => {
                 <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
                 <Stack.Screen name="OtpVerification" component={OtpVerification} />
                 <Stack.Screen name="ResetPassword" component={ResetPassword} />
+                <Stack.Screen name="UserDetails" component={UserDetails} />
               </>
             )
         }

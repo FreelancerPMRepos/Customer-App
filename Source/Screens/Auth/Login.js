@@ -11,14 +11,13 @@ import {
 
 import { BASE_URL, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, socialLogin, resetAuth } from '../../Actions/AuthActions'
+import { login, socialLogin } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
 import Loader from '../../Components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
     GoogleSignin,
-    GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
@@ -26,8 +25,10 @@ import {
     AccessToken,
     GraphRequest,
     GraphRequestManager,
-    Profile
 } from 'react-native-fbsdk'
+import axios from 'axios';
+import strings from '../../Localization/strings';
+import { showMessageAlert } from '../../Utils/Utility';
 
 
 GoogleSignin.configure({
@@ -44,7 +45,6 @@ GoogleSignin.configure({
 const Login = (props) => {
     const dispatch = useDispatch()
     const auth = useSelector(state => state.auth)
-    const { isError } = auth
     const [email, setEmail] = useState('')
     const [Password, setPassword] = useState('')
     const [isLoading, setLoading] = useState(false)
@@ -52,15 +52,14 @@ const Login = (props) => {
 
     useEffect(() => {
         GoogleSignin.configure()
-   //     dispatch(resetAuth())
     }, [])
 
     const _onLogin = () => {
         if (email == '') {
-            alert('Please enter email.')
+            showMessageAlert(strings.please_enter_email)
             return false
         } else if (Password == '') {
-            alert('Please enter password.')
+            showMessageAlert(strings.please_enter_password)
             return false
         } else {
             const data = {
@@ -84,35 +83,28 @@ const Login = (props) => {
                 const jsonValue = JSON.stringify(data)
                 await AsyncStorage.setItem('@storage_Key', jsonValue)
                 await AsyncStorage.setItem('@google_email', userInfo.user.email)
-                dispatch(socialLogin(data))
+                axios.post(`${BASE_URL}/social/login`, data)
+                    .then(res => {
+                        if (res.data.user_status == '0') {
+                            props.navigation.navigate('UserDetails')
+                        } else {
+                            dispatch(socialLogin(res.data.access_token))
+                        }
+                    })
+                    .catch(e => {
+                        console.log("error", e.message)
+                        alert(`${e.message}.`)
+                        dispatch({ type: AUTH_ERROR, payload: { error: e } })
+                    })
             } catch (e) {
                 // saving error
             }
         } catch (error) {
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                this.setState({
-                    isGoogleLoading: false
-                })
-            } else if (error.code === statusCodes.IN_PROGRESS) {
-                // operation (f.e. sign in) is in progress already
-                this.setState({
-                    isGoogleLoading: false
-                })
-            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                // play services not available or outdated
-                alert('Google SignIn Play Services Not Available')
-                this.setState({
-                    isGoogleLoading: false
-                })
-            } else {
-                // some other error happened
-                alert(error)
-            }
+            alert(error)
         }
     }
 
     const _onFacebookSignin = () => {
-        // Attempt a login using the Facebook login dialog asking for default permissions.
         let self = this
         LoginManager.logInWithPermissions(['public_profile', 'email']).then(
             function (result) {
@@ -142,7 +134,20 @@ const Login = (props) => {
                                     try {
                                         const jsonValue = JSON.stringify(fbdata)
                                         AsyncStorage.setItem('@storage_Key', jsonValue)
-                                        dispatch(socialLogin(fbdata))
+                                        axios.post(`${BASE_URL}/social/login`, fbdata)
+                                            .then(res => {
+                                                console.log("asdf", res.data)
+                                                if (res.data.user_status == '0') {
+                                                    props.navigation.navigate('UserDetails')
+                                                } else {
+                                                    dispatch(socialLogin())
+                                                }
+                                            })
+                                            .catch(e => {
+                                                console.log("asd", e.message)
+                                                alert(`${e.message}.`)
+                                                dispatch({ type: AUTH_ERROR, payload: { error: e } })
+                                            })
                                     } catch (e) {
                                         console.log("error", e)
                                     }
@@ -164,44 +169,44 @@ const Login = (props) => {
 
     const renderEmailView = () => {
         return (
-            <View style={{ width: width * 0.83, marginTop: 44 }}>
-                <Text style={{ color: Colors.white }}>Email</Text>
-                <TextInput placeholder="Enter Email" onChangeText={text => setEmail(text)} value={email} style={styles.input} placeholderTextColor='#FFFFFF' />
+            <View style={styles.emailView}>
+                <Text style={{ color: Colors.white }}>{strings.email}</Text>
+                <TextInput placeholder={strings.enter_email} onChangeText={text => setEmail(text)} value={email} style={styles.input} placeholderTextColor={Colors.white} />
             </View>
         )
     }
 
     const renderPasswordView = () => {
         return (
-            <View style={{ width: width * 0.83, marginTop: 24.50 }}>
-                <Text style={{ color: Colors.white }}>Password</Text>
-                <TextInput placeholder="Enter Password" style={styles.input} placeholderTextColor='#FFFFFF' secureTextEntry={true} onChangeText={text => setPassword(text)} value={Password} />
+            <View style={styles.passwordView}>
+                <Text style={{ color: Colors.white }}>{strings.password}</Text>
+                <TextInput placeholder={strings.enter_password} style={styles.input} placeholderTextColor={Colors.white} secureTextEntry={true} onChangeText={text => setPassword(text)} value={Password} />
             </View>
         )
     }
 
     const renderForgotPassword = () => {
         return (
-            <Pressable style={{ marginTop: 10.59, fontSize: 14, alignSelf: 'flex-end', marginRight: 33 }} onPress={() => props.navigation.navigate('ForgotPassword')}>
-                <Text style={{ color: Colors.white }}>Forgot Password?</Text>
+            <Pressable style={styles.forgotPasswordButton} onPress={() => props.navigation.navigate('ForgotPassword')}>
+                <Text style={{ color: Colors.white }}>{strings.forgot_password}</Text>
             </Pressable>
         )
     }
 
     const renderLoginButton = () => {
         return (
-            <Pressable style={{ backgroundColor: 'white', marginTop: 33,opacity: 0.6 }} onPress={() => _onLogin()}>
-                <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir-Medium' }}>LOG IN</Text>
+            <Pressable style={styles.loginButton} onPress={() => _onLogin()}>
+                <Text style={styles.loginButtonText}>{strings.log_in}</Text>
             </Pressable>
         )
     }
 
     const renderSignupView = () => {
         return (
-            <View style={{ marginTop: 15, flexDirection: 'row' }}>
-                <Text style={{ color: Colors.white, fontFamily: 'Avenir Black' }}>Didn’t Have An Account?</Text>
+            <View style={styles.signUpView}>
+                <Text style={styles.didHaveText}>{strings.do_not_have_an_account}</Text>
                 <Pressable onPress={() => props.navigation.navigate('Signup')}>
-                    <Text style={{ color: Colors.white, fontWeight: 'bold' }}>  Sign Up.</Text>
+                    <Text style={{ color: Colors.white, fontWeight: 'bold' }}>  {strings.sign_up}.</Text>
                 </Pressable>
             </View>
         )
@@ -210,27 +215,25 @@ const Login = (props) => {
     const renderContinueView = () => {
         return (
             <View style={{ marginTop: 15 }}>
-                <Text style={{ color: Colors.white, fontFamily: 'Avenir Medium' }}>Or Continue With</Text>
+                <Text style={{ color: Colors.white, fontFamily: 'Avenir Medium' }}>{strings.or_continue_with}</Text>
             </View>
         )
     }
 
     const renderSocialButton = () => {
         return (
-            <View style={{ flexDirection: 'row', marginTop: 7 }}>
-                <Pressable style={{  flexDirection: 'row', width: 155, justifyContent: 'center', height: 29 }} onPress={() => _onGoogleSignin()}>
+            <View style={styles.socialButtonView}>
+                <Pressable style={styles.googleButton} onPress={() => _onGoogleSignin()}>
                     <Image
-                        style={{ marginTop: 7}}
+                        style={styles.socialButtonImage}
                         source={require('../../Images/Google_transparent.png')}
                     />
-                    {/* <Text style={{ marginTop: 4, marginBottom: 4, marginLeft: 7 }}>Google</Text> */}
                 </Pressable>
-                <Pressable style={{flexDirection: 'row', width: 155, justifyContent: 'center', marginLeft: 7 }} onPress={() => _onFacebookSignin()}>
-                <Image
-                        style={{ marginTop: 7}}
+                <Pressable style={styles.facebookButton} onPress={() => _onFacebookSignin()}>
+                    <Image
+                        style={styles.socialButtonImage}
                         source={require('../../Images/facebook_transparent.png')}
                     />
-                    {/* <Text style={{ color: '#FFFFFF', marginTop: 4, marginBottom: 4 , marginLeft: 7}}>Facebook</Text> */}
                 </Pressable>
             </View>
         )
@@ -244,8 +247,7 @@ const Login = (props) => {
                 <Image
                     source={require('../../Images/logo.png')}
                 />
-                <Text style={styles.quoteText}>Your Way. Every Time.</Text>
-                {/* <Text style={styles.loginText}>Log In</Text> */}
+                <Text style={styles.quoteText}>{strings.your_way_every_time}</Text>
                 {renderEmailView()}
                 {renderPasswordView()}
                 {renderForgotPassword()}
@@ -286,5 +288,58 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginTop: 33,
         fontFamily: 'Avenir-Heavy'
+    },
+    emailView: {
+        width: width * 0.83,
+        marginTop: 44
+    },
+    passwordView: {
+        width: width * 0.83,
+        marginTop: 24.50
+    },
+    forgotPasswordButton: {
+        marginTop: 10.59,
+        fontSize: 14,
+        alignSelf: 'flex-end',
+        marginRight: 33
+    },
+    loginButton: {
+        backgroundColor: 'white',
+        marginTop: 33,
+        opacity: 0.6
+    },
+    loginButtonText: {
+        marginLeft: 44,
+        marginRight: 44,
+        marginTop: 8,
+        marginBottom: 8,
+        fontFamily: 'Avenir-Medium'
+    },
+    signUpView: {
+        marginTop: 15,
+        flexDirection: 'row'
+    },
+    didHaveText: {
+        color: Colors.white,
+        fontFamily: 'Avenir Black'
+    },
+    socialButtonView: {
+        flexDirection: 'row',
+        marginTop: 7
+    },
+    googleButton: {
+        flexDirection: 'row',
+        width: 155,
+        justifyContent: 'center',
+        height: 29
+    },
+    socialButtonImage: {
+        marginTop: 7
+    },
+    facebookButton: {
+        flexDirection: 'row',
+        width: 155,
+        justifyContent: 'center',
+        marginLeft: 7
     }
 })

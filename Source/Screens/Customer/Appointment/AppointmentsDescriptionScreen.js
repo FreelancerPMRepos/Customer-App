@@ -72,8 +72,9 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     axios.get(`${BASE_URL}/style/detail/${appointmentDetails.style.id}`)
       .then(res => {
         navigation.navigate('StoreDescription', { storeDetails: appointmentDetails.store, page: "Appointment" })
-
-        dispatch(addSalon(res.data))
+        var data = [res.data];
+        data.push({booking_type: 'rebook'})
+        dispatch(addSalon(data))
         setLoading(false)
       })
       .catch(e => {
@@ -660,7 +661,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
 
           {
             type == 'PASSED' ?
-              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => navigation.navigate('ReviewScreen')}>
+              <Pressable style={[styles.button, { marginTop: 13 }]} onPress={() => navigation.navigate('ReviewScreen', { storeDetails: appointmentDetails })}>
                 <Text style={styles.buttonText}>Review</Text>
               </Pressable>
               :
@@ -682,7 +683,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
 
           {
             type == 'PASSED' ?
-              <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginTop: 12.5 }} onPress={() => navigation.navigate("ComplaintScreen", { id: appointmentDetails.store.id })}>
+              <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginTop: 12.5 }} onPress={() => navigation.navigate("ComplaintScreen", { data: appointmentDetails })}>
                 <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, borderBottomWidth: 1 }}>File Complaint</Text>
               </Pressable>
               :

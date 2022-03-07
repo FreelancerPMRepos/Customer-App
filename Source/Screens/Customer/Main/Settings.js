@@ -293,7 +293,6 @@ const Settings = (props) => {
             <FlatList
               data={list}
               renderItem={({ item, index }) => {
-                // console.log("item", item.upload_front_photo)
                 return (
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} key={index}>
                     <CheckBox
@@ -301,7 +300,6 @@ const Settings = (props) => {
                       disabled={false}
                       value={item.isChecked}
                       onValueChange={() => handleClick(index)}
-                      //   onValueChange={console.log("index", item.name, index)}
                       style={{ marginTop: 8 }}
                     />
                     <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, marginTop: 15 }}>{item.name}</Text>

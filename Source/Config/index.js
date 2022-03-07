@@ -8,6 +8,9 @@ const Colors = {
   black: '#1A1919',
   white: '#FFFFFF',
   greyLight: '#171717',
+  spanishGrey: '#9E9E9E',
+  blueGreen: '#25CAC8',
+  spanishGreyLight: '#979797'
 };
 
 const BASE_URL = `https://haircut.winayak.com/api`

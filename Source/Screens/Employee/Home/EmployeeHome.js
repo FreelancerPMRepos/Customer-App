@@ -13,7 +13,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { setAuthToken } from '../../../Utils/setHeader';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
@@ -28,6 +28,7 @@ const EmployeeHome = (props) => {
     const [dropdownValue, setDropdownValue] = useState('');
     const [appointmentData, setAppointmentData] = useState([]);
     const [userData, setUserData] = useState([]);
+    const dispatch = useDispatch()
 
     useEffect(() => {
         let isCancelled = false;
@@ -47,7 +48,6 @@ const EmployeeHome = (props) => {
                     const jsonValue = JSON.stringify(res.data)
                     AsyncStorage.setItem('@user_details', jsonValue)
                     setUserData(res.data)
-                    console.log('res user info', res.data)
                 } catch (e) {
                     console.log('e', e)
                 }
@@ -60,7 +60,6 @@ const EmployeeHome = (props) => {
     const getAppointments = (value) => {
         axios.get(`${BASE_URL}/booking/employee?type=${value}`)
             .then(res => {
-                console.log("appointment response", res.data)
                 setAppointmentData(res.data)
             })
             .catch(e => {
@@ -97,6 +96,28 @@ const EmployeeHome = (props) => {
                             }}
                         />
                     </View>
+                    {
+                        appointmentData.length == 0 ?
+                            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={{marginTop: 50}}>No Data Found</Text>
+                            </View>
+                            :
+                            appointmentData?.map((res, index) => {
+                                return (
+                                    <Pressable key={index} style={styles.boxStyle} onPress={() => props.navigation.navigate('AppointmentDetails', { data: userData, id: res.id})}>
+                                        <Image
+                                            style={styles.profileImageStyle}
+                                            source={require('../../../Images/profile.png')}
+                                        />
+                                        <View style={styles.nameServiceBox}>
+                                            <Text style={styles.nameStyle}>{res.user.name}</Text>
+                                            <Text style={styles.haircutStyle}>{res?.style?.service?.name}</Text>
+                                        </View>
+                                        <Text style={styles.timeStyle}>{moment(res.booking_date).format("hh:mm A")}</Text>
+                                    </Pressable>
+                                )
+                            }) 
+                    }
                     {/* {
                         appointmentData?.map((res, index) => {
                             return (
@@ -182,7 +203,7 @@ const styles = EStyleSheet.create({
         fontFamily: 'Avenir-Medium',
         color: Colors.black,
         lineHeight: "19rem",
-        paddingLeft: "120rem",
+        paddingLeft: "70rem",
         lineHeight: "19rem"
     },
     nameServiceBox: {

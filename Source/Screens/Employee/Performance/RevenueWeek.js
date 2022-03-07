@@ -80,6 +80,7 @@ const RevenueWeek = (props) => {
                     <View style={{ flexDirection: 'row', marginLeft: 17, borderBottomWidth: 1, marginRight: 16, borderColor: '#979797' }}>
                         {
                             listData.map((res) => {
+                                var revenue = res.revenue.toString()
                                 return (
                                     <View style={{ borderLeftWidth: 1, flexDirection: 'row', flexWrap: 'wrap', borderColor: '#979797' }}>
                                         {
@@ -89,7 +90,7 @@ const RevenueWeek = (props) => {
                                                         <Text style={{ color: '#1A1919', fontFamily: 'Avenir-Heavy', lineHeight: 19, fontSize: 12, width: 50, textAlign: 'right', paddingRight: 5 }}>{moment(val).format('DD')}</Text>
                                                         {
                                                             moment(val).format('DD') == moment(res.date).format('DD') ?
-                                                                <Text style={{ color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, paddingLeft: 11, paddingBottom: 5.5, flexWrap: 'wrap' }}>${res.revenue}</Text>
+                                                                <Text style={{ color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, paddingLeft: 11, paddingBottom: 5.5, flexWrap: 'wrap' }}>{res.revenue > 999 ? `$${revenue.substring(0,2)}K` : res.revenue > 1000000 ? `$${revenue.substring(0,4)}M` : `${res.revenue}`}</Text>
                                                                 :
                                                                 null
                                                         }

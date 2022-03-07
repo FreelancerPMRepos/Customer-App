@@ -15,7 +15,7 @@ import { BASE_URL } from '../../../Config';
 import axios from 'axios';
 import { setAuthToken } from '../../../Utils/setHeader';
 import { useSelector, useDispatch } from 'react-redux';
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Loader from '../../../Components/Loader';
 import { Rating } from 'react-native-ratings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,7 +84,6 @@ const Home = (props) => {
   }
 
   const getUserInfo = async () => {
-    setLoading(true)
     axios.get(`${BASE_URL}/users/me`)
       .then(res => {
         try {
@@ -93,11 +92,9 @@ const Home = (props) => {
         } catch (e) {
           // saving error
         }
-        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
-        setLoading(false)
       })
   }
 
@@ -115,13 +112,21 @@ const Home = (props) => {
       }}>
         <MapView
           style={styles.map}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
+        // region={{
+        //   latitude: 37.78825,
+        //   longitude: -122.4324,
+        //   latitudeDelta: 0.015,
+        //   longitudeDelta: 0.0121,
+        // }}
         >
+          {
+            storeList.map((marker, index) => (
+              <Marker
+                key={index}
+                coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+                title={marker.store_name}
+              />
+            ))}
         </MapView>
         <View style={{ flexDirection: 'row', position: 'absolute', marginTop: 32 }}>
           <View style={{ backgroundColor: '#FFFFFF', flexDirection: 'row' }}>
@@ -199,7 +204,17 @@ const Home = (props) => {
               </Pressable>
             </View>
         }
-
+        {/* {
+          <View style={{ top: 350, right: 17, backgroundColor: 'white', borderRadius: 7, width: 74, flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Pressable style={{ }}>
+              <Image source={require('../../../Images/minus.png')} style={{ height: 20, width: 14, marginLeft: 20 }} />
+            </Pressable>
+            <View style={{borderLeftWidth: 1, paddingLeft: 20}}/>
+            <Pressable>
+              <Image source={require('../../../Images/plus_map.png')} style={{ height: 12, width: 12, marginTop: 3 }} />
+            </Pressable>
+          </View>
+        } */}
       </View>
       <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? height * 0.52 : height * 0.395, position: 'absolute', width: width * 1 }}>
         <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? height * 0.49 : height * 0.35, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
@@ -212,7 +227,7 @@ const Home = (props) => {
         </Pressable>
         <ScrollView>
           {
-            storeList.length == 0 ?
+            storeList.length === 0 ?
               <View style={{ flex: 1 }}>
                 <Text>NO store available</Text>
               </View>
@@ -287,7 +302,6 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: 'red',
   },
   imageContainer: {
     alignItems: 'center',

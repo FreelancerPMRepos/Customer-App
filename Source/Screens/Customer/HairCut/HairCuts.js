@@ -20,13 +20,20 @@ const GridViewItems = [
   { key: '../../../Images/upcoming.png' },
 ]
 
-const HelloWorldApp = (props) => {
+const HelloWorldApp = ({navigation,props}) => {
   const [list, setList] = useState([]);
   const [isLoading, setLoading] = useState(false)
 
+
   useEffect(() => {
-    getAllFavouriteList();
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      getAllFavouriteList();
+    });
+
+    return unsubscribe;
+  }, [navigation])
+
+ 
 
   console.log("key", GridViewItems.key)
 
@@ -61,13 +68,13 @@ const HelloWorldApp = (props) => {
               return (
                 <View key={index}>
                   <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 10 }}>{res.name}</Text>
-                  <View style={{ flexDirection: 'row' }}>
+                  <ScrollView style={{ flexDirection: 'row', marginRight: 20 }} horizontal={true} showsHorizontalScrollIndicator={false}>
                     {
                       res.list.map((val, index) => {
                         return (
-                          <Pressable style={{}} key={index} onPress={() => props.navigation.navigate('HairCutDescriptionScreen', { id: val.style_id})}>
+                          <Pressable style={{}} key={index} onPress={() => navigation.navigate('HairCutDescriptionScreen', { id: val.style_id})}>
                             <ImageBackground
-                              style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end', }}
+                              style={{ marginLeft: 11, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end', }}
                               //  source={require('../../Images/upcoming.png')}
                               source={{
                                 uri: `${val.upload_front_photo}`,
@@ -82,7 +89,7 @@ const HelloWorldApp = (props) => {
                         )
                       })
                     }
-                  </View>
+                  </ScrollView>
                 </View>
               )
             })

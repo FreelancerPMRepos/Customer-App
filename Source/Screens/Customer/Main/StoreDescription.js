@@ -25,6 +25,8 @@ const DaysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 
 const DayShortCapsName = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
+const genderList = ["Men", "Women"]
+
 
 const StoreDescription = ({ navigation, route, props }) => {
     const updatedName = useSelector(state => state)
@@ -40,6 +42,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
     const [pickStyleModal, setPickStyleModal] = useState(false);
     const [hairdresserModal, setHairdresserModal] = useState(false);
+    const [genderModal, setGenderModal] = useState(false);
     const [bookingDone, setBookingDone] = useState(false);
     const [serviceId, setServiceId] = useState('');
     const [serviceName, setServiceName] = useState('');
@@ -49,6 +52,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [pickStyleName, setPickStyleName] = useState('');
     const [hairdresserId, setHairdresserId] = useState('');
     const [hairdresserName, setHairdresserName] = useState('');
+    const [genderName, setGenderName] = useState('');
     const [userDetails, setUserDetails] = useState('');
     const [timeInterval, setTimeInterval] = useState('');
     const [serviceTypeDiscount, setServiceTypeDiscount] = useState('');
@@ -69,6 +73,8 @@ const StoreDescription = ({ navigation, route, props }) => {
     // Time
     const [time, setTime] = useState([]);
 
+
+
     useEffect(() => {
         setNextYear(new Date().getFullYear());
         setNextDate(new Date().getMonth());
@@ -78,6 +84,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         getData();
         Check();
         getStoreData();
+        updatedName.fav.data == null ? null : setServiceId(updatedName?.fav?.data?.service?.id)
     }, [])
 
 
@@ -104,7 +111,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (updatedName.fav.data == null) {
             null
         } else {
-            //   console.log("dssa",updatedName.fav.data.service.id)
             setServiceId(updatedName?.fav?.data?.service?.id)
         }
     }
@@ -364,6 +370,11 @@ const StoreDescription = ({ navigation, route, props }) => {
         setHairdresserModal(!hairdresserModal)
     }
 
+    const _onGender = (res) => {
+        setGenderName(res)
+        setGenderModal(!genderModal)
+    }
+
     const _onTime = (res) => {
         setSelectedTime(res)
         setTimeModalVisible(!timeModalVisible)
@@ -397,7 +408,11 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const _onBook = () => {
         setLoading(true)
-        if (serviceId == '') {
+        if (genderName == '') {
+            alert('Please select gender.')
+            setLoading(false)
+            return false
+        } else if (serviceId == '') {
             alert('Please select service.')
             setLoading(false)
             return false
@@ -425,6 +440,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                 service_id: serviceId,
                 style_type_id: serviceTypeId,
                 style_id: pickStyleId,
+                gender: genderName,
                 booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
             })
                 .then(res => {
@@ -442,7 +458,37 @@ const StoreDescription = ({ navigation, route, props }) => {
         }
     }
 
-
+    const renderGender = () => {
+        return (
+            <View>
+                <Pressable style={{ borderWidth: 1, borderColor: '#979797', height: 35, marginRight: 26.5, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setGenderModal(!genderModal)}>
+                    <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{genderName == '' ? 'Select' : genderName}</Text>
+                    <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
+                </Pressable>
+                {
+                    genderModal == true ?
+                        <View style={{ borderWidth: 1, marginRight: 27 }}>
+                            {
+                                genderList.map((res, index) => {
+                                    return (
+                                        <Pressable key={index} onPress={() => _onGender(res)}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res}</Text>
+                                            <View
+                                                style={{
+                                                    borderBottomColor: '#979797',
+                                                    borderBottomWidth: 1,
+                                                }}
+                                            />
+                                        </Pressable>
+                                    )
+                                })
+                            }
+                        </View> :
+                        null
+                }
+            </View>
+        )
+    }
 
     const renderService = () => {
         return (
@@ -682,6 +728,10 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
+    const _onChangeSalon = () => {
+        dispatch(deleteSalon(updatedName.fav))
+        navigation.navigate('HomeTabs', { screen: 'Home' })
+    }
 
     return (
         <View style={styles.container}>
@@ -741,7 +791,17 @@ const StoreDescription = ({ navigation, route, props }) => {
 
                         }
                         <View style={{ marginLeft: 15 }}>
-                            <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
+                                {
+                                    updatedName.fav.data == null || updatedName.fav.data[1] == undefined ?
+                                        null
+                                        :
+                                        <Pressable style={{ borderWidth: 1, fontFamily: 'Avenir-Medium', lineHeight: 16 }} onPress={() => _onChangeSalon()}>
+                                            <Text style={{ marginLeft: 10.5, marginRight: 10.5, marginTop: 5.5, marginBottom: 5.5 }}>Change salon</Text>
+                                        </Pressable>
+                                }
+                            </View>
                             <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{overallDistance} Miles</Text>
                             <View style={{ marginRight: 186 }}>
                                 <Rating
@@ -796,9 +856,15 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 28, marginTop: 10 }}>Book</Text>
                     <View style={{ marginLeft: 27.5 }}>
                         {
+                            <View>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Gender</Text>
+                                {renderGender()}
+                            </View>
+                        }
+                        {
                             updatedName.fav.data == null ?
                                 <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Service</Text>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service</Text>
                                     {renderService()}
 
                                 </View>

@@ -11,7 +11,6 @@ import {
 
 import { BASE_URL, isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
-import { signUp } from '../../Actions/AuthActions'
 import { SET_USER } from '../../Actions/Types'
 
 import {
@@ -27,7 +26,7 @@ import {
 } from 'react-native-fbsdk-next'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { resetAuth } from '../../Actions/AuthActions';
+import { SocialSignup } from '../../Actions/AuthActions';
 
 
 GoogleSignin.configure({
@@ -54,7 +53,7 @@ const UserDetails = (props) => {
     getData()
     getEmail()
     setEmail('')
-  //  dispatch(resetAuth())
+    //  dispatch(resetAuth())
   }, [])
 
   const getData = async () => {
@@ -72,8 +71,8 @@ const UserDetails = (props) => {
     try {
       const value = await AsyncStorage.getItem('@google_email')
       setEmail(value)
-     // setId(parData.social_id)
-     // setType(parData.type)
+      // setId(parData.social_id)
+      // setType(parData.type)
     } catch (e) {
       // error reading value
     }
@@ -87,19 +86,13 @@ const UserDetails = (props) => {
       alert('Please Enter valid Email')
       return false
     } else {
-      axios.post(`${BASE_URL}/social/signup`, {
+      const data = {
         email: email,
         social_id: id,
         type: type,
         role: 'USER'
-      })
-        .then(res => {
-          dispatch({ type: SET_USER, payload: { access_token: res.data.access_token } })
-           props.navigation.navigate('HomeTabs')
-        })
-        .catch(e => {
-          console.log('e', e)
-        })
+      }
+      dispatch(SocialSignup(data))
     }
   }
 
@@ -108,7 +101,7 @@ const UserDetails = (props) => {
     return (
       <View style={{ width: width * 0.83, marginTop: 44 }}>
         <Text style={{ color: "#FFFFFF" }}>Email</Text>
-        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} editable={type == 'GOOGLE' ? false : true}/>
+        <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} editable={type == 'GOOGLE' ? false : true} />
       </View>
     )
   }
@@ -138,6 +131,7 @@ const UserDetails = (props) => {
   )
 }
 export default UserDetails;
+
 
 const styles = StyleSheet.create({
   container: {

@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, Image, Pressable, TouchableOpacity } from 'react-native';
-import { BASE_URL, Colors } from '../../../Config';
+import { BASE_URL, Colors, height, width } from '../../../Config';
 import Header from '../../../Components/EmployeeHeader';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Styles = (props) => {
     const [serviceData, setServiceData] = useState([]);
+    const [styleData, setStyleData] = useState([]);
     const [selectedService, setSelectedService] = useState('');
-    
+    const [selectedServiceId, setSelectedServiceId] = useState('');
+
 
     const _onBack = () => props.navigation.goBack()
 
@@ -22,6 +25,23 @@ const Styles = (props) => {
                 console.log("response service", res.data)
                 setServiceData(res.data)
                 setSelectedService(res.data[0].name)
+                console.log("sd",res.data[0].name)
+                _onSelectService(res.data[0].name)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+
+    const _onSelectService = async (val) => {
+        const value = await AsyncStorage.getItem('@user_details')
+        const user_data = value != null ? JSON.parse(value) : null;
+        console.log("sd", user_data.store_id)
+        setSelectedService(val.name)
+        setSelectedServiceId(val.id)
+        axios.get(`${BASE_URL}/style/list/${user_data.store_id}`)
+            .then(res => {
+                setStyleData(res.data)
             })
             .catch(e => {
                 console.log('e', e)
@@ -38,14 +58,14 @@ const Styles = (props) => {
                         {
                             serviceData.map((res, index) => {
                                 return (
-                                    <View>
+                                    <View key={index}>
                                         {
                                             res.name == selectedService ?
-                                                <Pressable style={{ backgroundColor: '#141313', borderRadius: 5, marginLeft: 10, marginTop: 11, marginBottom: 10 }} onPress={() => setSelectedService(res.name)}>
+                                                <Pressable style={{ backgroundColor: '#141313', borderRadius: 5, marginLeft: 10, marginTop: 11, marginBottom: 10 }} onPress={() => setSelectedService(res)}>
                                                     <Text style={{ color: '#FFFFFF', marginLeft: 14, marginRight: 13, marginTop: 8, marginBottom: 7, fontFamily: 'Avenir-Heavy', lineHeight: 19 }}>{res.name}</Text>
                                                 </Pressable>
                                                 :
-                                                <Pressable onPress={() => setSelectedService(res.name)}>
+                                                <Pressable onPress={() => _onSelectService(res)}>
                                                     <Text style={{ fontFamily: 'Avenir-Heavy', lineHeight: 19, marginTop: 19, marginLeft: 25 }}>{res.name}</Text>
                                                 </Pressable>
                                         }
@@ -54,35 +74,37 @@ const Styles = (props) => {
                             })
                         }
                     </View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Pressable onPress={() => props.navigation.navigate('StylesDescription')}>
-                            <Image
-                                style={styles.tinyLogo}
-                                source={require('../../../Images/cut1.png')}
-                            />
-                            <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20 }}>Shoulder Length</Text>
-                        </Pressable>
-                        <Pressable onPress={() => props.navigation.navigate('StylesDescription')}>
-                            <Image
-                                style={styles.tinyLogo}
-                                source={require('../../../Images/cut2.png')}
-                            />
-                            <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20 }}>Fishtail Braid</Text>
-                        </Pressable>
-                        <Pressable onPress={() => props.navigation.navigate('StylesDescription')}>
-                            <Image
-                                style={{ height: 120, marginTop: 15 }}
-                                source={require('../../../Images/upcoming.png')}
-                            />
-                            <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginTop: 17 }}>Short & Straight</Text>
-                        </Pressable>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 9 }}>
+                        {
+                            styleData.map((res) => {
+                                return (
+                                    <Pressable onPress={() => props.navigation.navigate('StylesDescription')}>
+                                        {
+                                            res.service.name == selectedService ?
+                                                <View>
+                                                    <Image
+                                                        style={{ height: 194, width: 104, marginLeft: 16 }}
+                                                        source={{
+                                                            uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
+                                                        }}
+                                                    />
+                                                    <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20 }}>{res.name}</Text>
+                                                </View>
+                                                :
+                                                null
+                                        }
+
+                                    </Pressable>
+                                )
+                            })
+                        }
                     </View>
                 </View>
             }
             {
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => props.navigation.navigate('AddStyle', { service_name: selectedService})}
+                    onPress={() => props.navigation.navigate('AddStyle', { service_name: selectedService, service_id: selectedServiceId })}
                     style={styles.touchableOpacityStyle}>
                     <Image
                         source={require('../../../Images/Group.png')}

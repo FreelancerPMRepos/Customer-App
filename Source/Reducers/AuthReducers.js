@@ -43,6 +43,7 @@ export default (state = initialState, action) => {
                 return {
                     ...state,
                     loginType: false,
+                    loginSuccess: false
                 }
         case RESET_AUTH:
             return initialState

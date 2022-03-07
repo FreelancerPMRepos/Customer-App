@@ -8,8 +8,8 @@ import {
     ScrollView 
 } from 'react-native';
 
-import { BASE_URL, Colors } from '../../Config';
-import Header from '../../Components/Header';
+import { BASE_URL, Colors } from '../../../Config';
+import Header from '../../../Components/EmployeeHeader';
 import axios from 'axios';
 
 const AppointmentDetails = ({ navigation, route, props }) => {
