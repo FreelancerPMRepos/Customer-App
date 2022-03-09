@@ -8,7 +8,6 @@ import {
   Pressable,
   ScrollView,
   TextInput,
-  PixelRatio,
 } from 'react-native';
 
 import { BASE_URL } from '../../../Config';
@@ -22,7 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { deleteSalon } from '../../../Actions/PickSalon';
 import moment from 'moment';
-import { getDistance, getPreciseDistance } from 'geolib';
+import { getPreciseDistance } from 'geolib';
 import Slider from '@react-native-community/slider';
 import SelectDropdown from 'react-native-select-dropdown'
 
@@ -105,20 +104,8 @@ const Home = (props) => {
       {
         isLoading && <Loader />
       }
-      <View style={{
-        height: height * 0.56,
-        width: width * 1,
-        alignItems: 'center',
-      }}>
-        <MapView
-          style={styles.map}
-        // region={{
-        //   latitude: 37.78825,
-        //   longitude: -122.4324,
-        //   latitudeDelta: 0.015,
-        //   longitudeDelta: 0.0121,
-        // }}
-        >
+      <View style={styles.mapView}>
+        <MapView style={styles.map}>
           {
             storeList.map((marker, index) => (
               <Marker
@@ -216,6 +203,8 @@ const Home = (props) => {
           </View>
         } */}
       </View>
+
+      {/* // store List View */}
       <View style={{ bottom: 0, backgroundColor: 'white', height: viewHideShow == true ? height * 0.52 : height * 0.395, position: 'absolute', width: width * 1 }}>
         <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? height * 0.49 : height * 0.35, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
           {
@@ -257,7 +246,7 @@ const Home = (props) => {
                           <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium', lineHeight: 20, }}>{res.store_name}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{moment(res.opentime, "H").format('h')}-{moment(res.closetime, "H").format('h')}</Text>
+                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
                           {
                             res.is_available == 1 ?
                               <Text style={{ color: '#70CF2B', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Open</Text>
@@ -308,20 +297,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'yellow',
   },
   imageWrapper: {
-    width: 125, // half of the image width
+    width: 125,
     height: 250,
     backgroundColor: 'transparent',
     overflow: 'hidden'
   },
   image: {
-    //  width: 250,
-    //   height: 250,
     width: 180,
     height: 100,
-    borderRadius: 125, // half of the image width
+    borderRadius: 125,
     backgroundColor: 'transparent'
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
+  mapView: {
+    height: height * 0.56,
+    width: width * 1,
+    alignItems: 'center',
+  }
 })
