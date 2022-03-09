@@ -9,8 +9,9 @@ import {
     Image
 } from 'react-native';
 import Header from '../../Components/Header'
-import { BASE_URL, isValidEmail } from '../../Config';
+import { BASE_URL, height, isValidEmail, width } from '../../Config';
 import Loader from '../../Components/Loader';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 const ForgotPassword = (props) => {
     const [isLoading, setLoading] = useState(false)
@@ -52,19 +53,22 @@ const ForgotPassword = (props) => {
                 isLoading && <Loader />
             }
             {
-                <View>
-                    <Text style={styles.forgotPasswordText}>Forgot Password</Text>
-                    <Image
-                        style={styles.tinyLogo}
-                        source={require('../../Images/forgot.png')}
-                    />
-                    <Text style={styles.titleText}>Please enter your registered Email.</Text>
-                    <TextInput placeholder="Registered Email" style={styles.emailTextinput} onChangeText={text => setEmail(text)} value={email} />
-                    <Text style={styles.subtitleText}>We will send verification code on your registered Email.</Text>
-                    <Pressable style={styles.sendButton} onPress={() => _onSend()}>
-                        <Text style={styles.buttonText}>Send</Text>
-                    </Pressable>
-                </View>
+                <KeyboardAwareScrollView>
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}> 
+                        <Text style={styles.forgotPasswordText}>Forgot Password</Text>
+                        <Image
+                            style={styles.tinyLogo}
+                            source={require('../../Images/forgot.png')}
+                        />
+                        <Text style={styles.titleText}>Please enter your registered Email.</Text>
+                        <TextInput placeholder="Registered Email" style={styles.emailTextinput} onChangeText={text => setEmail(text)} value={email} />
+                        <Text style={styles.subtitleText}>We will send verification code on your registered Email.</Text>
+                        <Pressable style={styles.sendButton} onPress={() => _onSend()}>
+                            <Text style={styles.buttonText}>Send</Text>
+                        </Pressable>
+                    </View>
+                </KeyboardAwareScrollView>
+
             }
         </View>
     )
@@ -77,22 +81,18 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     tinyLogo: {
-        marginLeft: 145,
         marginTop: 17
     },
     forgotPasswordText: {
         color: '#17171A',
         fontSize: 18,
         fontFamily: 'Avenir-Heavy',
-        marginLeft: 132,
         marginTop: 60
     },
     titleText: {
         color: '#17171A',
         fontSize: 16,
         fontFamily: 'Avenir-Medium',
-        marginLeft: 83,
-        marginRight: 81,
         marginTop: 34,
         textAlign: 'center'
     },
@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     },
     emailTextinput: {
         borderWidth: 1,
+        width: width * 0.87,
         marginLeft: 15.5,
         marginRight: 15.5,
         marginTop: 14.5,
@@ -117,7 +118,8 @@ const styles = StyleSheet.create({
         borderColor: '#504E4E',
         marginLeft: 22.5,
         marginRight: 21.5,
-        marginTop: 110
+        width: width * 0.85,
+        marginTop: height * 0.08
     },
     buttonText: {
         color: '#2A2929',
