@@ -47,11 +47,11 @@ const HelloWorldApp = (props) => {
     let isCancelled = false;
     if (!isCancelled) {
       if (auth.access_token) {
+        locationPermission()
         setAuthToken(auth.access_token)
         getTopStyleList();
         getServiceList()
         getUserInfo()
-        locationPermission()
       }
     }
     return () => {
@@ -108,6 +108,7 @@ const HelloWorldApp = (props) => {
   }
 
   const locationPermission = async () => {
+    setLoading(true)
     if (Platform.OS === 'ios') {
       getOneTimeLocation();
     } else {
@@ -122,16 +123,20 @@ const HelloWorldApp = (props) => {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           //To Check, If Permission is granted
           getOneTimeLocation();
+          setLoading(false)
         } else {
           setLocationStatus('Permission Denied');
+          setLoading(false)
         }
       } catch (err) {
         console.warn(err);
+        setLoading(false)
       }
     }
   }
 
   const getOneTimeLocation = () => {
+    setLoading(true)
     setLocationStatus('Getting Location ...');
     Geolocation.getCurrentPosition(
       //Will give you the current location
@@ -153,9 +158,11 @@ const HelloWorldApp = (props) => {
         setCurrentLatitude(currentLatitude);
         global.CurrentLongitude = currentLongitude
         global.CurrentLatitude = currentLongitude
+        setLoading(false)
       },
       (error) => {
         setLocationStatus(error.message);
+        setLoading(false)
       },
       {
         enableHighAccuracy: false,
