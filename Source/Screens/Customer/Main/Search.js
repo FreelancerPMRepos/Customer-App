@@ -61,7 +61,7 @@ const HelloWorldApp = (props) => {
 
   const renderHeader = () => {
     return (
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: '30%' }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: '30%', marginTop: 25 }}>
         <Image source={require('../../../Images/hairkut.png')} style={{ resizeMode: 'contain' }} />
         <View style={{ flexDirection: 'row' }}>
           <Pressable onPress={() => props.navigation.navigate('StyleScreen')}>
