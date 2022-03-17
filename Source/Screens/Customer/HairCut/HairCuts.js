@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
     marginRight: 20
   },
   serviceImage: {
-    marginLeft: 11, 
-    marginTop: 14, 
-    height: height * 0.16, 
-    width: width * 0.28, 
+    marginLeft: 11,
+    marginTop: 14,
+    height: height * 0.16,
+    width: width * 0.28,
     alignItems: 'flex-end',
   },
   sciscorImage: {
-    marginTop: 7, 
+    marginTop: 7,
     marginRight: 7.51
   }
 })

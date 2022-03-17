@@ -4,7 +4,6 @@ import {
   Text,
   View,
   StyleSheet,
-  FlatList,
   Image,
   Pressable,
   Modal,
@@ -13,7 +12,7 @@ import {
 } from 'react-native';
 import Header from '../../../Components/Header'
 import { BASE_URL, Colors, height, width } from '../../../Config';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { addSalon } from '../../../Actions/PickSalon'
 
 
@@ -76,7 +75,6 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   const _onPick = () => {
     const user = list
     dispatch(addSalon(user))
-    alert('Salon Picked')
     navigation.navigate('HomeTabs', {
       screen: 'Home'
     })
@@ -95,18 +93,18 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setModalVisible(!modalVisible)}>
+            <Pressable style={styles.crossView} onPress={() => setModalVisible(!modalVisible)}>
               <Image
-                style={{ marginRight: 14.49, marginTop: 18.5 }}
+                style={styles.crossImage}
                 source={require('../../../Images/cross.png')}
               />
             </Pressable>
-            <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
-            <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12 }}>
+            <Text style={styles.addNote}>Add Note</Text>
+            <View style={styles.noteView}>
               <TextInput placeholder="Type your note" style={{ textAlignVertical: 'top' }} multiline={true} numberOfLines={5} onChangeText={text => setNote(text)} value={note} />
             </View>
-            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => _onNoteSave()}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 8.5, marginBottom: 7.5 }} >SAVE</Text>
+            <Pressable style={styles.saveButton} onPress={() => _onNoteSave()}>
+              <Text style={styles.saveText} >SAVE</Text>
             </Pressable>
           </View>
         </View>
@@ -122,20 +120,20 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
       {
         <ScrollView>
           {renderAddNoteModal()}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={styles.mainView}>
             <Text style={styles.afroHairTextStyle}>{list.name}</Text>
             <Image
-              style={{ marginTop: 5, marginRight: 29 }}
+              style={styles.heartImage}
               source={require('../../../Images/black_heart.png')}
             />
           </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          <View style={styles.imageView}>
             {
               list.upload_front_photo == null ?
                 null
                 :
                 <Image
-                  style={{ marginLeft: 26, marginTop: 15, height: height * 0.16, width: width * 0.26, }}
+                  style={styles.frontImage}
                   source={{
                     uri: list.upload_front_photo,
                   }}
@@ -146,7 +144,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
                 null
                 :
                 <Image
-                  style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.26, }}
+                  style={styles.backImage}
                   source={{
                     uri: list.upload_back_photo,
                   }}
@@ -157,7 +155,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
                 null
                 :
                 <Image
-                  style={{ marginLeft: 12, marginTop: 15, height: height * 0.16, width: width * 0.26, marginRight: 26 }}
+                  style={styles.rightImage}
                   source={{
                     uri: list.upload_right_photo,
                   }}
@@ -168,7 +166,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
                 null
                 :
                 <Image
-                  style={{ marginLeft: 26, marginTop: 14, height: height * 0.16, width: width * 0.26, }}
+                  style={styles.leftImage}
                   source={{
                     uri: list.upload_left_photo,
                   }}
@@ -179,7 +177,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
                 null
                 :
                 <Image
-                  style={{ marginLeft: 12, marginTop: 14, height: height * 0.16, width: width * 0.26, }}
+                  style={styles.topImage}
                   source={{
                     uri: list.upload_top_photo,
                   }}
@@ -276,10 +274,88 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontSize: 14,
     fontFamily: 'Avenir-Medium',
-    // marginLeft: 29.5,
     marginTop: 9.5,
     marginBottom: 6.5,
     textAlign: 'center'
-    //   marginRight: 28.5
+  },
+  crossView: {
+    justifyContent: 'flex-end', 
+    alignSelf: 'flex-end'
+  },
+  crossImage: {
+    marginRight: 14.49, 
+    marginTop: 18.5
+  },
+  addNote: {
+    color: '#1A1919', 
+    fontSize: 18, 
+    fontFamily: 'Avenir-Heavy', 
+    marginLeft: 14.5
+  },
+  noteView: {
+    borderWidth: 1, 
+    borderColor: '#979797', 
+    marginLeft: 13, 
+    marginTop: 13.5, 
+    marginRight: 12
+  },
+  saveButton: {
+    borderWidth: 1, 
+    borderColor: '#171717', 
+    marginLeft: 96, 
+    marginRight: 96, 
+    marginTop: 21, 
+    marginBottom: 26
+  },
+  saveText: {
+    color: '#1A1919', 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Medium', 
+    textAlign: 'center', 
+    marginTop: 8.5, 
+    marginBottom: 7.5
+  },
+  mainView: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between'
+  },
+  heartImage: {
+    marginTop: 5, 
+    marginRight: 29
+  },
+  imageView: {
+    flexDirection: 'row', 
+    flexWrap: 'wrap'
+  },
+  frontImage: {
+    marginLeft: 26, 
+    marginTop: 15, 
+    height: height * 0.16, 
+    width: width * 0.26,
+  },
+  backImage: {
+    marginLeft: 12, 
+    marginTop: 15, 
+    height: height * 0.16, 
+    width: width * 0.26,
+  },
+  rightImage: {
+    marginLeft: 12, 
+    marginTop: 15, 
+    height: height * 0.16, 
+    width: width * 0.26, 
+    marginRight: 26
+  },
+  leftImage: {
+    marginLeft: 26, 
+    marginTop: 14, 
+    height: height * 0.16, 
+    width: width * 0.26,
+  },
+  topImage: {
+    marginLeft: 12, 
+    marginTop: 14, 
+    height: height * 0.16, 
+    width: width * 0.26,
   }
 })
