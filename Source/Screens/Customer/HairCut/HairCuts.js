@@ -20,7 +20,7 @@ const GridViewItems = [
   { key: '../../../Images/upcoming.png' },
 ]
 
-const HelloWorldApp = ({navigation,props}) => {
+const HelloWorldApp = ({ navigation, props }) => {
   const [list, setList] = useState([]);
   const [isLoading, setLoading] = useState(false)
 
@@ -33,7 +33,7 @@ const HelloWorldApp = ({navigation,props}) => {
     return unsubscribe;
   }, [navigation])
 
- 
+
 
   console.log("key", GridViewItems.key)
 
@@ -55,16 +55,15 @@ const HelloWorldApp = ({navigation,props}) => {
       {
         <Header {...props} />
       }
-       {
+      {
         isLoading && <Loader />
       }
       {
-        <ScrollView style={{marginBottom: 15}}>
+        <ScrollView style={{ marginBottom: 15 }}>
           <Text style={{ color: '#1A1919', fontSize: 16, marginLeft: 27, marginTop: 28, fontFamily: 'Avenir-Heavy' }}>Saved and Custom Styles</Text>
           {/* <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 34.67 }}>Haircuts</Text> */}
           {
             list.map((res, index) => {
-              console.log("res", res.list.length)
               return (
                 <View key={index}>
                   <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 27, marginTop: 10 }}>{res.name}</Text>
@@ -72,7 +71,7 @@ const HelloWorldApp = ({navigation,props}) => {
                     {
                       res.list.map((val, index) => {
                         return (
-                          <Pressable style={{}} key={index} onPress={() => navigation.navigate('HairCutDescriptionScreen', { id: val.style_id})}>
+                          <Pressable style={{}} key={index} onPress={() => navigation.navigate('HairCutDescriptionScreen', { id: val.style_id })}>
                             <ImageBackground
                               style={{ marginLeft: 11, marginTop: 14, height: height * 0.16, width: width * 0.28, alignItems: 'flex-end', }}
                               //  source={require('../../Images/upcoming.png')}
@@ -80,10 +79,18 @@ const HelloWorldApp = ({navigation,props}) => {
                                 uri: `${val.upload_front_photo}`,
                               }}
                             >
-                              <Image
-                                style={{ marginTop: 7, marginRight: 7.51 }}
-                                source={require('../../../Images/heart.png')}
-                              />
+                              {
+                                val.is_custom === 1 ?
+                                  <Image
+                                    style={{ marginTop: 7, marginRight: 7.51 }}
+                                    source={require('../../../Images/scisor.png')}
+                                  />
+                                  :
+                                  <Image
+                                    style={{ marginTop: 7, marginRight: 7.51 }}
+                                    source={require('../../../Images/heart.png')}
+                                  />
+                              }
                             </ImageBackground>
                           </Pressable>
                         )

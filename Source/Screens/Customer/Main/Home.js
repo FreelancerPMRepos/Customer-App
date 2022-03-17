@@ -45,7 +45,6 @@ const Home = (props) => {
     if (!isCancelled) {
       if (auth.access_token) {
         setAuthToken(auth.access_token)
-        getStoreList()
         getUserInfo()
         serviceList()
         getlocation()
@@ -60,6 +59,9 @@ const Home = (props) => {
     try {
       global.longitude = await AsyncStorage.getItem('CurrentLongitude')
       global.latitude = await AsyncStorage.getItem('CurrentLongitude')
+      {
+        global.longitude ?  getStoreList() : null
+      }
       if (value !== null) {
         alert('Not getting current location')
       }
@@ -241,7 +243,7 @@ const Home = (props) => {
         </Pressable>
         <ScrollView>
           {
-            storeList.length === 0 ?
+            storeList.length === 0 && isLoading === false ?
               <View style={styles.noStoreAvailableView}>
                 <Text>No store available</Text>
               </View>
