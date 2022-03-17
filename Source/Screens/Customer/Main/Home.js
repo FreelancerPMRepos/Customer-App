@@ -60,7 +60,7 @@ const Home = (props) => {
       global.longitude = await AsyncStorage.getItem('CurrentLongitude')
       global.latitude = await AsyncStorage.getItem('CurrentLongitude')
       {
-        global.longitude ?  getStoreList() : null
+        global.longitude ? getStoreList() : null
       }
       if (value !== null) {
         alert('Not getting current location')
@@ -113,15 +113,12 @@ const Home = (props) => {
   }
 
   const serviceList = () => {
-    setLoading(true)
     axios.get(`${BASE_URL}/service/all/list`)
       .then(res => {
         setServiceData(res.data)
-        setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
-        setLoading(false)
       })
   }
 
@@ -129,190 +126,199 @@ const Home = (props) => {
     setSelectedValue(item)
     getStoreList('', '', '', item)
   }
-
+  console.log("sd", storeList[0]?.latitude)
 
   return (
     <View style={styles.container}>
       {
-        isLoading && <Loader />
-      }
-      <View style={styles.mapView}>
-        <MapView style={styles.map}>
-          {
-            storeList.map((marker, index) => (
-              <Marker
-                key={index}
-                coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                title={marker.store_name}
-              />
-            ))}
-        </MapView>
-        <View style={styles.searchMainView}>
-          <View style={styles.searchView}>
-            <TextInput
-              placeholder="Search By Salons, Location"
-              style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
-              onChangeText={(text) => getStoreList('', '', text)}
-            />
-            <Image
-              style={{ marginTop: 12, marginRight: 12 }}
-              source={require('../../../Images/search.png')}
-            />
-          </View>
-          {
-            showFilter == false ?
-              <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
-                <Image
-                  style={styles.filterImage}
-                  source={require('../../../Images/filter.png')}
-                />
-              </Pressable>
-              :
-              null
-          }
-        </View>
-        {
-          showFilter == true ?
-            <View style={styles.priceView}>
-              <View>
-                <Picker
-                  selectedValue={selectedValue}
-                  style={styles.pickerStyle}
-                  onValueChange={(itemValue, itemIndex) => _onServiceChange(itemValue)}
-                >
-                  <Picker.Item label="Select Type" value="0" />
-                  {
-                    serviceData.map((res) => {
-                      return (
-                        <Picker.Item label={res.name} value={res.id} />
-                      )
-                    })
-                  }
-                </Picker>
-              </View>
-              <View style={styles.currencyView}>
-                <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
-                  <Text style={styles.currency}>£</Text>
-                </Pressable>
-                <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
-                  <Text style={styles.currency}>££</Text>
-                </Pressable>
-                <Pressable onPress={() => _onPriceFilter(100, 999)}>
-                  <Text style={styles.currency}>£££</Text>
-                </Pressable>
-              </View>
-            </View>
-            :
-            null
-        }
-        {
-          showFilter == true ?
-            <View style={styles.sliderView}>
-              <Slider
-                style={{ width: 360, height: 40 }}
-                minimumValue={100}
-                maximumValue={10000}
-                minimumTrackTintColor="#A9A8A8"
-                maximumTrackTintColor="#A9A8A8"
-                onValueChange={(value) => getStoreList('', '', '', '', value)}
-              />
-            </View> : null
-        }
-        {
-          updatedName.fav.data == null ?
-            null
-            :
-            <View style={styles.pickStyleView}>
-              <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
-              <Pressable onPress={() => _onSalonCancel()}>
-                <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
-              </Pressable>
-            </View>
-        }
-      </View>
+        isLoading === true ? <Loader /> :
 
-      {/* // store List View */}
-      <View style={[styles.storeView, { height: viewHideShow == true ? height * 0.52 : height * 0.395, }]}>
-        <Pressable style={[styles.upButton, { bottom: viewHideShow == true ? height * 0.49 : height * 0.35, }]} onPress={() => setViewHideShow(!viewHideShow)}>
-          {
-            viewHideShow == true ?
-              <Image source={require('../../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
-              :
-              <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
-          }
-        </Pressable>
-        <ScrollView>
-          {
-            storeList.length === 0 && isLoading === false ?
-              <View style={styles.noStoreAvailableView}>
-                <Text>No store available</Text>
+          <View style={styles.mapView}>
+            <MapView style={styles.map} initialRegion={{
+              latitude: storeList[0]?.latitude === undefined ? 37.78825 : storeList[0]?.latitude,
+              longitude: storeList[0]?.longitude === undefined ? -122.4324 : storeList[0]?.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}>
+              {
+                storeList.map((marker, index) => (
+                  <Marker
+                    key={index}
+                    coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+                    title={marker.store_name}
+                  />
+                ))}
+            </MapView>
+            <View style={styles.searchMainView}>
+              <View style={styles.searchView}>
+                <TextInput
+                  placeholder="Search By Salons, Location"
+                  style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
+                  onChangeText={(text) => getStoreList('', '', text)}
+                />
+                <Image
+                  style={{ marginTop: 12, marginRight: 12 }}
+                  source={require('../../../Images/search.png')}
+                />
               </View>
-              :
-              storeList?.map((res, index) => {
-                let price = res.min_male_price > res.min_female_price ? res.min_female_price : res.min_male_price
-                let price_length = price === null ? 0 : price.toString().length
-                var prefix = '';
-                if (price_length > 0) {
-                  for (var i = 0; i < price_length; i++) {
-                    prefix += '£';
-                  }
-                }
-                return (
-                  <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
-                    {
-                      res.images.length == 0 ?
-                        <Image
-                          style={styles.noImage}
-                          source={require('../../../Images/noImage.jpg')}
-                        />
-                        :
-                        <Image source={{
-                          uri: res?.images[0]?.url,
-                        }} style={styles.noImage} />
-                    }
-                    <View style={styles.storeContentView}>
-                      <View style={styles.contentView}>
-                        <View style={{ width: width * 0.35 }}>
-                          <Text style={styles.storeName}>{res.store_name}</Text>
-                        </View>
-                        <View style={styles.contentView}>
-                          <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
-                          {
-                            res.is_available == 1 ?
-                              <Text style={styles.timeText}> Open</Text>
-                              :
-                              <Text style={styles.timeText}> Closed</Text>
-                          }
-                        </View>
-                      </View>
-                      <Text style={styles.miles}>{res.distance} Miles</Text>
-                      <View style={styles.row}>
-                        <View style={{ marginTop: 3 }}>
-                          <Rating
-                            type='custom'
-                            ratingCount={5}
-                            ratingColor='#1F1E1E'
-                            ratingBackgroundColor='#c8c7c8'
-                            tintColor="#FFFFFF"
-                            readonly={true}
-                            startingValue={res.avg_rating}
-                            imageSize={16}
-                          //   onFinishRating={this.ratingCompleted}
-                          />
-                        </View>
-                        <Text style={styles.prefixText}>{prefix}</Text>
-                      </View>
-                      <Text numberOfLines={2} style={styles.description}>{res.description}</Text>
-                      <View style={styles.seeMoreView}>
-                        <Text style={styles.seeMoreText}>SEE MORE</Text>
-                      </View>
-                    </View>
+              {
+                showFilter == false ?
+                  <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
+                    <Image
+                      style={styles.filterImage}
+                      source={require('../../../Images/filter.png')}
+                    />
                   </Pressable>
-                )
-              })
-          }
-        </ScrollView>
-      </View>
+                  :
+                  null
+              }
+            </View>
+            {
+              showFilter == true ?
+                <View style={styles.priceView}>
+                  <View>
+                    <Picker
+                      selectedValue={selectedValue}
+                      style={styles.pickerStyle}
+                      onValueChange={(itemValue, itemIndex) => _onServiceChange(itemValue)}
+                    >
+                      <Picker.Item label="Select Type" value="0" />
+                      {
+                        serviceData.map((res) => {
+                          return (
+                            <Picker.Item label={res.name} value={res.id} />
+                          )
+                        })
+                      }
+                    </Picker>
+                  </View>
+                  <View style={styles.currencyView}>
+                    <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
+                      <Text style={styles.currency}>£</Text>
+                    </Pressable>
+                    <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
+                      <Text style={styles.currency}>££</Text>
+                    </Pressable>
+                    <Pressable onPress={() => _onPriceFilter(100, 999)}>
+                      <Text style={styles.currency}>£££</Text>
+                    </Pressable>
+                  </View>
+                </View>
+                :
+                null
+            }
+            {
+              showFilter == true ?
+                <View style={styles.sliderView}>
+                  <Slider
+                    style={{ width: 360, height: 40 }}
+                    minimumValue={100}
+                    maximumValue={10000}
+                    minimumTrackTintColor="#A9A8A8"
+                    maximumTrackTintColor="#A9A8A8"
+                    onValueChange={(value) => getStoreList('', '', '', '', value)}
+                  />
+                </View> : null
+            }
+            {
+              updatedName.fav.data == null ?
+                null
+                :
+                <View style={styles.pickStyleView}>
+                  <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
+                  <Pressable onPress={() => _onSalonCancel()}>
+                    <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
+                  </Pressable>
+                </View>
+            }
+          </View>
+      }
+      {/* // store List View */}
+      {
+        isLoading === true ? <Loader /> :
+
+          <View style={[styles.storeView, { height: viewHideShow == true ? height * 0.52 : height * 0.395, }]}>
+            <Pressable style={[styles.upButton, { bottom: viewHideShow == true ? height * 0.49 : height * 0.35, }]} onPress={() => setViewHideShow(!viewHideShow)}>
+              {
+                viewHideShow == true ?
+                  <Image source={require('../../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
+                  :
+                  <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
+              }
+            </Pressable>
+            <ScrollView>
+              {
+                storeList.length === 0 && isLoading === false ?
+                  <View style={styles.noStoreAvailableView}>
+                    <Text>No store available</Text>
+                  </View>
+                  :
+                  storeList?.map((res, index) => {
+                    let price = res.min_male_price > res.min_female_price ? res.min_female_price : res.min_male_price
+                    let price_length = price === null ? 0 : price.toString().length
+                    var prefix = '';
+                    if (price_length > 0) {
+                      for (var i = 0; i < price_length; i++) {
+                        prefix += '£';
+                      }
+                    }
+                    return (
+                      <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
+                        {
+                          res.images.length == 0 ?
+                            <Image
+                              style={styles.noImage}
+                              source={require('../../../Images/noImage.jpg')}
+                            />
+                            :
+                            <Image source={{
+                              uri: res?.images[0]?.url,
+                            }} style={styles.noImage} />
+                        }
+                        <View style={styles.storeContentView}>
+                          <View style={styles.contentView}>
+                            <View style={{ width: width * 0.35 }}>
+                              <Text style={styles.storeName}>{res.store_name}</Text>
+                            </View>
+                            <View style={styles.contentView}>
+                              <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
+                              {
+                                res.is_available == 1 ?
+                                  <Text style={styles.timeText}> Open</Text>
+                                  :
+                                  <Text style={styles.timeText}> Closed</Text>
+                              }
+                            </View>
+                          </View>
+                          <Text style={styles.miles}>{res.distance} Miles</Text>
+                          <View style={styles.row}>
+                            <View style={{ marginTop: 3 }}>
+                              <Rating
+                                type='custom'
+                                ratingCount={5}
+                                ratingColor='#1F1E1E'
+                                ratingBackgroundColor='#c8c7c8'
+                                tintColor="#FFFFFF"
+                                readonly={true}
+                                startingValue={res.avg_rating}
+                                imageSize={16}
+                              //   onFinishRating={this.ratingCompleted}
+                              />
+                            </View>
+                            <Text style={styles.prefixText}>{prefix}</Text>
+                          </View>
+                          <Text numberOfLines={2} style={styles.description}>{res.description}</Text>
+                          <View style={styles.seeMoreView}>
+                            <Text style={styles.seeMoreText}>SEE MORE</Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    )
+                  })
+              }
+            </ScrollView>
+          </View>
+      }
     </View>
   )
 }
@@ -365,130 +371,130 @@ const styles = StyleSheet.create({
     width: width * 1
   },
   filterButton: {
-    backgroundColor: '#FFFFFF', 
+    backgroundColor: '#FFFFFF',
     marginLeft: 5
   },
   filterImage: {
-    marginTop: 12, 
-    marginRight: 12, 
-    marginLeft: 17, 
+    marginTop: 12,
+    marginRight: 12,
+    marginLeft: 17,
     marginRight: 16
   },
   priceView: {
-    top: 95, 
+    top: 95,
     flexDirection: 'row'
   },
   pickerStyle: {
-    height: 50, 
-    width: 180, 
+    height: 50,
+    width: 180,
     backgroundColor: 'white'
   },
   currencyView: {
-    backgroundColor: 'white', 
-    marginLeft: 20, 
+    backgroundColor: 'white',
+    marginLeft: 20,
     flexDirection: 'row'
   },
   currency: {
-    width: 54, 
-    textAlign: 'center', 
+    width: 54,
+    textAlign: 'center',
     paddingTop: 15.5,
   },
   sliderView: {
-    top: 110, 
+    top: 110,
     backgroundColor: 'white'
   },
   pickStyleView: {
-    top: 95, 
-    backgroundColor: Colors.white, 
-    marginLeft: width * 0.57, 
+    top: 95,
+    backgroundColor: Colors.white,
+    marginLeft: width * 0.57,
     flexDirection: 'row'
   },
   pickStyleImage: {
-    height: 60, 
-    width: 59.39, 
-    marginTop: 5.5, 
-    marginLeft: 7.8, 
+    height: 60,
+    width: 59.39,
+    marginTop: 5.5,
+    marginLeft: 7.8,
     marginBottom: 5.5
   },
   crossImage: {
-    marginTop: 20, 
-    marginLeft: 10, 
+    marginTop: 20,
+    marginLeft: 10,
     marginRight: 14
   },
   upButton: {
-    height: 50, 
-    width: 50, 
-    borderRadius: 30, 
-    backgroundColor: 'white', 
-    position: 'absolute', 
-    justifyContent: 'center', 
-    alignSelf: 'center', 
+    height: 50,
+    width: 50,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    position: 'absolute',
+    justifyContent: 'center',
+    alignSelf: 'center',
     alignItems: 'center'
   },
   noStoreAvailableView: {
-    alignItems: 'center', 
+    alignItems: 'center',
     marginTop: height * 0.19
   },
   store: {
-    flexDirection: 'row', 
-    marginLeft: 28, 
-    marginTop: 29.38, 
-    marginRight: 20, 
-    borderBottomWidth: 1, 
+    flexDirection: 'row',
+    marginLeft: 28,
+    marginTop: 29.38,
+    marginRight: 20,
+    borderBottomWidth: 1,
     borderColor: '#979797'
   },
   noImage: {
-    height: 83, 
+    height: 83,
     width: 71
   },
   storeContentView: {
-    marginLeft: 23, 
+    marginLeft: 23,
     flex: 1
   },
   contentView: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     justifyContent: 'space-between',
   },
   storeName: {
-    color: '#1A1919', 
-    fontSize: 15, 
-    fontFamily: 'Avenir-Medium', 
+    color: '#1A1919',
+    fontSize: 15,
+    fontFamily: 'Avenir-Medium',
     lineHeight: 20,
   },
   time: {
-    fontFamily: 'Avenir-Medium', 
+    fontFamily: 'Avenir-Medium',
     lineHeight: 16
   },
   timeText: {
-    color: '#70CF2B', 
-    fontFamily: 'Avenir-Medium', 
+    color: '#70CF2B',
+    fontFamily: 'Avenir-Medium',
     lineHeight: 16
   },
   miles: {
-    fontSize: 12, 
-    fontFamily: 'Avenir-Medium', 
+    fontSize: 12,
+    fontFamily: 'Avenir-Medium',
     lineHeight: 16
   },
   prefixText: {
-    fontSize: 14, 
-    fontFamily: 'Avenir-Heavy', 
+    fontSize: 14,
+    fontFamily: 'Avenir-Heavy',
     marginLeft: 14
   },
   description: {
-    fontSize: 12, 
-    fontFamily: 'Avenir-Medium', 
+    fontSize: 12,
+    fontFamily: 'Avenir-Medium',
     lineHeight: 16
   },
   seeMoreView: {
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginBottom: 13, 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 13,
     marginRight: 35
   },
   seeMoreText: {
-    marginTop: 8, 
-    fontFamily: 'Avenir-Heavy', 
-    borderBottomWidth: 1, 
+    marginTop: 8,
+    fontFamily: 'Avenir-Heavy',
+    borderBottomWidth: 1,
     lineHeight: 16
   }
 })
