@@ -118,7 +118,7 @@ const AppointmentDetails = ({ navigation, route, props }) => {
                                 }}
                             />
                         </View>
-                        <Pressable style={styles.buttonStyle} onPress={() => navigation.navigate('AddStyle', { service_name: appointmentData?.style?.service?.name, service_id: appointmentData?.style?.service?.id })}>
+                        <Pressable style={styles.buttonStyle} onPress={() => navigation.navigate('AddStyle', { service_name: appointmentData?.style?.service?.name, service_id: appointmentData?.style?.service?.id, page: 'Detail', userId: appointmentData?.user?.id })}>
                             <Text style={styles.buttonText}>Add Custom Hairstyle</Text>
                         </Pressable>
                     </View>

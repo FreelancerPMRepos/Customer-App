@@ -31,6 +31,8 @@ const AddStyle = ({ navigation, route, props }) => {
     const [tags, setTags] = useState({ tag: '', tagsArray: [] })
     const { service_name } = route.params
     const { service_id } = route.params
+    const { page } = route.params
+    const { userId } = route.params
 
     const _onBack = () => navigation.goBack()
 
@@ -348,6 +350,8 @@ const AddStyle = ({ navigation, route, props }) => {
                 showMessageAlert('Please select service')
             } else {
                 axios.post(`${BASE_URL}/style`, {
+                    is_custom: page === 'Detail' ? '1' : '0',
+                    user_id: page === 'Detail' ? userId : '',
                     store_id: userData.store_id,
                     service_id: service_id,
                     name: serviceName,
