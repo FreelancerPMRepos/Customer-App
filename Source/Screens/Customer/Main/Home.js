@@ -126,7 +126,6 @@ const Home = (props) => {
     setSelectedValue(item)
     getStoreList('', '', '', item)
   }
-  console.log("sd", storeList[0]?.latitude)
 
   return (
     <View style={styles.container}>
