@@ -31,6 +31,8 @@ import BookingSuccessfullScreen from '../Screens/Customer/Main/BookingSuccessful
 import PrivacyPolicy from '../Screens/Customer/Main/PrivacyPolicy';
 import StyleScreen from '../Screens/Customer/Main/StyleScreen';
 import TagSearchScreen from '../Screens/Customer/Main/TagSearchScreen';
+import ProfileResetPassword from '../Screens/Customer/Main/ProfileResetPassword';
+import ChangeLocation from '../Screens/Customer/Main/ChangeLocation';
 
 // HairCut
 import HairCuts from '../Screens/Customer/HairCut/HairCuts';
@@ -185,6 +187,8 @@ const Routes = (props) => {
                     <Stack.Screen name="PastComplaint" component={PastComplaint} />
                     <Stack.Screen name="StyleScreen" component={StyleScreen} />
                     <Stack.Screen name="TagSearchScreen" component={TagSearchScreen} />
+                    <Stack.Screen name='ProfileResetPassword' component={ProfileResetPassword} />
+                    <Stack.Screen name="ChangeLocation" component={ChangeLocation} />
                   </>
                   :
                   <>

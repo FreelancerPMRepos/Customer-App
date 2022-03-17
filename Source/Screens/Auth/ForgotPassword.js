@@ -11,7 +11,7 @@ import {
 import Header from '../../Components/Header'
 import { BASE_URL, height, isValidEmail, width } from '../../Config';
 import Loader from '../../Components/Loader';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ForgotPassword = (props) => {
     const [isLoading, setLoading] = useState(false)

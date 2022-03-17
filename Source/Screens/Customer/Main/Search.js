@@ -8,7 +8,6 @@ import {
   Image,
   ScrollView,
   ImageBackground,
-  PermissionsAndroid,
 } from 'react-native';
 
 import Header from '../../../Components/Header'
@@ -17,7 +16,6 @@ import Loader from '../../../Components/Loader';
 import { useSelector, useDispatch } from 'react-redux';
 import { setAuthToken } from '../../../Utils/setHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import Dialog, { DialogContent } from 'react-native-popup-dialog';
 import strings from '../../../Localization/strings';
@@ -38,42 +36,22 @@ const HelloWorldApp = (props) => {
   const [selectedSubTags, setSelectedSubTags] = useState('');
   const [isLoading, setLoading] = useState(false)
   const auth = useSelector(state => state.auth)
-  const [currentLongitude, setCurrentLongitude] = useState('...');
-  const [currentLatitude, setCurrentLatitude] = useState('...');
-  const [locationStatus, setLocationStatus] = useState('');
-  let isApiCall = false;
 
   useEffect(() => {
     let isCancelled = false;
     if (!isCancelled) {
       if (auth.access_token) {
-        locationPermission()
         setAuthToken(auth.access_token)
         getTopStyleList();
         getServiceList()
         getUserInfo()
+        //   locationPermission()
       }
     }
     return () => {
       isCancelled = true
     }
   }, [])
-
-  const renderHeader = () => {
-    return (
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: '30%', marginTop: 25 }}>
-        <Image source={require('../../../Images/hairkut.png')} style={{ resizeMode: 'contain' }} />
-        <View style={{ flexDirection: 'row' }}>
-          <Pressable onPress={() => props.navigation.navigate('StyleScreen')}>
-            <Image source={require('../../../Images/search.png')} style={{ resizeMode: 'contain' }} />
-          </Pressable>
-          <Pressable onPress={() => props.navigation.navigate('TagSearchScreen')}>
-            <Image source={require('../../../Images/filter.png')} style={{ resizeMode: 'contain', marginLeft: '20%' }} />
-          </Pressable>
-        </View>
-      </View>
-    )
-  }
 
   const getUserInfo = async () => {
     setLoading(true)
@@ -106,71 +84,6 @@ const HelloWorldApp = (props) => {
         setLoading(false)
       })
   }
-
-  const locationPermission = async () => {
-    setLoading(true)
-    if (Platform.OS === 'ios') {
-      getOneTimeLocation();
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Access Required',
-            message: 'This App needs to Access your location',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          //To Check, If Permission is granted
-          getOneTimeLocation();
-          setLoading(false)
-        } else {
-          setLocationStatus('Permission Denied');
-          setLoading(false)
-        }
-      } catch (err) {
-        console.warn(err);
-        setLoading(false)
-      }
-    }
-  }
-
-  const getOneTimeLocation = () => {
-    setLoading(true)
-    setLocationStatus('Getting Location ...');
-    Geolocation.getCurrentPosition(
-      //Will give you the current location
-      (position) => {
-        setLocationStatus('You are Here');
-
-        //getting the Longitude from the location json
-        const currentLongitude =
-          JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
-        const currentLatitude =
-          JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
-        setCurrentLongitude(currentLongitude);
-
-        //Setting Longitude state
-        setCurrentLatitude(currentLatitude);
-        global.CurrentLongitude = currentLongitude
-        global.CurrentLatitude = currentLongitude
-        setLoading(false)
-      },
-      (error) => {
-        setLocationStatus(error.message);
-        setLoading(false)
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 1000
-      },
-    );
-  };
 
   const getServiceList = () => {
     axios.get(`${BASE_URL}/service/all/list`)
@@ -496,14 +409,13 @@ const HelloWorldApp = (props) => {
 
   return (
     <View style={styles.container}>
-      {/* {
+      {
         <Header {...props} />
-      } */}
-      {renderHeader()}
+      }
       {
         isLoading && <Loader />
       }
-      {/* {SearchBarButton()} */}
+      {SearchBarButton()}
       {
         // <ScrollView>
         //   {

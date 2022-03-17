@@ -7,7 +7,7 @@ import {
     Pressable
 } from 'react-native';
 import Header from '../../Components/Header'
-import { BASE_URL, width } from '../../Config';
+import { BASE_URL, height, width } from '../../Config';
 import OTPInputView from '@twotalltotems/react-native-otp-input'
 import axios from 'axios';
 import Loader from '../../Components/Loader';
@@ -30,7 +30,7 @@ const OtpVerification = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                 alert(`${e.response.data.message}.`)
+                alert(`${e.response.data.message}.`)
                 setLoading(false)
             })
     }
@@ -46,7 +46,7 @@ const OtpVerification = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                 alert(`${e.response.data.message}.`)
+                alert(`${e.response.data.message}.`)
                 setLoading(false)
             })
     }
@@ -60,7 +60,7 @@ const OtpVerification = ({ navigation, route, props }) => {
                 isLoading && <Loader />
             }
             {
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={styles.otpVerificationText}>OTP Verification</Text>
                     <Image
                         style={styles.tinyLogo}
@@ -71,13 +71,10 @@ const OtpVerification = ({ navigation, route, props }) => {
                         <OTPInputView
                             style={{ height: 50, marginTop: 20, }}
                             pinCount={4}
-                            //    code={this.state.otp} //You can supply this prop or not. The component will be used as a controlled / uncontrolled component respectively.
                             onCodeChanged={otp => setOtp(otp)}
                             autoFocusOnLoad={false}
                             editable={true}
                             codeInputFieldStyle={styles.inputItem}
-                        // onCodeFilled={code => {
-                        // }}
                         />
                     </View>
                     <Text style={styles.subtitle}>We have sent verification code on your registered email.</Text>
@@ -105,19 +102,16 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     tinyLogo: {
-        marginLeft: 142,
         marginTop: 17
     },
     otpVerificationText: {
         fontSize: 16,
         fontFamily: 'Avenir-Heavy',
-        marginLeft: 128,
-        marginTop: 60
+        marginTop: height * 0.04
     },
     title: {
         fontSize: 16,
         fontFamily: 'Avenir-Medium',
-        marginLeft: 78,
         marginTop: 42
     },
     subtitle: {
@@ -128,9 +122,7 @@ const styles = StyleSheet.create({
         marginRight: 26
     },
     buttonView: {
-    //    position: 'absolute',
-    //    bottom: 59
-    marginTop: 117
+        marginTop: height * 0.08
     },
     verifyButton: {
         borderWidth: 1,

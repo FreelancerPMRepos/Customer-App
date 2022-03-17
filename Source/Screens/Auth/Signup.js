@@ -6,10 +6,11 @@ import {
   ImageBackground,
   Image,
   TextInput,
-  Pressable
+  Pressable,
+  ScrollView
 } from 'react-native';
 
-import { BASE_URL, Colors, isValidEmail, width } from '../../Config';
+import { BASE_URL, Colors, height, isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
 import { signUp } from '../../Actions/AuthActions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +30,7 @@ import {
 import axios from 'axios';
 import strings from '../../Localization/strings';
 import { showMessageAlert } from '../../Utils/Utility';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 GoogleSignin.configure({
@@ -221,7 +223,7 @@ const Signup = (props) => {
 
   const renderSignupButton = () => {
     return (
-      <Pressable style={styles.signUpButton} onPress={() => _onSignUp()}>
+      <Pressable style={styles.signUpButton} onPress={() => _onSignUp()} disabled={isLoading}>
         <Text style={styles.signUpButtonText}>{strings.sign_up.toUpperCase()}</Text>
       </Pressable>
     )
@@ -251,13 +253,13 @@ const Signup = (props) => {
       <View style={styles.socialButtonView}>
         <Pressable style={styles.googleButton} onPress={() => _onGoogleSignin()}>
           <Image
-            style={{ marginTop: 7 }}
+            style={{ marginTop: height * 0.01 }}
             source={require('../../Images/Google_transparent.png')}
           />
         </Pressable>
         <Pressable style={styles.facebookButton} onPress={() => _onFacebookSignin()}>
           <Image
-            style={{ marginTop: 7 }}
+            style={{ marginTop: height * 0.01 }}
             source={require('../../Images/facebook_transparent.png')}
           />
         </Pressable>
@@ -269,20 +271,24 @@ const Signup = (props) => {
       {
         (auth.isLoading || isLoading) && <Loader />
       }
-      <ImageBackground source={require('../../Images/background.png')} resizeMode="cover" style={styles.image}>
-        <Image
-          style={styles.tinyLogo}
-          source={require('../../Images/logo.png')}
-        />
-        <Text style={styles.yourWayText}>{strings.your_way_every_time}</Text>
-        {renderNameView()}
-        {renderEmailView()}
-        {renderPasswordView()}
-        {renderConfirmPasswordView()}
-        {renderSignupButton()}
-        {renderLoginView()}
-        {renderContinueView()}
-        {renderSocialButton()}
+      <ImageBackground source={require('../../Images/background.png')} style={styles.image}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Image
+              style={styles.tinyLogo}
+              source={require('../../Images/logo.png')}
+            />
+            <Text style={styles.yourWayText}>{strings.your_way_every_time}</Text>
+            {renderNameView()}
+            {renderEmailView()}
+            {renderPasswordView()}
+            {renderConfirmPasswordView()}
+            {renderSignupButton()}
+            {renderLoginView()}
+            {renderContinueView()}
+            {renderSocialButton()}
+          </View>
+        </ScrollView>
       </ImageBackground>
     </View>
   )
@@ -291,7 +297,8 @@ export default Signup;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: 'red',
   },
   white: {
     color: Colors.white
@@ -299,7 +306,7 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   input: {
     borderColor: '#FFFFFF',
@@ -308,60 +315,64 @@ const styles = StyleSheet.create({
     color: '#FFFFFF'
   },
   nameView: {
-    width: width * 0.83, 
+    width: width * 0.83,
     marginTop: 20
   },
   emailView: {
-    width: width * 0.83, 
+    width: width * 0.83,
     marginTop: 24.50
   },
   signUpButton: {
-    backgroundColor: 'white', 
-    marginTop: 33, 
+    backgroundColor: 'white',
+    marginTop: 33,
     opacity: 0.6
   },
   signUpButtonText: {
-    marginLeft: 44, 
-    marginRight: 44, 
-    marginTop: 8, 
-    marginBottom: 8, 
+    marginLeft: 44,
+    marginRight: 44,
+    marginTop: height * 0.02,
+    marginBottom: 8,
     fontFamily: 'Avenir Medium'
   },
   alreadyAccountView: {
-    marginTop: 15, 
+    marginTop: height * 0.02,
     flexDirection: 'row'
   },
   alreadyAccountText: {
-    color: '#FFFFFF', 
+    color: '#FFFFFF',
     fontFamily: 'Avenir Black'
   },
   loginText: {
-    color: '#FFFFFF', 
+    color: '#FFFFFF',
     fontWeight: 'bold'
   },
   continueText: {
-    color: '#FFFFFF', 
+    color: '#FFFFFF',
     fontFamily: 'Avenir Medium'
   },
   socialButtonView: {
-    flexDirection: 'row', 
-    marginTop: 7
+    flexDirection: 'row',
+    marginTop: 7,
+    paddingBottom: 20
   },
   googleButton: {
-    flexDirection: 'row', 
-    width: 155, 
-    justifyContent: 'center', 
+    flexDirection: 'row',
+    width: 155,
+    justifyContent: 'center',
     height: 29
   },
   facebookButton: {
-    flexDirection: 'row', 
-    width: 155, 
-    justifyContent: 'center', 
+    flexDirection: 'row',
+    width: 155,
+    justifyContent: 'center',
     marginLeft: 7
   },
   yourWayText: {
-    color: "#FFFFFF", 
-    fontSize: 16, 
+    color: "#FFFFFF",
+    fontSize: 16,
     fontFamily: 'Avenir Heavy'
+  },
+  tinyLogo: {
+    marginTop: height * 0.05
   }
 })

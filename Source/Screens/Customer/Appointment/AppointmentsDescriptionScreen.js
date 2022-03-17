@@ -296,8 +296,8 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
               />
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
-            <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 120 }}>
-              <TextInput placeholder="Type your note" style={{}} multiline={true} onChangeText={text => setNote(text)} value={note} />
+            <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, }}>
+              <TextInput placeholder="Type your note" style={{ textAlignVertical: 'top',}} multiline={true} numberOfLines={5} onChangeText={text => setNote(text)} value={note} />
             </View>
             <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => addNote()}>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginTop: 8.5, marginBottom: 7.5, textAlign: 'center' }}>ADD</Text>

@@ -6,7 +6,8 @@ import {
     ImageBackground,
     Image,
     TextInput,
-    Pressable
+    Pressable,
+    PermissionsAndroid,
 } from 'react-native';
 
 import { BASE_URL, width } from '../../Config';
@@ -15,6 +16,7 @@ import { login, socialLogin } from '../../Actions/AuthActions'
 import { Colors } from '../../Config/index';
 import Loader from '../../Components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from '@react-native-community/geolocation';
 
 import {
     GoogleSignin,
@@ -52,7 +54,73 @@ const Login = (props) => {
 
     useEffect(() => {
         GoogleSignin.configure()
+        locationPermission()
     }, [])
+
+    const locationPermission = async () => {
+        if (Platform.OS === 'ios') {
+            getOneTimeLocation();
+        } else {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                    {
+                        title: 'Location Access Required',
+                        message: 'This App needs to Access your location',
+                    },
+                );
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    //To Check, If Permission is granted
+                    getOneTimeLocation();
+                } else {
+                    showMessageAlert('Permission Denied')
+                }
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+    }
+
+    const getOneTimeLocation = async () => {
+        setLoading(true)
+        Geolocation.getCurrentPosition(
+            //Will give you the current location
+            (position) => {
+
+                //getting the Longitude from the location json
+                const currentLongitude =
+                    JSON.stringify(position.coords.longitude);
+
+                //getting the Latitude from the location json
+                const currentLatitude =
+                    JSON.stringify(position.coords.latitude);
+
+                //Setting Longitude state
+
+                //Setting Longitude state
+                setLocation(currentLongitude, currentLatitude)
+               
+                setLoading(false)
+            },
+            (error) => {
+                setLoading(false)
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 30000,
+                maximumAge: 1000
+            },
+        );
+    };
+
+    const setLocation = async (currentLongitude, currentLatitude) => {
+        try {
+            await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
+            await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
+         } catch (e) {
+             // saving error
+         }
+    }
 
     const _onLogin = () => {
         if (email == '') {

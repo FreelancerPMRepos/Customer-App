@@ -84,54 +84,58 @@ const PastComplaint = ({ navigation, route, props }) => {
                 isLoading && <Loader />
             }
             {
-                <ScrollView style={styles.mainView}>
-                    {
-                        complainData.map((res, i) => {
-                            return (
-                                <View key={i}>
-                                    <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
-                                    <Text style={styles.complaint}>{res.complaint}</Text>
-                                    <Pressable onPress={() => getReplies(res.id, i)}>
+                complainData.length === 0 ?
+                    <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                        <Text>No Past Complaints</Text>
+                    </View> :
+                    <ScrollView style={styles.mainView}>
+                        {
+                            complainData.map((res, i) => {
+                                return (
+                                    <View key={i}>
+                                        <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
+                                        <Text style={styles.complaint}>{res.complaint}</Text>
+                                        <Pressable onPress={() => getReplies(res.id, i)}>
+                                            {
+                                                res.isShown === true ?
+                                                    <Text style={{ fontFamily: 'Avenir-Black', lineHeight: 19, marginTop: 12, }}>Replies</Text>
+                                                    :
+                                                    <Text style={styles.replies}>{res.commentsCount} Replies</Text>
+                                            }
+                                        </Pressable>
                                         {
                                             res.isShown === true ?
-                                                <Text style={{ fontFamily: 'Avenir-Black', lineHeight: 19, marginTop: 12, }}>Replies</Text>
-                                                :
-                                                <Text style={styles.replies}>{res.commentsCount} Replies</Text>
+                                                <View>
+                                                    {
+                                                        repliesData.length == 0 ?
+                                                            <Text>No replies</Text>
+                                                            :
+                                                            repliesData.map((val, j) => {
+                                                                return (
+                                                                    <View key={j}>
+                                                                        <Text style={{ fontFamily: 'Avenir-Heavy', marginTop: 4.5 }}>{val.name}</Text>
+                                                                        <Text style={{ fontFamily: 'Avenir-Book', marginTop: 1.5 }}>{val.comment}</Text>
+                                                                        <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', color: '#9E9E9E', marginTop: 9 }}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
+                                                                        {
+                                                                            repliesData.length > 1 ?
+                                                                                <View style={styles.horizontalLine} />
+                                                                                :
+                                                                                null
+                                                                        }
+
+                                                                    </View>
+                                                                )
+                                                            })
+                                                    }
+                                                </View> : null
                                         }
-                                    </Pressable>
-                                    {
-                                        res.isShown === true ?
-                                            <View>
-                                                {
-                                                    repliesData.length == 0 ?
-                                                        <Text>No replies</Text>
-                                                        :
-                                                        repliesData.map((val, j) => {
-                                                            return (
-                                                                <View key={j}>
-                                                                    <Text style={{ fontFamily: 'Avenir-Heavy', marginTop: 4.5 }}>{val.name}</Text>
-                                                                    <Text style={{ fontFamily: 'Avenir-Book', marginTop: 1.5 }}>{val.comment}</Text>
-                                                                    <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', color: '#9E9E9E', marginTop: 9 }}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
-                                                                    {
-                                                                        repliesData.length > 1 ?
-                                                                            <View style={styles.horizontalLine} />
-                                                                            :
-                                                                            null
-                                                                    }
+                                        <View style={styles.horizontalLine} />
+                                    </View>
+                                )
+                            })
+                        }
 
-                                                                </View>
-                                                            )
-                                                        })
-                                                }
-                                            </View> : null
-                                    }
-                                    <View style={styles.horizontalLine} />
-                                </View>
-                            )
-                        })
-                    }
-
-                </ScrollView>
+                    </ScrollView>
             }
         </View>
     )

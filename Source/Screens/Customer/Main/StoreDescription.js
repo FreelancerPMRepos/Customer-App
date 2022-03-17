@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { deleteSalon } from '../../../Actions/PickSalon'
 import Loader from '../../../Components/Loader';
 import { getPreciseDistance } from 'geolib';
+import MapView, { Marker } from 'react-native-maps';
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -733,6 +734,8 @@ const StoreDescription = ({ navigation, route, props }) => {
         navigation.navigate('HomeTabs', { screen: 'Home' })
     }
 
+
+
     return (
         <View style={styles.container}>
             {
@@ -743,6 +746,16 @@ const StoreDescription = ({ navigation, route, props }) => {
             }
             {
                 <ScrollView>
+                    {
+                        updatedName.fav.data == null ?
+                            null :
+                            <View style={styles.mapView}>
+                                <MapView style={styles.map}
+                                //  coordinate={{ latitude: storeData.latitude, longitude: storeData.longitude }}
+                                >
+                                </MapView>
+                            </View>
+                    }
                     {
                         updatedName.fav.data == null ?
                             null : page == 'Home' ? null
@@ -757,19 +770,19 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 <Image
                                     style={{ marginLeft: 26, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
                                     source={{
-                                        uri: updatedName.fav.data.upload_front_photo,
+                                        uri: updatedName.fav.data[0].upload_front_photo,
                                     }}
                                 />
                                 <Image
                                     style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
                                     source={{
-                                        uri: updatedName.fav.data.upload_back_photo,
+                                        uri: updatedName.fav.data[0].upload_back_photo,
                                     }}
                                 />
                                 <Image
                                     style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, marginRight: 26 }}
                                     source={{
-                                        uri: updatedName.fav.data.upload_right_photo,
+                                        uri: updatedName.fav.data[0].upload_right_photo,
                                     }}
                                 />
                             </View>
@@ -786,9 +799,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 <Image source={{
                                     uri: storeData.images[0].url,
                                 }} style={{ height: 83, width: 71 }} />
-
-
-
                         }
                         <View style={{ marginLeft: 15 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -811,7 +821,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                     ratingBackgroundColor='#c8c7c8'
                                     tintColor="#FFFFFF"
                                     readonly={true}
-                                    startingValue={storeData.rating}
+                                    startingValue={storeData.avg_rating}
                                     imageSize={16}
                                 //   onFinishRating={this.ratingCompleted}
                                 />
@@ -1124,4 +1134,12 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5
     },
+    map: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    mapView: {
+        height: height * 0.2,
+        width: width * 1,
+        alignItems: 'center',
+    }
 })

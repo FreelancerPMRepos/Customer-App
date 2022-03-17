@@ -22,11 +22,9 @@ const Styles = (props) => {
     const getServiceList = () => {
         axios.get(`${BASE_URL}/service/all/list`)
             .then(res => {
-                console.log("response service", res.data)
                 setServiceData(res.data)
                 setSelectedService(res.data[0].name)
-                console.log("sd",res.data[0].name)
-                _onSelectService(res.data[0].name)
+                _onSelectService(res?.data[0])
             })
             .catch(e => {
                 console.log('e', e)
@@ -36,7 +34,6 @@ const Styles = (props) => {
     const _onSelectService = async (val) => {
         const value = await AsyncStorage.getItem('@user_details')
         const user_data = value != null ? JSON.parse(value) : null;
-        console.log("sd", user_data.store_id)
         setSelectedService(val.name)
         setSelectedServiceId(val.id)
         axios.get(`${BASE_URL}/style/list/${user_data.store_id}`)
@@ -76,9 +73,9 @@ const Styles = (props) => {
                     </View>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 9 }}>
                         {
-                            styleData.map((res) => {
+                            styleData.map((res, index) => {
                                 return (
-                                    <Pressable onPress={() => props.navigation.navigate('StylesDescription')}>
+                                    <Pressable key={index} onPress={() => props.navigation.navigate('StylesDescription', {id: res.id})}>
                                         {
                                             res.service.name == selectedService ?
                                                 <View>
@@ -88,7 +85,7 @@ const Styles = (props) => {
                                                             uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
                                                         }}
                                                     />
-                                                    <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20 }}>{res.name}</Text>
+                                                    <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20, width: 104 }}>{res.name}</Text>
                                                 </View>
                                                 :
                                                 null

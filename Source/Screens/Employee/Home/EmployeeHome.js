@@ -4,7 +4,8 @@ import {
     View,
     Image,
     Pressable,
-    Dimensions
+    Dimensions,
+    ScrollView
 } from 'react-native';
 
 import Header from '../../../Components/EmployeeHeader';
@@ -48,6 +49,7 @@ const EmployeeHome = (props) => {
                     const jsonValue = JSON.stringify(res.data)
                     AsyncStorage.setItem('@user_details', jsonValue)
                     setUserData(res.data)
+                    global.employeeName = res.data.name
                 } catch (e) {
                     console.log('e', e)
                 }
@@ -81,7 +83,7 @@ const EmployeeHome = (props) => {
                 <Header leftIcon="menu" onLeftIconPress={() => _onMenuPress()} title={"Appointments"} rightIcon="notification" onRightIconPress={() => _onNotify()} {...props} />
             }
             {
-                <View>
+                <ScrollView style={{ marginBottom: 10 }}>
                     <Text style={styles.title}>{`Welcome ${userData.name}!`}</Text>
                     <Text style={styles.subTitle}>Your Appointment </Text>
                     <View style={styles.dropdownView}>
@@ -98,44 +100,37 @@ const EmployeeHome = (props) => {
                     </View>
                     {
                         appointmentData.length == 0 ?
-                            <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                                <Text style={{marginTop: 50}}>No Data Found</Text>
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ marginTop: 50 }}>No Data Found</Text>
                             </View>
                             :
                             appointmentData?.map((res, index) => {
                                 return (
-                                    <Pressable key={index} style={styles.boxStyle} onPress={() => props.navigation.navigate('AppointmentDetails', { data: userData, id: res.id})}>
-                                        <Image
-                                            style={styles.profileImageStyle}
-                                            source={require('../../../Images/profile.png')}
-                                        />
+                                    <Pressable key={index} style={styles.boxStyle} onPress={() => props.navigation.navigate('AppointmentDetails', { data: userData, id: res.id })}>
+                                        {
+                                             res.user.image_url === null ? 
+                                             <Image
+                                             style={styles.profileImageStyle}
+                                             source={require('../../../Images/dummy.png')}
+ 
+                                         />
+                                         :
+                                         <Image
+                                         style={styles.userImage}
+                                         source={{ uri: res.user.image_url}}
+
+                                     />
+                                        }
                                         <View style={styles.nameServiceBox}>
-                                            <Text style={styles.nameStyle}>{res.user.name}</Text>
+                                            <Text style={styles.nameStyle} numberOfLines={1}>{res.user.name}</Text>
                                             <Text style={styles.haircutStyle}>{res?.style?.service?.name}</Text>
                                         </View>
                                         <Text style={styles.timeStyle}>{moment(res.booking_date).format("hh:mm A")}</Text>
                                     </Pressable>
                                 )
-                            }) 
+                            })
                     }
-                    {/* {
-                        appointmentData?.map((res, index) => {
-                            return (
-                                <Pressable key={index} style={styles.boxStyle} onPress={() => props.navigation.navigate('AppointmentDetails', { data: userData, id: res.id})}>
-                                    <Image
-                                        style={styles.profileImageStyle}
-                                        source={require('../../Images/profile.png')}
-                                    />
-                                    <View style={styles.nameServiceBox}>
-                                        <Text style={styles.nameStyle}>{res.user.name}</Text>
-                                        <Text style={styles.haircutStyle}>{res.style.service.name}</Text>
-                                    </View>
-                                    <Text style={styles.timeStyle}>{moment(res.booking_date).format("hh:mm A")}</Text>
-                                </Pressable>
-                            )
-                        })
-                    } */}
-                </View>
+                </ScrollView>
             }
         </View>
     )
@@ -183,7 +178,15 @@ const styles = EStyleSheet.create({
         marginLeft: "5.5rem",
         marginBottom: "8.5rem",
         height: "48rem",
-        width: "48rem"
+        width: "53rem"
+    },
+    userImage: {
+        marginTop: "8.5rem",
+        marginLeft: "5.5rem",
+        marginBottom: "8.5rem",
+        height: 55,
+        width: 58,
+        borderRadius: 58/2
     },
     nameStyle: {
         fontSize: "16rem",
@@ -203,12 +206,13 @@ const styles = EStyleSheet.create({
         fontFamily: 'Avenir-Medium',
         color: Colors.black,
         lineHeight: "19rem",
-        paddingLeft: "70rem",
+        paddingLeft: 10,
         lineHeight: "19rem"
     },
     nameServiceBox: {
         marginLeft: "17rem",
-        marginTop: "16.17rem"
+        marginTop: "16.17rem",
+        width: 200,
     },
     dropdownView: {
         marginLeft: "15.5rem"

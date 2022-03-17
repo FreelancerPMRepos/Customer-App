@@ -16,7 +16,7 @@ import Header from '../../../Components/Header';
 import { useDispatch } from 'react-redux';
 import { resetAuth } from '../../../Actions/AuthActions';
 import axios from 'axios';
-import { BASE_URL } from '../../../Config';
+import { BASE_URL, width } from '../../../Config';
 import Loader from '../../../Components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from '@react-native-community/checkbox';
@@ -101,7 +101,6 @@ const Settings = (props) => {
           setHairColor(res.data.user_detail.hair_colour_is_natural)
           setSex(res.data.user_detail.gender)
           setLoading(false)
-          console.log("new list", data)
 
           var temp = []
           //  data.map((res, i) => {
@@ -280,21 +279,21 @@ const Settings = (props) => {
           <TextInput placeholder="zoe.corby@gmail.com" onChangeText={text => setEmail(text)} value={email} style={styles.textInputStyle} />
           <Text style={styles.commonText}>Password</Text>
           <TextInput placeholder="*********" onChangeText={text => setPassword(text)} value={password} style={styles.textInputStyle} />
-          <Pressable style={styles.loactionpasswordButton} onPress={() => props.navigation.navigate('ResetPassword')}>
+          <Pressable style={styles.loactionpasswordButton} onPress={() => props.navigation.navigate('ProfileResetPassword')}>
             <Text style={styles.resetPasswordText}>Reset Password</Text>
           </Pressable>
           <Text style={styles.commonText}>Location</Text>
           <TextInput placeholder="Auto Location Enabled" onChangeText={text => setLocation(text)} value={location} style={styles.textInputStyle} />
-          <View style={styles.loactionpasswordButton}>
+          <Pressable style={styles.loactionpasswordButton} onPress={() => props.navigation.navigate('ChangeLocation')}>
             <Text style={styles.changeLocationText}>Change Location</Text>
-          </View>
+          </Pressable>
           <Text style={styles.servicesText}>Which services are you interested in?</Text>
-          <View style={{}}>
+          <View style={{flexWrap: 'wrap' }}>
             <FlatList
               data={list}
               renderItem={({ item, index }) => {
                 return (
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} key={index}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: width * 0.28 }} key={index}>
                     <CheckBox
                       key={index}
                       disabled={false}
@@ -308,7 +307,7 @@ const Settings = (props) => {
               }
               }
               numColumns={3}
-              columnWrapperStyle={{ justifyContent: 'space-between' }}
+              columnWrapperStyle={{ flexWrap: 'wrap' }}
             />
           </View>
           <Text style={styles.commonText}>Sex</Text>
@@ -326,7 +325,7 @@ const Settings = (props) => {
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={sex}
             onSelect={(selectedItem, index) => {
               setSex(selectedItem)
@@ -348,7 +347,7 @@ const Settings = (props) => {
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairLength}
             onSelect={(selectedItem, index) => {
               setHairLength(selectedItem)
@@ -370,7 +369,7 @@ const Settings = (props) => {
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: 336 }}
+            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairColor}
             onSelect={(selectedItem, index) => {
               setHairColor(selectedItem)

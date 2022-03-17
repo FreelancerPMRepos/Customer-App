@@ -90,8 +90,10 @@ const ReviewScreen = ({ navigation, route, props }) => {
                     </View>
                     <TextInput
                         placeholder='Type your feedback'
-                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, }}
+                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, textAlignVertical: 'top'}}
                         onChangeText={text => setSalonFeedback(text)} value={salonFeedback}
+                        multiline={true}
+                        numberOfLines={5}
                     />
                     <Text style={{ fontSize: 18, fontFamily: 'Avenir-Black', lineHeight: 25, marginLeft: 27, marginTop: 28.5 }}>Stylist</Text>
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginLeft: 27, marginTop: 8 }}>Rating</Text>
@@ -110,8 +112,10 @@ const ReviewScreen = ({ navigation, route, props }) => {
                     </View>
                     <TextInput
                         placeholder='Type your feedback'
-                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, }}
+                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, textAlignVertical: 'top' }}
                         onChangeText={text => setStylistFeedback(text)} value={stylistFeedback}
+                        multiline={true}
+                        numberOfLines={5}
                     />
                     <Pressable style={{ borderWidth: 1, marginLeft: 114.5, marginTop: 28, marginRight: 130.5 }}>
                         <Text style={{ textAlign: 'center', marginTop: 8.5, marginBottom: 7.5, fontFamily: 'Avenir-Medium', lineHeight: 19 }} onPress={() => _onSend()}>Send</Text>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Pressable, Alert } from 'react-native';
-import { Colors, BASE_URL } from '../../Config';
+import { Colors, BASE_URL, height } from '../../Config';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { resetAuth } from '../../Actions/AuthActions';
@@ -54,10 +54,10 @@ const DrawerContent = (props) => {
             <View style={{ backgroundColor: Colors.white, flexDirection: 'row' }}>
                 <Image
                     style={styles.tinyLogo}
-                    source={require('../../Images/profile.png')}
+                    source={require('../../Images/dummy.png')}
                 />
                 <View style={{ marginLeft: 10, marginTop: 11 }}>
-                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: Colors.black }}>Kristen Jacob</Text>
+                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: Colors.black }}>{global.employeeName}</Text>
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, color: Colors.black }}>Stylist</Text>
                 </View>
             </View>
@@ -136,6 +136,8 @@ const styles = StyleSheet.create({
     tinyLogo: {
         marginTop: 8,
         marginLeft: 20,
-        marginBottom: 11
+        marginBottom: 11,
+        height: 40,
+        width: 42
     }
 })
