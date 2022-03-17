@@ -21,7 +21,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { deleteSalon } from '../../../Actions/PickSalon';
 import moment from 'moment';
-import { getPreciseDistance } from 'geolib';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 
@@ -76,7 +75,6 @@ const Home = (props) => {
     const new_keyword = keyword === undefined ? '' : keyword
     const new_service = serviceId === undefined ? '' : serviceId
     const new_miles = miles === undefined ? '' : miles
-    console.log("asd", `${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${global.latitude}&longitude=${global.longitude}`)
     axios.get(`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${global.latitude}&longitude=${global.longitude}`)
       .then(res => {
         setStoreList(res.data.list)
@@ -161,9 +159,9 @@ const Home = (props) => {
           </View>
           {
             showFilter == false ?
-              <Pressable style={{ backgroundColor: '#FFFFFF', marginLeft: 5 }} onPress={() => setShowFilter(!showFilter)}>
+              <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
                 <Image
-                  style={{ marginTop: 12, marginRight: 12, marginLeft: 17, marginRight: 16 }}
+                  style={styles.filterImage}
                   source={require('../../../Images/filter.png')}
                 />
               </Pressable>
@@ -173,11 +171,11 @@ const Home = (props) => {
         </View>
         {
           showFilter == true ?
-            <View style={{ top: 95, flexDirection: 'row' }}>
+            <View style={styles.priceView}>
               <View>
                 <Picker
                   selectedValue={selectedValue}
-                  style={{ height: 50, width: 180, backgroundColor: 'white' }}
+                  style={styles.pickerStyle}
                   onValueChange={(itemValue, itemIndex) => _onServiceChange(itemValue)}
                 >
                   <Picker.Item label="Select Type" value="0" />
@@ -190,15 +188,15 @@ const Home = (props) => {
                   }
                 </Picker>
               </View>
-              <View style={{ backgroundColor: 'white', marginLeft: 20, flexDirection: 'row' }}>
+              <View style={styles.currencyView}>
                 <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
-                  <Text style={{ width: 54, textAlign: 'center', paddingTop: 15.5, }}>£</Text>
+                  <Text style={styles.currency}>£</Text>
                 </Pressable>
                 <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
-                  <Text style={{ width: 54, textAlign: 'center', paddingTop: 15.5, }}>££</Text>
+                  <Text style={styles.currency}>££</Text>
                 </Pressable>
                 <Pressable onPress={() => _onPriceFilter(100, 999)}>
-                  <Text style={{ width: 54, textAlign: 'center', paddingTop: 15.5 }}>£££</Text>
+                  <Text style={styles.currency}>£££</Text>
                 </Pressable>
               </View>
             </View>
@@ -207,7 +205,7 @@ const Home = (props) => {
         }
         {
           showFilter == true ?
-            <View style={{ top: 110, backgroundColor: 'white' }}>
+            <View style={styles.sliderView}>
               <Slider
                 style={{ width: 360, height: 40 }}
                 minimumValue={100}
@@ -222,10 +220,10 @@ const Home = (props) => {
           updatedName.fav.data == null ?
             null
             :
-            <View style={{ top: 95, backgroundColor: Colors.white, marginLeft: width * 0.57, flexDirection: 'row' }}>
-              <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={{ height: 60, width: 59.39, marginTop: 5.5, marginLeft: 7.8, marginBottom: 5.5 }} />
+            <View style={styles.pickStyleView}>
+              <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
               <Pressable onPress={() => _onSalonCancel()}>
-                <Image source={require('../../../Images/cross.png')} style={{ marginTop: 20, marginLeft: 10, marginRight: 14 }} />
+                <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
               </Pressable>
             </View>
         }
@@ -233,7 +231,7 @@ const Home = (props) => {
 
       {/* // store List View */}
       <View style={[styles.storeView, { height: viewHideShow == true ? height * 0.52 : height * 0.395, }]}>
-        <Pressable style={{ height: 50, width: 50, borderRadius: 30, backgroundColor: 'white', position: 'absolute', bottom: viewHideShow == true ? height * 0.49 : height * 0.35, justifyContent: 'center', alignSelf: 'center', alignItems: 'center' }} onPress={() => setViewHideShow(!viewHideShow)}>
+        <Pressable style={[styles.upButton, { bottom: viewHideShow == true ? height * 0.49 : height * 0.35, }]} onPress={() => setViewHideShow(!viewHideShow)}>
           {
             viewHideShow == true ?
               <Image source={require('../../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
@@ -244,16 +242,11 @@ const Home = (props) => {
         <ScrollView>
           {
             storeList.length === 0 ?
-              <View style={{ alignItems: 'center', marginTop: height * 0.19 }}>
+              <View style={styles.noStoreAvailableView}>
                 <Text>No store available</Text>
               </View>
               :
               storeList?.map((res, index) => {
-                // var pdis = getPreciseDistance(
-                //   { latitude: res?.latitude == 0 ? global?.latitude : res.latitude, longitude: res?.longitude == 0 ? global?.longitude : res.longitude },
-                //   { latitude: global?.latitude, longitude: global?.longitude },
-                // );
-                // let distance = (pdis / 1609).toFixed(2)
                 let price = res.min_male_price > res.min_female_price ? res.min_female_price : res.min_male_price
                 let price_length = price === null ? 0 : price.toString().length
                 var prefix = '';
@@ -263,35 +256,35 @@ const Home = (props) => {
                   }
                 }
                 return (
-                  <Pressable style={{ flexDirection: 'row', marginLeft: 28, marginTop: 29.38, marginRight: 20, borderBottomWidth: 1, borderColor: '#979797' }} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
+                  <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
                     {
                       res.images.length == 0 ?
                         <Image
-                          style={{ height: 83, width: 71 }}
+                          style={styles.noImage}
                           source={require('../../../Images/noImage.jpg')}
                         />
                         :
                         <Image source={{
                           uri: res?.images[0]?.url,
-                        }} style={{ height: 83, width: 71 }} />
+                        }} style={styles.noImage} />
                     }
-                    <View style={{ marginLeft: 23, flex: 1 }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+                    <View style={styles.storeContentView}>
+                      <View style={styles.contentView}>
                         <View style={{ width: width * 0.35 }}>
-                          <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium', lineHeight: 20, }}>{res.store_name}</Text>
+                          <Text style={styles.storeName}>{res.store_name}</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                          <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
+                        <View style={styles.contentView}>
+                          <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
                           {
                             res.is_available == 1 ?
-                              <Text style={{ color: '#70CF2B', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Open</Text>
+                              <Text style={styles.timeText}> Open</Text>
                               :
-                              <Text style={{ color: '#E73E3E', fontFamily: 'Avenir-Medium', lineHeight: 16 }}> Closed</Text>
+                              <Text style={styles.timeText}> Closed</Text>
                           }
                         </View>
                       </View>
-                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{res.distance} Miles</Text>
-                      <View style={{ flexDirection: 'row' }}>
+                      <Text style={styles.miles}>{res.distance} Miles</Text>
+                      <View style={styles.row}>
                         <View style={{ marginTop: 3 }}>
                           <Rating
                             type='custom'
@@ -305,11 +298,11 @@ const Home = (props) => {
                           //   onFinishRating={this.ratingCompleted}
                           />
                         </View>
-                        <Text style={{ fontSize: 14, fontFamily: 'Avenir-Heavy', marginLeft: 14 }}>{prefix}</Text>
+                        <Text style={styles.prefixText}>{prefix}</Text>
                       </View>
-                      <Text numberOfLines={2} style={{ fontSize: 12, fontFamily: 'Avenir-Medium', lineHeight: 16 }}>{res.description}</Text>
-                      <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 13, marginRight: 35 }}>
-                        <Text style={{ marginTop: 8, fontFamily: 'Avenir-Heavy', borderBottomWidth: 1, lineHeight: 16 }}>SEE MORE</Text>
+                      <Text numberOfLines={2} style={styles.description}>{res.description}</Text>
+                      <View style={styles.seeMoreView}>
+                        <Text style={styles.seeMoreText}>SEE MORE</Text>
                       </View>
                     </View>
                   </Pressable>
@@ -326,6 +319,9 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
   },
   imageContainer: {
     alignItems: 'center',
@@ -365,5 +361,132 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     position: 'absolute',
     width: width * 1
+  },
+  filterButton: {
+    backgroundColor: '#FFFFFF', 
+    marginLeft: 5
+  },
+  filterImage: {
+    marginTop: 12, 
+    marginRight: 12, 
+    marginLeft: 17, 
+    marginRight: 16
+  },
+  priceView: {
+    top: 95, 
+    flexDirection: 'row'
+  },
+  pickerStyle: {
+    height: 50, 
+    width: 180, 
+    backgroundColor: 'white'
+  },
+  currencyView: {
+    backgroundColor: 'white', 
+    marginLeft: 20, 
+    flexDirection: 'row'
+  },
+  currency: {
+    width: 54, 
+    textAlign: 'center', 
+    paddingTop: 15.5,
+  },
+  sliderView: {
+    top: 110, 
+    backgroundColor: 'white'
+  },
+  pickStyleView: {
+    top: 95, 
+    backgroundColor: Colors.white, 
+    marginLeft: width * 0.57, 
+    flexDirection: 'row'
+  },
+  pickStyleImage: {
+    height: 60, 
+    width: 59.39, 
+    marginTop: 5.5, 
+    marginLeft: 7.8, 
+    marginBottom: 5.5
+  },
+  crossImage: {
+    marginTop: 20, 
+    marginLeft: 10, 
+    marginRight: 14
+  },
+  upButton: {
+    height: 50, 
+    width: 50, 
+    borderRadius: 30, 
+    backgroundColor: 'white', 
+    position: 'absolute', 
+    justifyContent: 'center', 
+    alignSelf: 'center', 
+    alignItems: 'center'
+  },
+  noStoreAvailableView: {
+    alignItems: 'center', 
+    marginTop: height * 0.19
+  },
+  store: {
+    flexDirection: 'row', 
+    marginLeft: 28, 
+    marginTop: 29.38, 
+    marginRight: 20, 
+    borderBottomWidth: 1, 
+    borderColor: '#979797'
+  },
+  noImage: {
+    height: 83, 
+    width: 71
+  },
+  storeContentView: {
+    marginLeft: 23, 
+    flex: 1
+  },
+  contentView: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+  },
+  storeName: {
+    color: '#1A1919', 
+    fontSize: 15, 
+    fontFamily: 'Avenir-Medium', 
+    lineHeight: 20,
+  },
+  time: {
+    fontFamily: 'Avenir-Medium', 
+    lineHeight: 16
+  },
+  timeText: {
+    color: '#70CF2B', 
+    fontFamily: 'Avenir-Medium', 
+    lineHeight: 16
+  },
+  miles: {
+    fontSize: 12, 
+    fontFamily: 'Avenir-Medium', 
+    lineHeight: 16
+  },
+  prefixText: {
+    fontSize: 14, 
+    fontFamily: 'Avenir-Heavy', 
+    marginLeft: 14
+  },
+  description: {
+    fontSize: 12, 
+    fontFamily: 'Avenir-Medium', 
+    lineHeight: 16
+  },
+  seeMoreView: {
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 13, 
+    marginRight: 35
+  },
+  seeMoreText: {
+    marginTop: 8, 
+    fontFamily: 'Avenir-Heavy', 
+    borderBottomWidth: 1, 
+    lineHeight: 16
   }
 })
