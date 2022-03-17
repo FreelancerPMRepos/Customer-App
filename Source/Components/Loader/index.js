@@ -11,7 +11,7 @@ const Loader = () => {
     return (
         <View style={styles.loader}>
             <View style={styles.loaderView}>
-                <ActivityIndicator size="small" color="#0000ff" />
+                <ActivityIndicator size="small" color="black" />
             </View>
         </View>
     )
