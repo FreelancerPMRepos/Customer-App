@@ -212,7 +212,7 @@ const styles = EStyleSheet.create({
     nameServiceBox: {
         marginLeft: "17rem",
         marginTop: "16.17rem",
-        width: 200,
+        width: width * 0.49,
     },
     dropdownView: {
         marginLeft: "15.5rem"

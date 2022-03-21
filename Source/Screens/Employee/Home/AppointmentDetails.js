@@ -8,7 +8,7 @@ import {
     ScrollView
 } from 'react-native';
 
-import { BASE_URL, Colors } from '../../../Config';
+import { BASE_URL, Colors, width } from '../../../Config';
 import Header from '../../../Components/EmployeeHeader';
 import axios from 'axios';
 import moment from 'moment';
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         marginLeft: 11.95,
         marginBottom: 8.5,
         height: 114,
-        width: 110
+        width: width * 0.26
     },
     haircutPhotoText: {
         color: '#141313',
