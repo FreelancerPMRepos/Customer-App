@@ -4,6 +4,7 @@ import Header from '../../../Components/Header'
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import axios from 'axios';
 import { BASE_URL } from '../../../Config';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ReviewScreen = ({ navigation, route, props }) => {
     const [salonFeedback, setSalonFeedback] = useState('')
@@ -72,7 +73,7 @@ const ReviewScreen = ({ navigation, route, props }) => {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
             }
             {
-                <View>
+                <KeyboardAwareScrollView>
                     <Text style={{ fontSize: 18, fontFamily: 'Avenir-Black', lineHeight: 25, marginLeft: 27 }}>Salon</Text>
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginLeft: 27, marginTop: 8 }}>Rating</Text>
                     <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start', marginLeft: 27, marginTop: 8 }}>
@@ -120,7 +121,7 @@ const ReviewScreen = ({ navigation, route, props }) => {
                     <Pressable style={{ borderWidth: 1, marginLeft: 114.5, marginTop: 28, marginRight: 130.5 }}>
                         <Text style={{ textAlign: 'center', marginTop: 8.5, marginBottom: 7.5, fontFamily: 'Avenir-Medium', lineHeight: 19 }} onPress={() => _onSend()}>Send</Text>
                     </Pressable>
-                </View>
+                </KeyboardAwareScrollView>
             }
         </View>
     )

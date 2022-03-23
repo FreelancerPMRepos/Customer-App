@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  Keyboard
 } from 'react-native';
 
 import { BASE_URL } from '../../../Config';
@@ -23,6 +24,7 @@ import { deleteSalon } from '../../../Actions/PickSalon';
 import moment from 'moment';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -38,6 +40,8 @@ const Home = (props) => {
   const [selectedValue, setSelectedValue] = useState();
   const updatedName = useSelector(state => state)
   const dispatch = useDispatch()
+  const [keyboardStatus, setKeyboardStatus] = useState();
+  const [keyword, setKeyword] = useState('')
 
 
   useEffect(() => {
@@ -55,12 +59,15 @@ const Home = (props) => {
     }
   }, [])
 
+
   const getlocation = async () => {
     try {
-      global.longitude = await AsyncStorage.getItem('CurrentLongitude')
-      global.latitude = await AsyncStorage.getItem('CurrentLongitude')
+      var longitude = await AsyncStorage.getItem('CurrentLongitude')
+      var latitude = await AsyncStorage.getItem('CurrentLongitude')
+      global.longitude = longitude
+      global.latitude = latitude
       {
-        global.longitude ? getStoreList() : null
+        global.longitude ? getStoreList("", "", "", "", "", latitude, longitude) : null
       }
       if (value !== null) {
         alert('Not getting current location')
@@ -70,14 +77,15 @@ const Home = (props) => {
     }
   }
 
-  const getStoreList = (fromPrice, toprice, keyword, serviceId, miles) => {
-    setLoading(true)
+  const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude) => {
+    { keyword ? '' : setLoading(true)}
     const new_to_price = toprice === undefined ? '' : toprice
     const new_from_price = fromPrice === undefined ? '' : fromPrice
     const new_keyword = keyword === undefined ? '' : keyword
     const new_service = serviceId === undefined ? '' : serviceId
     const new_miles = miles === undefined ? '' : miles
-    axios.get(`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${global.latitude}&longitude=${global.longitude}`)
+    console.log("api",`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${latitude}&longitude=${longitude}`)
+    axios.get(`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${latitude}&longitude=${longitude}`)
       .then(res => {
         setStoreList(res.data.list)
         setLoading(false)
@@ -109,7 +117,7 @@ const Home = (props) => {
   }
 
   const _onPriceFilter = (fromPrice, toprice) => {
-    getStoreList(fromPrice, toprice)
+    getStoreList(fromPrice, toprice, "", "", "", global.latitude, global.longitude)
   }
 
   const serviceList = () => {
@@ -127,195 +135,222 @@ const Home = (props) => {
     getStoreList('', '', '', item)
   }
 
+  const _onSearch = () => {
+    console.log("In search")
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardStatus("Keyboard Shown");
+      //  keyboardStatus.current = true;
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardStatus("Keyboard Hidden");
+      //  keyboardStatus.current = false;
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    }
+  }
+
+  const _onKeywordSearch = (text) => {
+    setKeyword(text)
+    getStoreList('', '', text, "", "", global.latitude, global.longitude)
+  }
+
   return (
     <View style={styles.container}>
+
       {
         isLoading === true ? <Loader /> :
-
-          <View style={styles.mapView}>
-            <MapView style={styles.map} initialRegion={{
-              latitude: storeList[0]?.latitude === undefined ? 37.78825 : storeList[0]?.latitude,
-              longitude: storeList[0]?.longitude === undefined ? -122.4324 : storeList[0]?.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}>
-              {
-                storeList.map((marker, index) => (
-                  <Marker
-                    key={index}
-                    coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                    title={marker.store_name}
+          <KeyboardAwareScrollView>
+            <View style={styles.mapView}>
+              <MapView style={styles.map} initialRegion={{
+                latitude: storeList[0]?.latitude === undefined ? 37.78825 : storeList[0]?.latitude,
+                longitude: storeList[0]?.longitude === undefined ? -122.4324 : storeList[0]?.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}>
+                {
+                  storeList.map((marker, index) => (
+                    <Marker
+                      key={index}
+                      coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+                      title={marker.store_name}
+                    />
+                  ))}
+              </MapView>
+              <View style={styles.searchMainView}>
+                <View style={styles.searchView}>
+                  <TextInput
+                    placeholder="Search By Salons, Location"
+                    style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
+                    value={keyword}
+                    onChangeText={(text) => _onKeywordSearch(text)}
+                    onFocus={() => _onSearch()}
                   />
-                ))}
-            </MapView>
-            <View style={styles.searchMainView}>
-              <View style={styles.searchView}>
-                <TextInput
-                  placeholder="Search By Salons, Location"
-                  style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
-                  onChangeText={(text) => getStoreList('', '', text)}
-                />
-                <Image
-                  style={{ marginTop: 12, marginRight: 12 }}
-                  source={require('../../../Images/search.png')}
-                />
+                  <Image
+                    style={{ marginTop: 12, marginRight: 12 }}
+                    source={require('../../../Images/search.png')}
+                  />
+                </View>
+                {
+                  showFilter == false ?
+                    <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
+                      <Image
+                        style={styles.filterImage}
+                        source={require('../../../Images/filter.png')}
+                      />
+                    </Pressable>
+                    :
+                    null
+                }
               </View>
               {
-                showFilter == false ?
-                  <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
-                    <Image
-                      style={styles.filterImage}
-                      source={require('../../../Images/filter.png')}
-                    />
-                  </Pressable>
+                showFilter == true ?
+                  <View style={styles.priceView}>
+                    <View>
+                      <Picker
+                        selectedValue={selectedValue}
+                        style={styles.pickerStyle}
+                        onValueChange={(itemValue, itemIndex) => _onServiceChange(itemValue)}
+                      >
+                        <Picker.Item label="Select Type" value="0" />
+                        {
+                          serviceData.map((res) => {
+                            return (
+                              <Picker.Item label={res.name} value={res.id} />
+                            )
+                          })
+                        }
+                      </Picker>
+                    </View>
+                    <View style={styles.currencyView}>
+                      <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
+                        <Text style={styles.currency}>£</Text>
+                      </Pressable>
+                      <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
+                        <Text style={styles.currency}>££</Text>
+                      </Pressable>
+                      <Pressable onPress={() => _onPriceFilter(100, 999)}>
+                        <Text style={styles.currency}>£££</Text>
+                      </Pressable>
+                    </View>
+                  </View>
                   :
                   null
               }
+              {
+                showFilter == true ?
+                  <View style={styles.sliderView}>
+                    <Slider
+                      style={{ width: 360, height: 40 }}
+                      minimumValue={100}
+                      maximumValue={10000}
+                      minimumTrackTintColor="#A9A8A8"
+                      maximumTrackTintColor="#A9A8A8"
+                      onValueChange={(value) => getStoreList('', '', '', '', value)}
+                    />
+                  </View> : null
+              }
+              {
+                updatedName.fav.data == null ?
+                  null
+                  :
+                  <View style={styles.pickStyleView}>
+                    <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
+                    <Pressable onPress={() => _onSalonCancel()}>
+                      <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
+                    </Pressable>
+                  </View>
+              }
             </View>
-            {
-              showFilter == true ?
-                <View style={styles.priceView}>
-                  <View>
-                    <Picker
-                      selectedValue={selectedValue}
-                      style={styles.pickerStyle}
-                      onValueChange={(itemValue, itemIndex) => _onServiceChange(itemValue)}
-                    >
-                      <Picker.Item label="Select Type" value="0" />
-                      {
-                        serviceData.map((res) => {
-                          return (
-                            <Picker.Item label={res.name} value={res.id} />
-                          )
-                        })
-                      }
-                    </Picker>
-                  </View>
-                  <View style={styles.currencyView}>
-                    <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
-                      <Text style={styles.currency}>£</Text>
-                    </Pressable>
-                    <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
-                      <Text style={styles.currency}>££</Text>
-                    </Pressable>
-                    <Pressable onPress={() => _onPriceFilter(100, 999)}>
-                      <Text style={styles.currency}>£££</Text>
-                    </Pressable>
-                  </View>
-                </View>
-                :
-                null
-            }
-            {
-              showFilter == true ?
-                <View style={styles.sliderView}>
-                  <Slider
-                    style={{ width: 360, height: 40 }}
-                    minimumValue={100}
-                    maximumValue={10000}
-                    minimumTrackTintColor="#A9A8A8"
-                    maximumTrackTintColor="#A9A8A8"
-                    onValueChange={(value) => getStoreList('', '', '', '', value)}
-                  />
-                </View> : null
-            }
-            {
-              updatedName.fav.data == null ?
-                null
-                :
-                <View style={styles.pickStyleView}>
-                  <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
-                  <Pressable onPress={() => _onSalonCancel()}>
-                    <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
-                  </Pressable>
-                </View>
-            }
-          </View>
+          </KeyboardAwareScrollView>
       }
       {/* // store List View */}
       {
         isLoading === true ? <Loader /> :
-
-          <View style={[styles.storeView, { height: viewHideShow == true ? height * 0.52 : height * 0.395, }]}>
-            <Pressable style={[styles.upButton, { bottom: viewHideShow == true ? height * 0.49 : height * 0.35, }]} onPress={() => setViewHideShow(!viewHideShow)}>
-              {
-                viewHideShow == true ?
-                  <Image source={require('../../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
-                  :
-                  <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
-              }
-            </Pressable>
-            <ScrollView>
-              {
-                storeList.length === 0 && isLoading === false ?
-                  <View style={styles.noStoreAvailableView}>
-                    <Text>No store available</Text>
-                  </View>
-                  :
-                  storeList?.map((res, index) => {
-                    let price = res.min_male_price > res.min_female_price ? res.min_female_price : res.min_male_price
-                    let price_length = price === null ? 0 : price.toString().length
-                    var prefix = '';
-                    if (price_length > 0) {
-                      for (var i = 0; i < price_length; i++) {
-                        prefix += '£';
-                      }
-                    }
-                    return (
-                      <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
-                        {
-                          res.images.length == 0 ?
-                            <Image
-                              style={styles.noImage}
-                              source={require('../../../Images/noImage.jpg')}
-                            />
-                            :
-                            <Image source={{
-                              uri: res?.images[0]?.url,
-                            }} style={styles.noImage} />
+          <View>
+            <View style={[styles.storeView, { height: keyboardStatus === 'Keyboard Shown' ? height * 0.2 : viewHideShow == true ? height * 0.535 : height * 0.44 }]}>
+              <Pressable style={[styles.upButton, { bottom: keyboardStatus === 'Keyboard Shown' ? height * 0.15 : viewHideShow == true ? height * 0.49 : height * 0.39, }]} onPress={() => setViewHideShow(!viewHideShow)}>
+                {
+                  viewHideShow == true ?
+                    <Image source={require('../../../Images/arrowDown.png')} style={{ marginBottom: 20 }} />
+                    :
+                    <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
+                }
+              </Pressable>
+              <ScrollView>
+                {
+                  storeList.length === 0 && isLoading === false ?
+                    <View style={styles.noStoreAvailableView}>
+                      <Text>No store available</Text>
+                    </View>
+                    :
+                    storeList?.map((res, index) => {
+                      let price = res.min_male_price > res.min_female_price ? res.min_female_price : res.min_male_price
+                      let price_length = price === null ? 0 : price.toString().length
+                      var prefix = '';
+                      if (price_length > 0) {
+                        for (var i = 0; i < price_length; i++) {
+                          prefix += '£';
                         }
-                        <View style={styles.storeContentView}>
-                          <View style={styles.contentView}>
-                            <View style={{ width: width * 0.35 }}>
-                              <Text style={styles.storeName}>{res.store_name}</Text>
-                            </View>
-                            <View style={styles.contentView}>
-                              <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
-                              {
-                                res.is_available == 1 ?
-                                  <Text style={styles.timeText}> Open</Text>
-                                  :
-                                  <Text style={styles.timeText}> Closed</Text>
-                              }
-                            </View>
-                          </View>
-                          <Text style={styles.miles}>{res.distance} Miles</Text>
-                          <View style={styles.row}>
-                            <View style={{ marginTop: 3 }}>
-                              <Rating
-                                type='custom'
-                                ratingCount={5}
-                                ratingColor='#1F1E1E'
-                                ratingBackgroundColor='#c8c7c8'
-                                tintColor="#FFFFFF"
-                                readonly={true}
-                                startingValue={res.avg_rating}
-                                imageSize={16}
-                              //   onFinishRating={this.ratingCompleted}
+                      }
+                      return (
+                        <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
+                          {
+                            res.images.length == 0 ?
+                              <Image
+                                style={styles.noImage}
+                                source={require('../../../Images/noImage.jpg')}
                               />
+                              :
+                              <Image source={{
+                                uri: res?.images[0]?.url,
+                              }} style={styles.noImage} />
+                          }
+                          <View style={styles.storeContentView}>
+                            <View style={styles.contentView}>
+                              <View style={{ width: width * 0.35 }}>
+                                <Text style={styles.storeName}>{res.store_name}</Text>
+                              </View>
+                              <View style={styles.contentView}>
+                                <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
+                                {
+                                  res.is_available == 1 ?
+                                    <Text style={styles.timeText}> Open</Text>
+                                    :
+                                    <Text style={styles.timeText}> Closed</Text>
+                                }
+                              </View>
                             </View>
-                            <Text style={styles.prefixText}>{prefix}</Text>
+                            <Text style={styles.miles}>{res.distance} Miles</Text>
+                            <View style={styles.row}>
+                              <View style={{ marginTop: 3 }}>
+                                <Rating
+                                  type='custom'
+                                  ratingCount={5}
+                                  ratingColor='#1F1E1E'
+                                  ratingBackgroundColor='#c8c7c8'
+                                  tintColor="#FFFFFF"
+                                  readonly={true}
+                                  startingValue={res.avg_rating}
+                                  imageSize={16}
+                                //   onFinishRating={this.ratingCompleted}
+                                />
+                              </View>
+                              <Text style={styles.prefixText}>{prefix}</Text>
+                            </View>
+                            <Text numberOfLines={2} style={styles.description}>{res.description}</Text>
+                            <View style={styles.seeMoreView}>
+                              <Text style={styles.seeMoreText}>SEE MORE</Text>
+                            </View>
                           </View>
-                          <Text numberOfLines={2} style={styles.description}>{res.description}</Text>
-                          <View style={styles.seeMoreView}>
-                            <Text style={styles.seeMoreText}>SEE MORE</Text>
-                          </View>
-                        </View>
-                      </Pressable>
-                    )
-                  })
-              }
-            </ScrollView>
+                        </Pressable>
+                      )
+                    })
+                }
+              </ScrollView>
+            </View>
           </View>
       }
     </View>
@@ -350,7 +385,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   mapView: {
-    height: height * 0.56,
+    height: height * 0.50,
     width: width * 1,
     alignItems: 'center',
   },
@@ -367,7 +402,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'white',
     position: 'absolute',
-    width: width * 1
+    width: width * 1,
   },
   filterButton: {
     backgroundColor: '#FFFFFF',
@@ -385,7 +420,7 @@ const styles = StyleSheet.create({
   },
   pickerStyle: {
     height: 50,
-    width: 180,
+    width: width * 0.43,
     backgroundColor: 'white'
   },
   currencyView: {
@@ -394,7 +429,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row'
   },
   currency: {
-    width: 54,
+    width: width * 0.13,
     textAlign: 'center',
     paddingTop: 15.5,
   },

@@ -68,20 +68,27 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   }
 
   const _onRebook = () => {
-    setLoading(true)
-    axios.get(`${BASE_URL}/style/detail/${appointmentDetails.style.id}`)
-      .then(res => {
-        navigation.navigate('StoreDescription', { storeDetails: appointmentDetails.store, page: "Appointment" })
-        var data = [res.data];
-        data.push({booking_type: 'rebook'})
-        dispatch(addSalon(data))
-        setLoading(false)
-      })
-      .catch(e => {
-        console.log('e rrr', e)
-        alert(`${e.response.data.message}.`)
-        setLoading(false)
-      })
+    if (appointmentDetails.style && appointmentDetails.style.id) {
+      setLoading(true)
+      axios.get(`${BASE_URL}/style/detail/${appointmentDetails.style.id}`)
+        .then(res => {
+          var data = [res.data];
+          data.push({ booking_type: 'rebook' })
+          dispatch(addSalon(data))
+          navigation.navigate('StoreDescription', { storeDetails: appointmentDetails.store, page: "Appointment" })
+          setLoading(false)
+        })
+        .catch(e => {
+          console.log('e rrr', e)
+          alert(`${e.response.data.message}.`)
+          setLoading(false)
+        })
+    } else {
+      var data = [appointmentDetails];
+      data.push({ booking_type: 'rebook' })
+      dispatch(addSalon(data))
+      navigation.navigate('StoreDescription', { storeDetails: appointmentDetails.store, page: "Appointment" })
+    }
   }
 
 
@@ -138,7 +145,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   }
 
   const getIsopen = (day, date) => {
-    if (date >= new Date()) {
+    if (moment(date).format('MM/DD/YYYY') >= moment(new Date()).format('MM/DD/YYYY')) {
       for (var i in dateList) {
         if (dateList[i].day == DaysName[day]) {
           return dateList[i].is_open;
@@ -286,9 +293,9 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-          {
-            isLoading && <Loader />
-          }
+            {
+              isLoading && <Loader />
+            }
             <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setModalVisible(!modalVisible)}>
               <Image
                 style={{ marginRight: 14.49, marginTop: 18.5 }}
@@ -297,7 +304,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             </Pressable>
             <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
             <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, }}>
-              <TextInput placeholder="Type your note" style={{ textAlignVertical: 'top',}} multiline={true} numberOfLines={5} onChangeText={text => setNote(text)} value={note} />
+              <TextInput placeholder="Type your note" style={{ textAlignVertical: 'top', }} multiline={true} numberOfLines={5} onChangeText={text => setNote(text)} value={note} />
             </View>
             <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => addNote()}>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginTop: 8.5, marginBottom: 7.5, textAlign: 'center' }}>ADD</Text>

@@ -13,7 +13,7 @@ import {
 import Header from '../../../Components/Header'
 import { BASE_URL, height, width } from '../../../Config';
 import Loader from '../../../Components/Loader';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { setAuthToken } from '../../../Utils/setHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -23,17 +23,13 @@ import strings from '../../../Localization/strings';
 
 
 const HelloWorldApp = (props) => {
-  const [keyword, setKeyword] = useState('')
   const [modalVisible, setModalVisible] = useState(false);
-  const [list, setList] = useState(false);
+  const [topData, setTopData] = useState({});
+  const [topList, setTopList] = useState([]);
   const [tagList, setTagList] = useState([]);
   const [search, setSearch] = useState('');
-  const [tags, setTags] = useState([]);
-  const [tagsList, setTagsList] = useState([]);
   const [serviceData, setServiceData] = useState([]);
-  const [searchData, setSearchData] = useState([]);
   const [selectedTags, setSelectedTags] = useState('');
-  const [selectedSubTags, setSelectedSubTags] = useState('');
   const [isLoading, setLoading] = useState(false)
   const auth = useSelector(state => state.auth)
 
@@ -45,7 +41,6 @@ const HelloWorldApp = (props) => {
         getTopStyleList();
         getServiceList()
         getUserInfo()
-        //   locationPermission()
       }
     }
     return () => {
@@ -71,12 +66,19 @@ const HelloWorldApp = (props) => {
       })
   }
 
-  const getTopStyleList = () => {
+  const getTopStyleList = (name, keyword) => {
     setLoading(true)
-    axios.get(`${BASE_URL}/top/cuts/styles`)
+    global.key = keyword === undefined ? '' : keyword
+    var seacrch_keyword = name === undefined ? '' : name
+    console.log("object", `${BASE_URL}/top/cuts/styles?name=${seacrch_keyword}&keyword=${global.key}`)
+    axios.get(`${BASE_URL}/top/cuts/styles?name=${seacrch_keyword}&keyword=${global.key}`)
       .then(res => {
-        setList(res.data)
-        //    getTags(res.data.service_id)
+        if (Array.isArray(res.data)) {
+          setTopList(res.data)
+        } else {
+          setTopData(res.data)
+        }
+
         setLoading(false)
       })
       .catch(e => {
@@ -88,7 +90,6 @@ const HelloWorldApp = (props) => {
   const getServiceList = () => {
     axios.get(`${BASE_URL}/service/all/list`)
       .then(res => {
-        console.log("d", res.data)
         setServiceData(res.data)
         getTags(res.data[0].id)
         setSelectedTags(res.data[0].name)
@@ -104,14 +105,12 @@ const HelloWorldApp = (props) => {
     setLoading(true)
     axios.get(`${BASE_URL}/service/tag/${id}`)
       .then(res => {
-        console.log("response", res.data)
         if (res.data.value) {
           var temp = res.data.value.split('|');
           var tags = [];
           for (var index in temp) {
             tags.push({ isSelected: false, value: temp[index] })
           }
-          console.log("TAGS", tags)
           setTagList(tags)
         }
         setLoading(false)
@@ -122,29 +121,13 @@ const HelloWorldApp = (props) => {
       })
   }
 
-  const _onSelectedTags = (tag) => {
-    setLoading(true)
-    axios.get(`${BASE_URL}/search/keyword?keyword=${tag}`)
-      .then(res => {
-        console.log("gfgahdfa", res.data)
-        setTagsList(res.data)
-        setLoading(false)
-      })
-      .catch(e => {
-        console.log('e', e)
-        setLoading(false)
-      })
-  }
-
   const _onFavourite = (id) => {
     setLoading(true)
-    console.log("id", id)
     axios.post(`${BASE_URL}/favourite`, {
       style_id: id
     })
       .then(res => {
         getTopStyleList()
-        _onSelectedTags(selectedSubTags)
         setLoading(false)
       })
       .catch(e => {
@@ -152,8 +135,6 @@ const HelloWorldApp = (props) => {
         setLoading(false)
       })
   }
-
-
 
   const _addTags = (j) => {
     var temp = [];
@@ -161,31 +142,21 @@ const HelloWorldApp = (props) => {
       if (index == j) {
         tagList[j].isSelected = !tagList[j].isSelected;
       }
-
       temp.push(tagList[index])
-      // console.log("TEMP",temp)
       setTagList(temp)
     }
+    var keyword = ""
     for (var index in tagList) {
       if (tagList[index].isSelected == true) {
-        _onSelectedTags(tagList[index].value,)
+        keyword ? keyword = keyword + "," + tagList[index].value : keyword = tagList[index].value
       }
     }
+    getTopStyleList("", keyword)
   }
 
-  const _onSearch = (event) => {
-    setTimeout(() => {
-      axios.get(`${BASE_URL}/search/styles?name=${search}`)
-        .then(res => {
-          console.log("a", res.data)
-          setSearchData(res.data)
-          setLoading(false)
-        })
-        .catch(e => {
-          console.log('e', e)
-          setLoading(false)
-        })
-    }, 2000);
+  const _onSearch = (text) => {
+    setSearch(text)
+    getTopStyleList(text, '')
   }
 
   const onSelectServiceId = (res) => {
@@ -197,48 +168,11 @@ const HelloWorldApp = (props) => {
     return (
       <View>
         <View style={styles.row}>
-          <TextInput placeholder={strings.search_by_styles} style={styles.searchBar} onChangeText={text => setSearch(text)} />
-          <Pressable style={{ borderWidth: 1 }} onPress={() => _onSearch()}>
-            <Image source={require('../../../Images/search.png')} style={styles.searchIcon} />
-          </Pressable>
+          <TextInput placeholder={strings.search_by_styles} style={styles.searchBar} onChangeText={text => _onSearch(text)} />
         </View>
         <Pressable style={styles.tagButton} onPress={() => setModalVisible(true)}>
           <Text style={styles.tagButtonText}>{strings.tags}</Text>
         </Pressable>
-      </View>
-    )
-  }
-
-  const SearchData = () => {
-    return (
-      <View>
-        {
-          searchData.map((res, index) => {
-            return (
-              <Pressable key={index} onPress={() => _onFavourite(res.id)}>
-                <ImageBackground
-                  style={styles.searchImage}
-                  source={{
-                    uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
-                  }}
-                >
-                  {
-                    res.is_fav == 1 ?
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/heart.png')}
-                      />
-                      :
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/empty_heart.png')}
-                      />
-                  }
-                </ImageBackground>
-              </Pressable>
-            )
-          })
-        }
       </View>
     )
   }
@@ -249,7 +183,7 @@ const HelloWorldApp = (props) => {
         <Text style={styles.topCutText}>{strings.top_cuts}</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {
-            list?.top_cuts?.map((item, index) => {
+            topData?.top_cuts?.map((item, index) => {
               return (
                 <Pressable key={index} onPress={() => _onFavourite(item.style_id)}>
                   <ImageBackground
@@ -287,7 +221,7 @@ const HelloWorldApp = (props) => {
         <Text style={styles.popularStyleText}>{strings.popular_styles}</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {
-            list?.top_styles?.map((item, index) => {
+            topData?.top_styles?.map((item, index) => {
               return (
                 <Pressable key={index} onPress={() => _onFavourite(item.style_id)}>
                   <ImageBackground
@@ -318,39 +252,6 @@ const HelloWorldApp = (props) => {
     )
   }
 
-  const TagData = () => {
-    return (
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 }}>
-        {
-          tagsList?.map((res, index) => {
-            return (
-              <Pressable key={index} onPress={() => _onFavourite(res.style_id)}>
-                <ImageBackground
-                  style={styles.searchImage}
-                  source={{
-                    uri: `${res?.style?.upload_front_photo != null ? res?.style?.upload_front_photo : res?.style?.upload_back_photo != null ? res?.style?.upload_back_photo : res?.style?.upload_top_photo != null ? res?.style?.upload_top_photo : res?.style?.upload_right_photo != null ? res?.style?.upload_right_photo : res?.style?.upload_left_photo != null ? res?.style?.upload_left_photo : res?.style?.upload_left_photo}`,
-                  }}
-                >
-                  {
-                    res.is_fav == 1 ?
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/heart.png')}
-                      />
-                      :
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/empty_heart.png')}
-                      />
-                  }
-                </ImageBackground>
-              </Pressable>
-            )
-          })
-        }
-      </View>
-    )
-  }
 
   const TagModal = () => {
     return (
@@ -406,6 +307,40 @@ const HelloWorldApp = (props) => {
     )
   }
 
+  const data = () => {
+    return (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 }}>
+        {
+          topList?.map((res, index) => {
+            return (
+              <Pressable key={index} onPress={() => _onFavourite(res.style_id)}>
+                <ImageBackground
+                  style={styles.searchImage}
+                  source={{
+                    uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
+                  }}
+                >
+                  {
+                    res.is_fav == 1 ?
+                      <Image
+                        style={styles.heartIcon}
+                        source={require('../../../Images/heart.png')}
+                      />
+                      :
+                      <Image
+                        style={styles.heartIcon}
+                        source={require('../../../Images/empty_heart.png')}
+                      />
+                  }
+                </ImageBackground>
+              </Pressable>
+            )
+          })
+        }
+      </View>
+    )
+  }
+
 
   return (
     <View style={styles.container}>
@@ -417,30 +352,17 @@ const HelloWorldApp = (props) => {
       }
       {SearchBarButton()}
       {
-        // <ScrollView>
-        //   {
-        //     selectedSubTags == '' ?
-        //       <View>
-        //         {
-        //           search != '' ?
-        //             SearchData()
-        //             :
-        //             TopCuts()
-        //         }
-        //         {
-        //           search != '' ?
-        //             null
-        //             :
-        //             PopularStyles()
-        //         }
-        //       </View>
-        //       :
-        //       TagData()
-        //   }
-        // </ScrollView>
         <ScrollView>
-          {TopCuts()}
-          {PopularStyles()}
+          {
+            search === '' && global.key === '' ?
+              <View>
+                {TopCuts()}
+                {PopularStyles()}
+              </View>
+              :
+              data()
+          }
+
         </ScrollView>
       }
       {TagModal()}
@@ -474,7 +396,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir-Book',
     lineHeight: 22,
     fontSize: 16,
-    width: '75%'
+    width: '90%'
   },
   searchIcon: {
     marginTop: 15,

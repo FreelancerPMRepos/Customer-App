@@ -62,6 +62,7 @@ const EmployeeHome = (props) => {
     const getAppointments = (value) => {
         axios.get(`${BASE_URL}/booking/employee?type=${value}`)
             .then(res => {
+                console.log("df",res.data)
                 setAppointmentData(res.data)
             })
             .catch(e => {
@@ -123,7 +124,7 @@ const EmployeeHome = (props) => {
                                         }
                                         <View style={styles.nameServiceBox}>
                                             <Text style={styles.nameStyle} numberOfLines={1}>{res.user.name}</Text>
-                                            <Text style={styles.haircutStyle}>{res?.style?.service?.name}</Text>
+                                            <Text style={styles.haircutStyle}>{res?.service?.name}</Text>
                                         </View>
                                         <Text style={styles.timeStyle}>{moment(res.booking_date).format("hh:mm A")}</Text>
                                     </Pressable>

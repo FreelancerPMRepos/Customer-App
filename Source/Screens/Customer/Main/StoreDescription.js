@@ -77,16 +77,27 @@ const StoreDescription = ({ navigation, route, props }) => {
 
 
     useEffect(() => {
-        setNextYear(new Date().getFullYear());
-        setNextDate(new Date().getMonth());
-        getServiceList();
-        getHairdresserList();
-        getDateSlot();
-        getData();
-        Check();
-        getStoreData();
-        updatedName.fav.data == null ? null : setServiceId(updatedName?.fav?.data?.service?.id)
+        console.log("In use Effect")
+        let isCancelled = false;
+        if (!isCancelled) {
+            if (updatedName.fav != null && updatedName.fav.data != null && updatedName.fav.data != null && updatedName.fav.data.length > 0 && updatedName.fav.data[0].service) {
+                console.log("object",updatedName.fav.data[0].service.id)
+                setServiceId(updatedName.fav.data[0].service.id)
+            }
+            setNextYear(new Date().getFullYear());
+            setNextDate(new Date().getMonth());
+            getServiceList();
+            getHairdresserList();
+            getDateSlot();
+            getData();
+            Check();
+            getStoreData();
+        }
+        return () => {
+          isCancelled = true
+        }
     }, [])
+
 
 
     const getStoreData = () => {
@@ -191,6 +202,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             } else if (date.getDay() == 2) {
                 newObj.date2 = date.getDate();
                 newObj.is_open2 = getIsopen(date.getDay(), date);
+                console.log("ds", newObj.is_open2)
             } else if (date.getDay() == 3) {
                 newObj.date3 = date.getDate();
                 newObj.is_open3 = getIsopen(date.getDay(), date);
@@ -207,13 +219,12 @@ const StoreDescription = ({ navigation, route, props }) => {
 
             date.setDate(date.getDate() + 1);
         }
-
         days.push(newObj);
         setDays(days);
     }
 
     const getIsopen = (day, date) => {
-        if (date >= new Date()) {
+        if (moment(date).format('MM/DD/YYYY') >= moment(new Date()).format('MM/DD/YYYY')) {
             for (var i in dateList) {
                 if (dateList[i].day == DaysName[day]) {
                     return dateList[i].is_open;

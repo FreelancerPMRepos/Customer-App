@@ -376,12 +376,8 @@ const Settings = (props) => {
               console.log(selectedItem, index)
             }}
           />
-          <Pressable style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 20.59
-          }} onPress={() => _onSave()}>
-            <Text style={styles.logoutText}>Save</Text>
+          <Pressable style={styles.saveButton} onPress={() => _onSave()}>
+            <Text style={styles.saveButtonText}>Save</Text>
           </Pressable>
           <View style={styles.bottomButtonView}>
             <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'privacy'})}>
@@ -443,6 +439,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     color: '#17171A'
   },
+  saveButtonText: {
+    borderWidth: 1,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
+    color: '#17171A'
+  },
   bottomButtonView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -465,4 +469,9 @@ const styles = StyleSheet.create({
     color: "#444",
     textAlign: "left"
   },
+  saveButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20.59
+  }
 })
