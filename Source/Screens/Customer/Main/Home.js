@@ -42,6 +42,7 @@ const Home = (props) => {
   const dispatch = useDispatch()
   const [keyboardStatus, setKeyboardStatus] = useState();
   const [keyword, setKeyword] = useState('')
+  const [miles, setMiles] = useState(0)
 
 
   useEffect(() => {
@@ -63,12 +64,13 @@ const Home = (props) => {
   const getlocation = async () => {
     try {
       var longitude = await AsyncStorage.getItem('CurrentLongitude')
-      var latitude = await AsyncStorage.getItem('CurrentLongitude')
+      var latitude = await AsyncStorage.getItem('CurrentLatitude')
       global.longitude = longitude
       global.latitude = latitude
       {
         global.longitude ? getStoreList("", "", "", "", "", latitude, longitude) : null
       }
+     
       if (value !== null) {
         alert('Not getting current location')
       }
@@ -79,13 +81,13 @@ const Home = (props) => {
 
   const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude) => {
     { keyword ? '' : setLoading(true)}
-    const new_to_price = toprice === undefined ? '' : toprice
-    const new_from_price = fromPrice === undefined ? '' : fromPrice
-    const new_keyword = keyword === undefined ? '' : keyword
-    const new_service = serviceId === undefined ? '' : serviceId
-    const new_miles = miles === undefined ? '' : miles
-    console.log("api",`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${latitude}&longitude=${longitude}`)
-    axios.get(`${BASE_URL}/store/list2?price_to=${new_to_price}&price_from=${new_from_price}&keyword=${new_keyword}&service_id=${new_service}&miles=${new_miles}&latitude=${latitude}&longitude=${longitude}`)
+    global.new_to_price = toprice === undefined ? '' : toprice
+    global.new_from_price = fromPrice === undefined ? '' : fromPrice
+    global.new_keyword = keyword === undefined ? '' : keyword
+    global.new_service = serviceId === undefined ? '' : serviceId
+    global.new_miles = miles === undefined ? '' : miles
+    console.log("api",`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
+    axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
       .then(res => {
         setStoreList(res.data.list)
         setLoading(false)
@@ -117,7 +119,7 @@ const Home = (props) => {
   }
 
   const _onPriceFilter = (fromPrice, toprice) => {
-    getStoreList(fromPrice, toprice, "", "", "", global.latitude, global.longitude)
+    getStoreList(fromPrice, toprice, global.new_keyword, global.new_service, global.new_miles, global.latitude, global.longitude)
   }
 
   const serviceList = () => {
@@ -154,7 +156,12 @@ const Home = (props) => {
 
   const _onKeywordSearch = (text) => {
     setKeyword(text)
-    getStoreList('', '', text, "", "", global.latitude, global.longitude)
+    getStoreList(global.new_from_price, global.new_to_price, text, global.new_service, global.new_miles, global.latitude, global.longitude)
+  }
+
+  const _onDrag = (value) => {
+    setMiles(value)
+    getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
   }
 
   return (
@@ -244,11 +251,13 @@ const Home = (props) => {
                   <View style={styles.sliderView}>
                     <Slider
                       style={{ width: 360, height: 40 }}
-                      minimumValue={100}
-                      maximumValue={10000}
+                      minimumValue={0}
+                      maximumValue={100}
                       minimumTrackTintColor="#A9A8A8"
                       maximumTrackTintColor="#A9A8A8"
-                      onValueChange={(value) => getStoreList('', '', '', '', value)}
+                      value={miles}
+                      onSlidingComplete={(value) => _onDrag(value)}
+                  //    onValueChange={(value) => getStoreList('', '', '', '', value, global.latitude, global.longitude)}
                     />
                   </View> : null
               }
@@ -279,7 +288,7 @@ const Home = (props) => {
                     <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
                 }
               </Pressable>
-              <ScrollView>
+              <ScrollView style={{marginTop: 15}}>
                 {
                   storeList.length === 0 && isLoading === false ?
                     <View style={styles.noStoreAvailableView}>
@@ -310,11 +319,11 @@ const Home = (props) => {
                           }
                           <View style={styles.storeContentView}>
                             <View style={styles.contentView}>
-                              <View style={{ width: width * 0.35 }}>
+                              <View style={{ width: width * 0.35}}>
                                 <Text style={styles.storeName}>{res.store_name}</Text>
                               </View>
                               <View style={styles.contentView}>
-                                <Text style={styles.time}>{moment(res.opentime, "H").format('h a')}-{moment(res.closetime, "H").format('h a')}</Text>
+                                <Text style={styles.time}>{moment.utc(res.opentime, "H").local().format('h a')}-{moment.utc(res.closetime, "H").local().format('h a')}</Text>
                                 {
                                   res.is_available == 1 ?
                                     <Text style={styles.timeText}> Open</Text>
@@ -323,7 +332,7 @@ const Home = (props) => {
                                 }
                               </View>
                             </View>
-                            <Text style={styles.miles}>{res.distance} Miles</Text>
+                            <Text style={styles.miles}>{res.latitude === 0 && res.longitude === 0 ? 0 : res.distance} Miles</Text>
                             <View style={styles.row}>
                               <View style={{ marginTop: 3 }}>
                                 <Rating
@@ -402,7 +411,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'white',
     position: 'absolute',
-    width: width * 1,
+    width: width * 1
   },
   filterButton: {
     backgroundColor: '#FFFFFF',
@@ -471,19 +480,19 @@ const styles = StyleSheet.create({
   },
   store: {
     flexDirection: 'row',
-    marginLeft: 28,
-    marginTop: 29.38,
-    marginRight: 20,
+    marginLeft: width * 0.03,
+    marginTop: height * 0.05,
+    marginRight: 10,
     borderBottomWidth: 1,
-    borderColor: '#979797'
+    borderColor: '#979797',
+  //  justifyContent: 'space-between',
   },
   noImage: {
     height: 83,
-    width: 71
+    width: width * 0.2
   },
   storeContentView: {
-    marginLeft: 23,
-    flex: 1
+    marginLeft: width * 0.05,
   },
   contentView: {
     flexDirection: 'row',
@@ -517,7 +526,8 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 12,
     fontFamily: 'Avenir-Medium',
-    lineHeight: 16
+    lineHeight: 16,
+    width: width * 0.7
   },
   seeMoreView: {
     justifyContent: 'center',

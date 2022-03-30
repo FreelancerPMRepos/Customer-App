@@ -5,6 +5,7 @@ import { Rating, AirbnbRating } from 'react-native-ratings';
 import axios from 'axios';
 import { BASE_URL } from '../../../Config';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { showMessageAlert } from '../../../Utils/Utility';
 
 const ReviewScreen = ({ navigation, route, props }) => {
     const [salonFeedback, setSalonFeedback] = useState('')
@@ -56,14 +57,16 @@ const ReviewScreen = ({ navigation, route, props }) => {
         })
         .then(res => {
             console.log("ASDf",res.data)
-            alert(res.data.message)
+            showMessageAlert(res.data.message)
             setSalonFeedback('')
             setStylistFeedback('')
-       //     setLoading(false)
+            _onBack()
           })
           .catch(e => {
             console.log('e rrr', e)
-       //     setLoading(false)
+            showMessageAlert(e.response.data.message)
+            setSalonFeedback('')
+            setStylistFeedback('')
           })
     }
 
@@ -74,16 +77,15 @@ const ReviewScreen = ({ navigation, route, props }) => {
             }
             {
                 <KeyboardAwareScrollView>
-                    <Text style={{ fontSize: 18, fontFamily: 'Avenir-Black', lineHeight: 25, marginLeft: 27 }}>Salon</Text>
-                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginLeft: 27, marginTop: 8 }}>Rating</Text>
-                    <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start', marginLeft: 27, marginTop: 8 }}>
+                    <Text style={styles.salonText}>Salon</Text>
+                    <Text style={styles.ratingText}>Rating</Text>
+                    <View style={styles.ratingView}>
                         <Rating
                             type='custom'
                             ratingCount={5}
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            //    readonly={true}
                             startingValue={3}
                             imageSize={28}
                             onFinishRating={ratingCompleted}
@@ -91,21 +93,20 @@ const ReviewScreen = ({ navigation, route, props }) => {
                     </View>
                     <TextInput
                         placeholder='Type your feedback'
-                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, textAlignVertical: 'top'}}
+                        style={styles.input}
                         onChangeText={text => setSalonFeedback(text)} value={salonFeedback}
                         multiline={true}
                         numberOfLines={5}
                     />
-                    <Text style={{ fontSize: 18, fontFamily: 'Avenir-Black', lineHeight: 25, marginLeft: 27, marginTop: 28.5 }}>Stylist</Text>
-                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginLeft: 27, marginTop: 8 }}>Rating</Text>
-                    <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start', marginLeft: 27, marginTop: 8 }}>
+                    <Text style={[styles.salonText, { marginTop: 28.5 }]}>Stylist</Text>
+                    <Text style={styles.ratingText}>Rating</Text>
+                    <View style={styles.ratingView}>
                         <Rating
                             type='custom'
                             ratingCount={5}
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            //    readonly={true}
                             startingValue={3}
                             imageSize={28}
                             onFinishRating={StylistratingCompleted}
@@ -113,13 +114,13 @@ const ReviewScreen = ({ navigation, route, props }) => {
                     </View>
                     <TextInput
                         placeholder='Type your feedback'
-                        style={{ borderWidth: 1, marginLeft: 26.5, marginTop: 17.5, marginRight: 26.5, height: 75, textAlignVertical: 'top' }}
+                        style={styles.input}
                         onChangeText={text => setStylistFeedback(text)} value={stylistFeedback}
                         multiline={true}
                         numberOfLines={5}
                     />
-                    <Pressable style={{ borderWidth: 1, marginLeft: 114.5, marginTop: 28, marginRight: 130.5 }}>
-                        <Text style={{ textAlign: 'center', marginTop: 8.5, marginBottom: 7.5, fontFamily: 'Avenir-Medium', lineHeight: 19 }} onPress={() => _onSend()}>Send</Text>
+                    <Pressable style={styles.sendButton}>
+                        <Text style={styles.sendButtonText} onPress={() => _onSend()}>Send</Text>
                     </Pressable>
                 </KeyboardAwareScrollView>
             }
@@ -132,5 +133,45 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#FFFFFF"
+    },
+    salonText: {
+        fontSize: 18, 
+        fontFamily: 'Avenir-Black', 
+        lineHeight: 25, 
+        marginLeft: 27
+    },
+    ratingText: {
+        fontSize: 16, 
+        fontFamily: 'Avenir-Heavy', 
+        lineHeight: 22, 
+        marginLeft: 27, 
+        marginTop: 8
+    },
+    ratingView: {
+        justifyContent: 'flex-start', 
+        alignItems: 'flex-start', 
+        marginLeft: 27, 
+        marginTop: 8
+    },
+    input: {
+        borderWidth: 1, 
+        marginLeft: 26.5, 
+        marginTop: 17.5, 
+        marginRight: 26.5, 
+        height: 75, 
+        textAlignVertical: 'top'
+    },
+    sendButton: {
+        borderWidth: 1, 
+        marginLeft: 114.5, 
+        marginTop: 28, 
+        marginRight: 130.5,
+        marginBottom: 10
+    },
+    sendButtonText: {
+        textAlign: 'center', 
+        marginTop: 8.5, 
+        marginBottom: 7.5, 
+        fontFamily: 'Avenir-Medium',
     }
 })

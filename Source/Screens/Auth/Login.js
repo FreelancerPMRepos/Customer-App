@@ -99,7 +99,8 @@ const Login = (props) => {
 
                 //Setting Longitude state
                 setLocation(currentLongitude, currentLatitude)
-               
+                console.log("as", currentLongitude)
+      console.log('ds', currentLatitude)
                 setLoading(false)
             },
             (error) => {

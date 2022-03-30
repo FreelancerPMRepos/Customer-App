@@ -19,8 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Dialog, { DialogContent } from 'react-native-popup-dialog';
 import strings from '../../../Localization/strings';
-
-
+import { showMessageAlert } from '../../../Utils/Utility';
 
 const HelloWorldApp = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -69,9 +68,8 @@ const HelloWorldApp = (props) => {
   const getTopStyleList = (name, keyword) => {
     setLoading(true)
     global.key = keyword === undefined ? '' : keyword
-    var seacrch_keyword = name === undefined ? '' : name
-    console.log("object", `${BASE_URL}/top/cuts/styles?name=${seacrch_keyword}&keyword=${global.key}`)
-    axios.get(`${BASE_URL}/top/cuts/styles?name=${seacrch_keyword}&keyword=${global.key}`)
+    global.seacrch_keyword = name === undefined ? '' : name
+    axios.get(`${BASE_URL}/top/cuts/styles?name=${global.seacrch_keyword}&keyword=${global.key}`)
       .then(res => {
         if (Array.isArray(res.data)) {
           setTopList(res.data)
@@ -122,16 +120,18 @@ const HelloWorldApp = (props) => {
   }
 
   const _onFavourite = (id) => {
+    console.log("id",id)
     setLoading(true)
     axios.post(`${BASE_URL}/favourite`, {
       style_id: id
     })
       .then(res => {
-        getTopStyleList()
+        getTopStyleList(global.seacrch_keyword, global.key)
         setLoading(false)
       })
       .catch(e => {
         console.log('e', e)
+        showMessageAlert(e.response.data.message)
         setLoading(false)
       })
   }
@@ -362,7 +362,6 @@ const HelloWorldApp = (props) => {
               :
               data()
           }
-
         </ScrollView>
       }
       {TagModal()}

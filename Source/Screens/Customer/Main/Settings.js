@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Text,
   View,
-  SafeAreaView,
   StyleSheet,
   TextInput,
   ScrollView,
@@ -22,11 +21,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from '@react-native-community/checkbox';
 import {
   GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
 } from '@react-native-google-signin/google-signin';
+
 import {
-  LoginManager, AccessToken,
+  LoginManager,
   GraphRequest,
   GraphRequestManager,
 } from 'react-native-fbsdk'
@@ -86,7 +84,6 @@ const Settings = (props) => {
 
   const getData = async (data) => {
     setLoading(true)
-    console.log("yaha aaya")
     try {
       const jsonValue = await AsyncStorage.getItem('@user_details')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
@@ -103,21 +100,6 @@ const Settings = (props) => {
           setLoading(false)
 
           var temp = []
-          //  data.map((res, i) => {
-          //     console.log("reskjnj",i)
-          //     res?.data?.user_interest?.map((res, j) => {
-          //       if (res?.data.user_interest[j].service_id == data[i].id) {
-          //         data[i].isChecked = true;
-          //       }
-          //     })
-          //     temp.push(data[i])
-          //     if (i == 0) {
-          //  //     alert(temp)
-          //       setList(temp)
-          //     }
-          //   })
-
-
           for (var i in data) {
             if (res.data.user_interest) {
               for (var j in res.data.user_interest) {
@@ -125,9 +107,7 @@ const Settings = (props) => {
                   data[i].isChecked = true;
                 }
               }
-
             }
-
             temp.push(data[i])
             if (i == 0) {
               setList(temp)
@@ -191,9 +171,6 @@ const Settings = (props) => {
     let remove_google = await AsyncStorage.removeItem('@google_email')
     const jsonValue = await AsyncStorage.getItem('facebook_token')
     const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-    // let logout = LoginManager.logOut();
-    // // const token = await AccessToken.getCurrentAccessToken();
-    // console.log("facebook logout token",logout)
     if (parData == null) {
 
     } else {
@@ -225,21 +202,11 @@ const Settings = (props) => {
     const jsonValue = await AsyncStorage.getItem('@user_details')
     const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
     var temp = [];
-    // for (var i = 0; i < list.length; i++) {
-    //    alert(i)
-    //   // if (list[i].isChecked == true) {
-    //   //   // temp[list[i].id]
-    //   // }
-    // }
     toggleCheckBox.map((res, index) => {
       if (res.isChecked == true) {
-        //    alert(res.id)
         temp.push(res.id)
       }
-      // temp[toggleCheckBox[index].id]
     })
-    //  alert("got")
-    console.log("temp", temp)
     axios.put(`${BASE_URL}/customer`, {
       id: parData.id,
       name: name,
@@ -251,7 +218,6 @@ const Settings = (props) => {
       interest: temp
     })
       .then(res => {
-        console.log('res update', res.data)
         alert(res.data.message)
         setLoading(false)
       })
@@ -288,7 +254,7 @@ const Settings = (props) => {
             <Text style={styles.changeLocationText}>Change Location</Text>
           </Pressable>
           <Text style={styles.servicesText}>Which services are you interested in?</Text>
-          <View style={{flexWrap: 'wrap' }}>
+          <View style={{ flexWrap: 'wrap' }}>
             <FlatList
               data={list}
               renderItem={({ item, index }) => {
@@ -311,7 +277,6 @@ const Settings = (props) => {
             />
           </View>
           <Text style={styles.commonText}>Sex</Text>
-          {/* <TextInput placeholder="Male" onChangeText={text => setSex(text)} value={sex} style={styles.textInputStyle} /> */}
           <SelectDropdown
             data={sex_dropdown}
             renderDropdownIcon={() => {
@@ -333,7 +298,6 @@ const Settings = (props) => {
             }}
           />
           <Text style={styles.commonText}>Hair Length</Text>
-          {/* <TextInput placeholder="Short" onChangeText={text => setHairLength(text)} value={hairLength} style={styles.textInputStyle} /> */}
           <SelectDropdown
             data={hair_length}
             renderDropdownIcon={() => {
@@ -355,7 +319,6 @@ const Settings = (props) => {
             }}
           />
           <Text style={styles.commonText}>Is your hair naturally coloured?</Text>
-          {/* <TextInput placeholder="Yes" onChangeText={text => setHairColor(text)} value={hairColor} style={styles.textInputStyle} /> */}
           <SelectDropdown
             data={color}
             renderDropdownIcon={() => {
@@ -380,11 +343,11 @@ const Settings = (props) => {
             <Text style={styles.saveButtonText}>Save</Text>
           </Pressable>
           <View style={styles.bottomButtonView}>
-            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'privacy'})}>
-            <Text style={styles.privacyPolicyText}>Privacy Policy</Text>
+            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'privacy' })}>
+              <Text style={styles.privacyPolicyText}>Privacy Policy</Text>
             </Pressable>
-            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'terms'})}>
-            <Text style={styles.termsServiceText}>Terms Of Service</Text>
+            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'terms' })}>
+              <Text style={styles.termsServiceText}>Terms Of Service</Text>
             </Pressable>
             <Pressable onPress={() => onLogout()}>
               <Text style={styles.logoutText}>Logout</Text>

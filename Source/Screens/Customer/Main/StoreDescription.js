@@ -73,6 +73,10 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [nextYear, setNextYear] = useState(0);
     // Time
     const [time, setTime] = useState([]);
+    // location
+    const [mark, setMark] = useState([])
+    const [latitude, setLatitude] = useState('')
+    const [longitude, setLongitude] = useState('')
 
 
 
@@ -80,8 +84,9 @@ const StoreDescription = ({ navigation, route, props }) => {
         console.log("In use Effect")
         let isCancelled = false;
         if (!isCancelled) {
+            getStoreData();
             if (updatedName.fav != null && updatedName.fav.data != null && updatedName.fav.data != null && updatedName.fav.data.length > 0 && updatedName.fav.data[0].service) {
-                console.log("object",updatedName.fav.data[0].service.id)
+                //  console.log("object", updatedName.fav.data[0].service)
                 setServiceId(updatedName.fav.data[0].service.id)
             }
             setNextYear(new Date().getFullYear());
@@ -90,11 +95,10 @@ const StoreDescription = ({ navigation, route, props }) => {
             getHairdresserList();
             getDateSlot();
             getData();
-            Check();
-            getStoreData();
+       //     Check();
         }
         return () => {
-          isCancelled = true
+            isCancelled = true
         }
     }, [])
 
@@ -105,12 +109,20 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
             .then(res => {
                 setStoreData(res.data)
+               // console.log("store data", res.data.longitude)
+                global.mark = [{ latitude: res.data.latitude, longitude: res.data.longitude }]
+                global.latitude = res.data.latitude
+                global.longitude = res.data.longitude
+                console.log("latitude", global.latitude)
+                console.log("longitude", global.longitude)
+                console.log("maek", global.mark)
                 var pdis = getPreciseDistance(
                     { latitude: res.data.latitude, longitude: res.data.longitude },
                     { latitude: global.CurrentLatitude, longitude: global.CurrentLongitude },
                 );
                 let distance = (pdis / 1609).toFixed(2)
                 setOverallDistance(distance)
+
                 setLoading(false)
             })
             .catch(e => {
@@ -175,13 +187,30 @@ const StoreDescription = ({ navigation, route, props }) => {
                             obj.isOffer = true;
                         }
                     }
-
                     timeStops.push(obj);
                     openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
+
+
+                }
+                var new_array = [];
+                for (var i in timeStops) {
+                    console.log("ds", moment.utc(new Date()).format('hh:mm A'))
+                    if (moment(`${nextYear}-${nextDate + 1}-${date}`).format('YYYY-M-DD') === moment(new Date()).format('YYYY-M-DD')) {
+                        if (moment(timeStops[i].date, 'hh:mm A').format('hh:mm A') >= moment.utc(new Date()).format('hh:mm A')) {
+                            console.log("andar aaya", timeStops[i].date)
+                            new_array.push(timeStops[i])
+
+                        }
+                    } else {
+                        new_array.push(timeStops[i])
+                    }
+
                 }
             }
         }
-        setTime(timeStops)
+
+        setTime(new_array)
+        //   console.log("object",new_array)
     }
 
     const getMonthDateDay = (year, date) => {
@@ -445,6 +474,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             setLoading(false)
             return false
         } else {
+            var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
             axios.post(`${BASE_URL}/booking`, {
                 store_id: storeDetails.id,
                 employee_id: hairdresserId,
@@ -453,7 +483,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                 style_type_id: serviceTypeId,
                 style_id: pickStyleId,
                 gender: genderName,
-                booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
+                booking_date: moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss"),
             })
                 .then(res => {
                     console.log("booking response", res.data)
@@ -515,34 +545,38 @@ const StoreDescription = ({ navigation, route, props }) => {
                         <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
                 </Pressable>
-                {
-                    modalVisible == true ?
-                        <View style={{ borderWidth: 1, marginRight: 27, }}>
-                            {
-                                serviceList.map((res, index) => {
-                                    return (
-                                        <Pressable key={index} onPress={() => service(res)}>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
-                                                {
-                                                    res.discount === false ? null :
-                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>Available Discount</Text>
+                <View>
+                    <ScrollView nestedScrollEnabled={true} style={{ marginRight: 27, maxHeight: 193 }}>
+                        {
+                            modalVisible == true ?
+                                <View style={{ borderWidth: 1 }}>
+                                    {
+                                        serviceList.map((res, index) => {
+                                            return (
+                                                <Pressable key={index} onPress={() => service(res)}>
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
+                                                        {
+                                                            res.discount === false ? null :
+                                                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>Available Discount</Text>
 
-                                                }
-                                            </View>
-                                            <View
-                                                style={{
-                                                    borderBottomColor: '#979797',
-                                                    borderBottomWidth: 1,
-                                                }}
-                                            />
-                                        </Pressable>
-                                    )
-                                })
-                            }
-                        </View> :
-                        null
-                }
+                                                        }
+                                                    </View>
+                                                    <View
+                                                        style={{
+                                                            borderBottomColor: '#979797',
+                                                            borderBottomWidth: 1,
+                                                        }}
+                                                    />
+                                                </Pressable>
+                                            )
+                                        })
+                                    }
+                                </View> :
+                                null
+                        }
+                    </ScrollView>
+                </View>
             </View>
         )
     }
@@ -560,34 +594,38 @@ const StoreDescription = ({ navigation, route, props }) => {
                         <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
                 </Pressable>
-                {
-                    serviceTypeModal == true ?
-                        <View style={{ borderWidth: 1, marginRight: 27 }}>
-                            {
-                                serviceTypeList.map((res, index) => {
-                                    return (
-                                        <Pressable key={index} onPress={() => _onServiceType(res)}>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
-                                                {
-                                                    res.discount === false ? null
-                                                        :
-                                                        <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.discount}% Discount</Text>
-                                                }
-                                            </View>
-                                            <View
-                                                style={{
-                                                    borderBottomColor: '#979797',
-                                                    borderBottomWidth: 1,
-                                                }}
-                                            />
-                                        </Pressable>
-                                    )
-                                })
-                            }
-                        </View> :
-                        null
-                }
+                <View>
+                    <ScrollView nestedScrollEnabled={true} style={{ marginRight: 27, maxHeight: 193 }}>
+                        {
+                            serviceTypeModal == true ?
+                                <View style={{ borderWidth: 1 }}>
+                                    {
+                                        serviceTypeList.map((res, index) => {
+                                            return (
+                                                <Pressable key={index} onPress={() => _onServiceType(res)}>
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                                        {
+                                                            res.discount === false ? null
+                                                                :
+                                                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.discount}% Discount</Text>
+                                                        }
+                                                    </View>
+                                                    <View
+                                                        style={{
+                                                            borderBottomColor: '#979797',
+                                                            borderBottomWidth: 1,
+                                                        }}
+                                                    />
+                                                </Pressable>
+                                            )
+                                        })
+                                    }
+                                </View> :
+                                null
+                        }
+                    </ScrollView>
+                </View>
             </View>
         )
     }
@@ -599,33 +637,37 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{pickStyleName == '' ? 'Select' : pickStyleName}</Text>
                     <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                 </Pressable>
-                {
-                    pickStyleModal == true ?
-                        <View style={{ borderWidth: 1, marginRight: 27 }}>
-                            {
-                                pickStyleList.map((res, index) => {
-                                    return (
-                                        <Pressable key={index} onPress={() => _onPickStyle(res)}>
-                                            {
-                                                pickStyleList ?
-                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.style.name}</Text>
-                                                    :
-                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>No Data Available</Text>
-                                            }
+                <View >
+                    <ScrollView nestedScrollEnabled={true} style={{ marginRight: 27, maxHeight: 193 }}>
+                        {
+                            pickStyleModal == true ?
+                                <View style={{ borderWidth: 1 }}>
+                                    {
+                                        pickStyleList.map((res, index) => {
+                                            return (
+                                                <Pressable key={index} onPress={() => _onPickStyle(res)}>
+                                                    {
+                                                        pickStyleList ?
+                                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.style.name}</Text>
+                                                            :
+                                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>No Data Available</Text>
+                                                    }
 
-                                            <View
-                                                style={{
-                                                    borderBottomColor: '#979797',
-                                                    borderBottomWidth: 1,
-                                                }}
-                                            />
-                                        </Pressable>
-                                    )
-                                })
-                            }
-                        </View> :
-                        null
-                }
+                                                    <View
+                                                        style={{
+                                                            borderBottomColor: '#979797',
+                                                            borderBottomWidth: 1,
+                                                        }}
+                                                    />
+                                                </Pressable>
+                                            )
+                                        })
+                                    }
+                                </View> :
+                                null
+                        }
+                    </ScrollView>
+                </View>
             </View>
         )
     }
@@ -637,27 +679,32 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 4.5 }}>{hairdresserName == '' ? 'Select' : hairdresserName}</Text>
                     <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                 </Pressable>
-                {
-                    hairdresserModal == true ?
-                        <View style={{ borderWidth: 1, marginRight: 27 }}>
-                            {
-                                hairdresserList.map((res, index) => {
-                                    return (
-                                        <Pressable key={index} onPress={() => _onHairdresser(res)}>
-                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
-                                            <View
-                                                style={{
-                                                    borderBottomColor: '#979797',
-                                                    borderBottomWidth: 1,
-                                                }}
-                                            />
-                                        </Pressable>
-                                    )
-                                })
-                            }
-                        </View> :
-                        null
-                }
+                <View >
+                    <ScrollView nestedScrollEnabled={true} style={{ marginRight: 27, maxHeight: 193 }}>
+                        {
+                            hairdresserModal == true ?
+                                <View style={{ borderWidth: 1 }}>
+                                    {
+                                        hairdresserList.map((res, index) => {
+                                            return (
+                                                <Pressable key={index} onPress={() => _onHairdresser(res)}>
+                                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
+                                                    <View
+                                                        style={{
+                                                            borderBottomColor: '#979797',
+                                                            borderBottomWidth: 1,
+                                                        }}
+                                                    />
+                                                </Pressable>
+                                            )
+                                        })
+                                    }
+                                </View>
+                                :
+                                null
+                        }
+                    </ScrollView>
+                </View>
             </View>
         )
     }
@@ -745,7 +792,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         navigation.navigate('HomeTabs', { screen: 'Home' })
     }
 
-
+    console.log("df", updatedName.fav.data[0].service)
 
     return (
         <View style={styles.container}>
@@ -756,14 +803,26 @@ const StoreDescription = ({ navigation, route, props }) => {
                 isLoading && <Loader />
             }
             {
-                <ScrollView>
+                <ScrollView nestedScrollEnabled={true}>
                     {
                         updatedName.fav.data == null ?
                             null :
                             <View style={styles.mapView}>
                                 <MapView style={styles.map}
-                                //  coordinate={{ latitude: storeData.latitude, longitude: storeData.longitude }}
+                                    initialRegion={{
+                                        latitude: Number(global.latitude),
+                                        longitude: Number(global.longitude),
+                                        latitudeDelta: 0.0922,
+                                        longitudeDelta: 0.0421,
+                                    }}
                                 >
+                                    {
+                                        global.mark?.map((marker, index) => (
+                                            <Marker
+                                                key={index}
+                                                coordinate={{ latitude: Number(marker.latitude), longitude: Number(marker.longitude) }}
+                                            />
+                                        ))}
                                 </MapView>
                             </View>
                     }
@@ -774,7 +833,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
                     }
                     {
-                        updatedName.fav.data == null ?
+                        updatedName.fav.data[0].upload_front_photo == undefined && updatedName.fav.data[0].upload_back_photo == undefined && updatedName.fav.data[0].upload_right_photo == undefined ?
                             null
                             :
                             <View style={{ flexDirection: 'row' }}>
@@ -838,7 +897,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 />
                             </View>
                             <View style={{ flexDirection: 'row' }}>
-                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>{moment(storeData.opentime, "H").format('h')}-{moment(storeData.closetime, "H").format('h')}</Text>
+                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>{moment.utc(storeData.opentime, "H").local().format('h')}-{moment.utc(storeData.closetime, "H").local().format('h')}</Text>
                                 {
                                     storeData?.is_available == 1 ?
                                         <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#70CF2B' }}> Open</Text>
@@ -1078,13 +1137,13 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     <View key={index}>
                                                         {
                                                             res.isOffer == true ?
-                                                                <Pressable style={{ flexDirection: 'row' }} onPress={() => _onTime(res.date)}>
-                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13, color: '#EB2C47' }}>{res.date}</Text>
+                                                                <Pressable style={{ flexDirection: 'row' }} onPress={() => _onTime(moment.utc(res.date, 'hh:mm A').local().format('hh:mm A'))}>
+                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13, color: '#EB2C47' }}>{moment.utc(res.date, 'hh:mm A').local().format('hh:mm A')}</Text>
                                                                     <Text style={{ marginTop: 20, marginLeft: 4, fontSize: 10, fontFamily: 'Avenir-Medium', lineHeight: 14, color: '#EB2C47' }}>{serviceTypeDiscount}% Discount</Text>
                                                                 </Pressable>
                                                                 :
-                                                                <Pressable onPress={() => _onTime(res.date)}>
-                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13 }}>{res.date}</Text>
+                                                                <Pressable onPress={() => _onTime(moment.utc(res.date, 'hh:mm A').local().format('hh:mm A'))}>
+                                                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13 }}>{moment.utc(res.date, 'hh:mm A').local().format('hh:mm A')}</Text>
                                                                 </Pressable>
                                                         }
                                                     </View>

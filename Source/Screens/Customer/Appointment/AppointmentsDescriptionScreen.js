@@ -54,6 +54,8 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     getNote();
   }, [])
 
+  console.log("ds",appointmentDetails)
+
   const getNote = () => {
     setLoading(true)
     axios.get(`${BASE_URL}/note/list/${appointmentDetails.id}`)
@@ -261,9 +263,10 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       alert('Please select time.')
     } else {
       setLoading(true)
+      var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
       axios.put(`${BASE_URL}/reschedule/booking`, {
         id: appointmentDetails.id,
-        booking_date: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`,
+        booking_date: moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss"),
       })
         .then(res => {
           setRescheduleModal(!resheduleModal)
@@ -624,7 +627,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             }
             <View style={{ marginLeft: 32, marginTop: 20, width: width * 0.52 }}>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{appointmentDetails?.style?.name == undefined ? appointmentDetails?.styletype?.name : appointmentDetails?.style?.name}</Text>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{moment(appointmentDetails?.booking_date,).add(0, 'days').calendar(null, { sameElse: 'DD MMM YYYY hh:mm A' })}</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{moment.utc(appointmentDetails?.booking_date,).local().add(0, 'days').calendar(null, { sameElse: 'DD MMM YYYY hh:mm A' })}</Text>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 14.67, lineHeight: 22 }}>Location</Text>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{appointmentDetails?.store?.store_name}</Text>
               <View style={{ marginTop: 13, justifyContent: 'flex-start', alignItems: 'flex-start' }}>

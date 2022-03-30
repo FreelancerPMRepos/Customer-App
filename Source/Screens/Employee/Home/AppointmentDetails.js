@@ -92,7 +92,7 @@ const AppointmentDetails = ({ navigation, route, props }) => {
                         <Text style={styles.descriptionSubheading}>{appointmentData?.style?.description}</Text>
                         <View style={styles.horizontalLine} />
                         <Text style={styles.dateTimeHeading}>Date & Time</Text>
-                        <Text style={styles.dateTimeSubHeading}>{moment(appointmentData.booking_date).add(0, 'days').calendar(null, { sameElse: 'DD MMM YYYY hh:mm A' })}</Text>
+                        <Text style={styles.dateTimeSubHeading}>{moment.utc(appointmentData.booking_date).local().add(0, 'days').calendar(null, { sameElse: 'DD MMM YYYY hh:mm A' })}</Text>
                         <View style={styles.horizontalLine} />
                         <Text style={styles.customerNoteTitle}>Customer Notes</Text>
                         <Text style={styles.customerNoteDescription}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the </Text>

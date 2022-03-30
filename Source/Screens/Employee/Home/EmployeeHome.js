@@ -126,7 +126,7 @@ const EmployeeHome = (props) => {
                                             <Text style={styles.nameStyle} numberOfLines={1}>{res.user.name}</Text>
                                             <Text style={styles.haircutStyle}>{res?.service?.name}</Text>
                                         </View>
-                                        <Text style={styles.timeStyle}>{moment(res.booking_date).format("hh:mm A")}</Text>
+                                        <Text style={styles.timeStyle}>{moment.utc(res.booking_date).local().format("hh:mm A")}</Text>
                                     </Pressable>
                                 )
                             })

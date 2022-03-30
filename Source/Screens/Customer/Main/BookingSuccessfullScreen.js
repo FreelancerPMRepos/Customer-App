@@ -7,6 +7,8 @@ import { width } from '../../../Config';
 const BookingSuccessfullScreen = ({ navigation, route, props }) => {
     const { transaction_id, booking_id, salon_name, employee_name, date_time } = route.params
 
+    console.log("asd",date_time)
+
     const _onBack = () => navigation.goBack()
 
     return (
@@ -50,7 +52,7 @@ const BookingSuccessfullScreen = ({ navigation, route, props }) => {
                             <View style={{flexDirection: 'row', marginLeft: 14.5,}}>
                                 <View style={{ width: width * 0.5}}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginTop: 13 }}>Date & Time</Text>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginTop: 7, marginBottom: 28.5 }}>{moment(date_time, "YYYY-M-D, HH:mm").format("DD MMM YYYY, hh:mm A")}</Text>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginTop: 7, marginBottom: 28.5 }}>{moment(date_time).format("DD MMM YYYY, hh:mm A")}</Text>
                                 </View>
                                 <View style={{}}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginTop: 13 }}>Stylist</Text>

@@ -5,19 +5,95 @@ import {
     StyleSheet,
     Switch,
     TextInput,
-    Pressable
+    Pressable,
+    PermissionsAndroid,
+    ScrollView
 } from 'react-native';
 
 import { Colors, height, width } from '../../../Config';
 import Header from '../../../Components/Header';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import Geolocation from '@react-native-community/geolocation';
+import Geocoder from 'react-native-geocoding';
+
+Geocoder.init("AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E"); // use a valid API key
+
+const GOOGLE_PLACES_API_KEY = 'AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E';
 
 const ChangeLocation = (props) => {
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const [latitude, setLatitude] = useState('')
+    const [longitude, setLongitude] = useState('')
+    const [address, setAddress] = useState('')
+    const [mark, setMark] = useState([])
+    const [searchLatitude, setSearchLatitude] = useState('')
+    const [searchLongitude, setSearchLongitude] = useState('')
 
     const _onBack = () => props.navigation.goBack()
+
+    const toggleSwitch = () => {
+        setAddress('')
+        setIsEnabled(previousState => !previousState);
+        getCurrentLocation()
+    }
+
+    const getCurrentLocation = async () => {
+        if (Platform.OS === 'ios') {
+            getOneTimeLocation();
+        } else {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                    {
+                        title: 'Location Access Required',
+                        message: 'This App needs to Access your location',
+                    },
+                );
+                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    //To Check, If Permission is granted
+                    getOneTimeLocation();
+                } else {
+                    showMessageAlert('Permission Denied')
+                }
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+    }
+
+    const getOneTimeLocation = async () => {
+        Geolocation.getCurrentPosition(
+            //Will give you the current location
+            (position) => {
+
+                //getting the Longitude from the location json
+                const currentLongitude =
+                    JSON.stringify(position.coords.longitude);
+                setLongitude(currentLongitude)
+                console.log("sdf", currentLongitude)
+                //getting the Latitude from the location json
+                const currentLatitude =
+                    JSON.stringify(position.coords.latitude);
+                setLatitude(currentLatitude)
+                Geocoder.from(currentLatitude, currentLongitude)
+                    .then(json => {
+                        var addressComponent = json.results[0].formatted_address;
+                        console.log("address", addressComponent);
+                        setAddress(addressComponent)
+                        setMark([{ latitude: currentLatitude, longitude: currentLongitude }])
+                    })
+                    .catch(error => console.warn(error));
+            },
+            (error) => {
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 1000
+            },
+        );
+    };
 
     const renderlocation = () => {
         return (
@@ -32,42 +108,86 @@ const ChangeLocation = (props) => {
                         value={isEnabled}
                     />
                 </View>
-                <TextInput style={{ borderWidth: 1, marginLeft: 15.5, marginRight: 15.5, marginTop: 24.5, textAlignVertical: 'top' }} multiline={true} numberOfLines={5} placeholder="Addresss" />
-                <View style={styles.mapView}>
-                    {/* <GooglePlacesAutocomplete
-                        placeholder='Search'
-                        onPress={(data, details) => {
-                            // 'details' is provided when fetchDetails = true
-                            console.log(data, details);
-                        }}
-                        query={{
-                            key: 'AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E',
-                            language: 'en',
-                        }}
-                       
-                    /> */}
-                    {/* <MapView style={styles.map} initialRegion={{
-                        latitude: 37.78825,
-                        longitude: -122.4324,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
-                    }}>
-                        {
-                            storeList.map((marker, index) => (
-                                <Marker
-                                    key={index}
-                                    coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                                    title={marker.store_name}
-                                />
-                            ))}
-                    </MapView> */}
-                </View>
-                <Pressable style={{ borderWidth: 1, marginLeft: 23, marginRight: 22, marginTop: 74 }}>
+                {
+                    isEnabled === true ?
+                        <View>
+                            <TextInput style={{ borderWidth: 1, marginLeft: 15.5, marginRight: 15.5, marginTop: 24.5, textAlignVertical: 'top', color: 'black' }} multiline={true} numberOfLines={5} value={address} onChangeText={(text) => setAddress(text)} placeholder="Addresss" editable={!isEnabled} />
+                            <View style={styles.mapView}>
+
+                                <MapView style={styles.map} initialRegion={{
+                                    latitude: Number(latitude),
+                                    longitude: Number(longitude),
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}>
+                                    {
+                                        mark?.map((marker, index) => (
+                                            <Marker
+                                                key={index}
+                                                coordinate={{ latitude: Number(marker.latitude), longitude: Number(marker.longitude) }}
+                                            />
+                                        ))}
+                                </MapView>
+                            </View>
+                        </View>
+                        :
+                        null
+                }
+                {/* <Pressable style={{ borderWidth: 1, marginLeft: 23, marginRight: 22, marginTop: 74 }}>
                     <Text style={{ textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 11.5, marginBottom: 11.5 }}>Save</Text>
-                </Pressable>
+                </Pressable> */}
             </View>
         )
     }
+
+    const renderSearchLocation = () => {
+        return (
+            <View>
+                <View style={{ padding: 10, height: '80%', paddingTop: 20, }}>
+                    <GooglePlacesAutocomplete
+                        placeholder="Address"
+                        GooglePlacesDetailsQuery={{ fields: "geometry" }}
+                        fetchDetails={true}
+                        query={{
+                            key: GOOGLE_PLACES_API_KEY,
+                            language: 'en', // language of the results
+                        }}
+                        onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng)}
+                        onFail={(error) => console.error(error)}
+                        listViewDisplayed="auto"
+                        styles={{
+                            textInputContainer: {
+                                //  backgroundColor: 'grey',
+                                borderWidth: 1,
+                                textAlignVertical: 'top',
+                            },
+                            textInput: {
+                                height: 38,
+                                color: '#5d5d5d',
+                                fontSize: 16,
+                            },
+                            predefinedPlacesDescription: {
+                                color: '#1faadb',
+                            },
+                        }}
+                    />
+                    {
+                        searchLatitude ?
+                            <Text>hello</Text> : null
+                    }
+                </View>
+
+
+            </View>
+        )
+    }
+
+    const setSearchLocation = (lat, lng) => {
+        setSearchLatitude(lat)
+        setSearchLongitude(lng)
+    }
+
+    console.log("sd", searchLatitude)
 
     return (
         <View style={styles.container}>
@@ -82,6 +202,7 @@ const ChangeLocation = (props) => {
                     {renderlocation()}
                 </View>
             }
+            {renderSearchLocation()}
         </View>
     )
 }
@@ -93,12 +214,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white
     },
     mapView: {
-       // height: height * 0.3,
-        // width: width * 0.92,
-        // alignItems: 'center',
-        // marginLeft: 16,
-        // marginRight: 16,
-        // marginTop: 23
+        height: height * 0.3,
+        width: width * 0.92,
+        alignItems: 'center',
+        marginLeft: 16,
+        marginRight: 16,
+        //    marginTop: 23
     },
     map: {
         ...StyleSheet.absoluteFillObject,
