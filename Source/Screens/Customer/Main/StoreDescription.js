@@ -95,7 +95,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             getHairdresserList();
             getDateSlot();
             getData();
-       //     Check();
+            //     Check();
         }
         return () => {
             isCancelled = true
@@ -109,7 +109,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
             .then(res => {
                 setStoreData(res.data)
-               // console.log("store data", res.data.longitude)
+                // console.log("store data", res.data.longitude)
                 global.mark = [{ latitude: res.data.latitude, longitude: res.data.longitude }]
                 global.latitude = res.data.latitude
                 global.longitude = res.data.longitude
@@ -487,7 +487,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             })
                 .then(res => {
                     console.log("booking response", res.data)
-                    dispatch(deleteSalon(updatedName.fav))
                     setBookingData(res.data)
                     setBookingDone(!bookingDone)
                     setLoading(false)
@@ -710,6 +709,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const onContinePay = () => {
+        dispatch(deleteSalon(updatedName.fav))
         setBookingDone(!bookingDone)
         navigation.navigate('PaymentScreen', { booking_id: bookingData.id, salon_name: storeData.store_name, employee_name: hairdresserName, date_time: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}` })
     }
@@ -792,8 +792,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         navigation.navigate('HomeTabs', { screen: 'Home' })
     }
 
-    console.log("df", updatedName.fav.data[0].service)
-
     return (
         <View style={styles.container}>
             {
@@ -833,28 +831,36 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginLeft: 29, lineHeight: 22 }}>{updatedName.fav.data.name}</Text>
                     }
                     {
-                        updatedName.fav.data[0].upload_front_photo == undefined && updatedName.fav.data[0].upload_back_photo == undefined && updatedName.fav.data[0].upload_right_photo == undefined ?
+                        updatedName.fav.data == null ?
                             null
                             :
-                            <View style={{ flexDirection: 'row' }}>
-                                <Image
-                                    style={{ marginLeft: 26, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
-                                    source={{
-                                        uri: updatedName.fav.data[0].upload_front_photo,
-                                    }}
-                                />
-                                <Image
-                                    style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
-                                    source={{
-                                        uri: updatedName.fav.data[0].upload_back_photo,
-                                    }}
-                                />
-                                <Image
-                                    style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, marginRight: 26 }}
-                                    source={{
-                                        uri: updatedName.fav.data[0].upload_right_photo,
-                                    }}
-                                />
+                            <View >
+                                {
+                                    updatedName?.fav?.data[0]?.upload_front_photo == undefined && updatedName?.fav?.data[0]?.upload_back_photo == undefined && updatedName?.fav?.data[0]?.upload_right_photo == undefined ?
+                                        null
+                                        :
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Image
+                                                style={{ marginLeft: 26, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
+                                                source={{
+                                                    uri: updatedName.fav.data[0].upload_front_photo,
+                                                }}
+                                            />
+                                            <Image
+                                                style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, }}
+                                                source={{
+                                                    uri: updatedName.fav.data[0].upload_back_photo,
+                                                }}
+                                            />
+                                            <Image
+                                                style={{ marginLeft: 12, marginTop: 15, height: height * 0.14, width: width * 0.28, marginRight: 26 }}
+                                                source={{
+                                                    uri: updatedName.fav.data[0].upload_right_photo,
+                                                }}
+                                            />
+                                        </View>
+                                }
+
                             </View>
                     }
                     <View style={{ flexDirection: 'row', marginLeft: 26, marginTop: updatedName.fav.data ? 23 : 10 }}>

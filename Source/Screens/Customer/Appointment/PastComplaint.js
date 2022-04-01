@@ -93,7 +93,7 @@ const PastComplaint = ({ navigation, route, props }) => {
                             complainData.map((res, i) => {
                                 return (
                                     <View key={i}>
-                                        <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
+                                        <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m a")}</Text>
                                         <Text style={styles.complaint}>{res.complaint}</Text>
                                         <Pressable onPress={() => getReplies(res.id, i)}>
                                             {

@@ -20,7 +20,7 @@ const ComplaintScreen = ({ navigation, route, props }) => {
 
     const _onSubmit = () => {
         if (complaint == '') {
-            alert('Please Enter Complaint')
+            alert('Please enter complaint')
         } else {
             setLoading(true)
             axios.post(`${BASE_URL}/complaint`, {
@@ -88,7 +88,7 @@ const ComplaintScreen = ({ navigation, route, props }) => {
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 6, lineHeight: 22 }}>Salon</Text>
                         </Pressable>
                     </View>
-                    <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 25, marginTop: 24 }}>Complaint</Text>
+                    <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 28, marginTop: 24 }}>Complaint</Text>
                     <TextInput
                         placeholder='Type your Complaint'
                         style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 28.5, marginRight: 24.5, marginTop: 6.5, textAlignVertical: 'top', }}

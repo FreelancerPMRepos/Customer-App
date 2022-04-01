@@ -70,7 +70,6 @@ const Home = (props) => {
       {
         global.longitude ? getStoreList("", "", "", "", "", latitude, longitude) : null
       }
-     
       if (value !== null) {
         alert('Not getting current location')
       }

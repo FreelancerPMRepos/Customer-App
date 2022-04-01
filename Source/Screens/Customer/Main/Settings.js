@@ -28,7 +28,8 @@ import {
   GraphRequest,
   GraphRequestManager,
 } from 'react-native-fbsdk'
-import SelectDropdown from 'react-native-select-dropdown'
+import SelectDropdown from 'react-native-select-dropdown';
+import { showMessageAlert } from '../../../Utils/Utility';
 
 const sex_dropdown = ["MALE", "FEMALE"]
 const hair_length = ["SHORT", "MEDIUM", "LONG",]
@@ -218,7 +219,7 @@ const Settings = (props) => {
       interest: temp
     })
       .then(res => {
-        alert(res.data.message)
+       showMessageAlert(res.data.message)
         setLoading(false)
       })
       .catch(e => {

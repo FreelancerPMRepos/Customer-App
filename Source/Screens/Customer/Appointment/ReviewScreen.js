@@ -10,8 +10,8 @@ import { showMessageAlert } from '../../../Utils/Utility';
 const ReviewScreen = ({ navigation, route, props }) => {
     const [salonFeedback, setSalonFeedback] = useState('')
     const [stylistFeedback, setStylistFeedback] = useState('')
-    const [salonRating, setSalonRating] = useState('3')
-    const [stylistRating, setStylistRating] = useState('3')
+    const [salonRating, setSalonRating] = useState('0')
+    const [stylistRating, setStylistRating] = useState('0')
     const { storeDetails } = route.params
 
 
@@ -29,45 +29,35 @@ const ReviewScreen = ({ navigation, route, props }) => {
     }
 
     const _onSend = () => {
-        console.log("As", {
-            booking_id: storeDetails.id,
-            salon: {
-                type: "STORE",
-                review: salonFeedback,
-                rating: salonRating
+        if (salonFeedback == '' || stylistFeedback == '') {
+            alert('Please enter feedback')
+        } else {
+            axios.post(`${BASE_URL}/review`, {
+                booking_id: storeDetails.id,
+                salon: {
+                    type: "STORE",
+                    review: salonFeedback,
+                    rating: salonRating
                 },
                 stylist: {
-                type: "SERVICE",
-                review: stylistFeedback,
-                rating: stylistRating
-                }        
-        })
-        axios.post(`${BASE_URL}/review`, {
-            booking_id: storeDetails.id,
-            salon: {
-                type: "STORE",
-                review: salonFeedback,
-                rating: salonRating
-                },
-                stylist: {
-                type: "SERVICE",
-                review: stylistFeedback,
-                rating: stylistRating
-                }        
-        })
-        .then(res => {
-            console.log("ASDf",res.data)
-            showMessageAlert(res.data.message)
-            setSalonFeedback('')
-            setStylistFeedback('')
-            _onBack()
-          })
-          .catch(e => {
-            console.log('e rrr', e)
-            showMessageAlert(e.response.data.message)
-            setSalonFeedback('')
-            setStylistFeedback('')
-          })
+                    type: "SERVICE",
+                    review: stylistFeedback,
+                    rating: stylistRating
+                }
+            })
+                .then(res => {
+                    showMessageAlert(res.data.message)
+                    setSalonFeedback('')
+                    setStylistFeedback('')
+                    _onBack()
+                })
+                .catch(e => {
+                    console.log('e rrr', e)
+                    showMessageAlert(e.response.data.message)
+                    setSalonFeedback('')
+                    setStylistFeedback('')
+                })
+        }
     }
 
     return (
@@ -86,7 +76,7 @@ const ReviewScreen = ({ navigation, route, props }) => {
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            startingValue={3}
+                            startingValue={0}
                             imageSize={28}
                             onFinishRating={ratingCompleted}
                         />
@@ -107,7 +97,7 @@ const ReviewScreen = ({ navigation, route, props }) => {
                             ratingColor='#1F1E1E'
                             ratingBackgroundColor='#c8c7c8'
                             tintColor="#FFFFFF"
-                            startingValue={3}
+                            startingValue={0}
                             imageSize={28}
                             onFinishRating={StylistratingCompleted}
                         />
@@ -135,43 +125,43 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF"
     },
     salonText: {
-        fontSize: 18, 
-        fontFamily: 'Avenir-Black', 
-        lineHeight: 25, 
-        marginLeft: 27
+        fontSize: 18,
+        fontFamily: 'Avenir-Black',
+        lineHeight: 25,
+        marginLeft: 30
     },
     ratingText: {
-        fontSize: 16, 
-        fontFamily: 'Avenir-Heavy', 
-        lineHeight: 22, 
-        marginLeft: 27, 
+        fontSize: 16,
+        fontFamily: 'Avenir-Heavy',
+        lineHeight: 22,
+        marginLeft: 30,
         marginTop: 8
     },
     ratingView: {
-        justifyContent: 'flex-start', 
-        alignItems: 'flex-start', 
-        marginLeft: 27, 
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        marginLeft: 27,
         marginTop: 8
     },
     input: {
-        borderWidth: 1, 
-        marginLeft: 26.5, 
-        marginTop: 17.5, 
-        marginRight: 26.5, 
-        height: 75, 
+        borderWidth: 1,
+        marginLeft: 30,
+        marginTop: 17.5,
+        marginRight: 26.5,
+        height: 75,
         textAlignVertical: 'top'
     },
     sendButton: {
-        borderWidth: 1, 
-        marginLeft: 114.5, 
-        marginTop: 28, 
+        borderWidth: 1,
+        marginLeft: 114.5,
+        marginTop: 28,
         marginRight: 130.5,
         marginBottom: 10
     },
     sendButtonText: {
-        textAlign: 'center', 
-        marginTop: 8.5, 
-        marginBottom: 7.5, 
+        textAlign: 'center',
+        marginTop: 8.5,
+        marginBottom: 7.5,
         fontFamily: 'Avenir-Medium',
     }
 })
