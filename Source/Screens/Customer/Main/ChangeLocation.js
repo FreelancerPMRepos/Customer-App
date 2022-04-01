@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     View,
     StyleSheet,
     Switch,
     TextInput,
-    Pressable,
     PermissionsAndroid,
-    ScrollView
 } from 'react-native';
 
 import { Colors, height, width } from '../../../Config';
@@ -29,6 +27,7 @@ const ChangeLocation = (props) => {
     const [mark, setMark] = useState([])
     const [searchLatitude, setSearchLatitude] = useState('')
     const [searchLongitude, setSearchLongitude] = useState('')
+    const [searchMark, setSearchMark] = useState([])
 
     const _onBack = () => props.navigation.goBack()
 
@@ -71,7 +70,6 @@ const ChangeLocation = (props) => {
                 const currentLongitude =
                     JSON.stringify(position.coords.longitude);
                 setLongitude(currentLongitude)
-                console.log("sdf", currentLongitude)
                 //getting the Latitude from the location json
                 const currentLatitude =
                     JSON.stringify(position.coords.latitude);
@@ -79,7 +77,6 @@ const ChangeLocation = (props) => {
                 Geocoder.from(currentLatitude, currentLongitude)
                     .then(json => {
                         var addressComponent = json.results[0].formatted_address;
-                        console.log("address", addressComponent);
                         setAddress(addressComponent)
                         setMark([{ latitude: currentLatitude, longitude: currentLongitude }])
                     })
@@ -98,8 +95,8 @@ const ChangeLocation = (props) => {
     const renderlocation = () => {
         return (
             <View>
-                <View style={{ marginLeft: 18, marginTop: 31, flexDirection: 'row', justifyContent: 'space-between', marginRight: 33 }}>
-                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', color: '#1A1919', lineHeight: 22 }}>Auto Location</Text>
+                <View style={styles.autoLocationView}>
+                    <Text style={styles.autoLocationText}>Auto Location</Text>
                     <Switch
                         trackColor={{ false: "#D0CDCD", true: "black" }}
                         thumbColor={isEnabled ? "white" : "white"}
@@ -111,9 +108,8 @@ const ChangeLocation = (props) => {
                 {
                     isEnabled === true ?
                         <View>
-                            <TextInput style={{ borderWidth: 1, marginLeft: 15.5, marginRight: 15.5, marginTop: 24.5, textAlignVertical: 'top', color: 'black' }} multiline={true} numberOfLines={5} value={address} onChangeText={(text) => setAddress(text)} placeholder="Addresss" editable={!isEnabled} />
-                            <View style={styles.mapView}>
-
+                            <TextInput style={styles.autoLocationInput} multiline={true} numberOfLines={5} value={address} onChangeText={(text) => setAddress(text)} placeholder="Addresss" editable={!isEnabled} />
+                            <View style={[styles.mapView, { marginTop: 23 }]}>
                                 <MapView style={styles.map} initialRegion={{
                                     latitude: Number(latitude),
                                     longitude: Number(longitude),
@@ -133,9 +129,6 @@ const ChangeLocation = (props) => {
                         :
                         null
                 }
-                {/* <Pressable style={{ borderWidth: 1, marginLeft: 23, marginRight: 22, marginTop: 74 }}>
-                    <Text style={{ textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 11.5, marginBottom: 11.5 }}>Save</Text>
-                </Pressable> */}
             </View>
         )
     }
@@ -143,51 +136,84 @@ const ChangeLocation = (props) => {
     const renderSearchLocation = () => {
         return (
             <View>
-                <View style={{ padding: 10, height: '80%', paddingTop: 20, }}>
-                    <GooglePlacesAutocomplete
-                        placeholder="Address"
-                        GooglePlacesDetailsQuery={{ fields: "geometry" }}
-                        fetchDetails={true}
-                        query={{
-                            key: GOOGLE_PLACES_API_KEY,
-                            language: 'en', // language of the results
-                        }}
-                        onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng)}
-                        onFail={(error) => console.error(error)}
-                        listViewDisplayed="auto"
-                        styles={{
-                            textInputContainer: {
-                                //  backgroundColor: 'grey',
-                                borderWidth: 1,
-                                textAlignVertical: 'top',
-                            },
-                            textInput: {
-                                height: 38,
-                                color: '#5d5d5d',
-                                fontSize: 16,
-                            },
-                            predefinedPlacesDescription: {
-                                color: '#1faadb',
-                            },
-                        }}
-                    />
-                    {
-                        searchLatitude ?
-                            <Text>hello</Text> : null
-                    }
-                </View>
-
-
+                {
+                    isEnabled === false ?
+                        <View style={styles.searchLocationView}>
+                            <GooglePlacesAutocomplete
+                                placeholder="Address"
+                                GooglePlacesDetailsQuery={{ fields: "geometry" }}
+                                fetchDetails={true}
+                                query={{
+                                    key: GOOGLE_PLACES_API_KEY,
+                                    language: 'en', // language of the results
+                                }}
+                                returnKeyType={'default'}
+                                onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng)}
+                                onFail={(error) => console.error(error)}
+                                listViewDisplayed="auto"
+                                suppressDefaultStyles={true}
+                                styles={{
+                                    textInputContainer: {
+                                        borderWidth: 1,
+                                        textAlignVertical: 'top',
+                                        marginLeft: 15.5,
+                                        marginRight: 15.5,
+                                    },
+                                    textInput: {
+                                        height: 38,
+                                        color: '#5d5d5d',
+                                        fontSize: 16,
+                                    },
+                                    predefinedPlacesDescription: {
+                                        color: '#1faadb',
+                                    },
+                                    listView: {
+                                        borderWidth: 1,
+                                        marginLeft: 15.5,
+                                        marginRight: 15.5,
+                                    },
+                                    row: {
+                                        paddingTop: 10,
+                                        paddingLeft: 5
+                                    }
+                                }}
+                            />
+                            {searchLatitude ? searchMap() : null}
+                        </View>
+                        :
+                        null
+                }
             </View>
         )
     }
 
     const setSearchLocation = (lat, lng) => {
+        setSearchMark([{ latitude: lat, longitude: lng }])
         setSearchLatitude(lat)
         setSearchLongitude(lng)
     }
 
-    console.log("sd", searchLatitude)
+
+    const searchMap = () => {
+        return (
+            <View style={[styles.mapView, { position: 'relative', marginTop: 23 }]}>
+                <MapView style={styles.map} region={{
+                    latitude: Number(searchLatitude),
+                    longitude: Number(searchLongitude),
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                }}>
+                    {
+                        searchMark?.map((marker, index) => (
+                            <Marker
+                                key={index}
+                                coordinate={{ latitude: Number(marker.latitude), longitude: Number(marker.longitude) }}
+                            />
+                        ))}
+                </MapView>
+            </View>
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -219,9 +245,34 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 16,
         marginRight: 16,
-        //    marginTop: 23
     },
     map: {
         ...StyleSheet.absoluteFillObject,
     },
+    autoLocationView: {
+        marginLeft: 18,
+        marginTop: 31,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginRight: 33
+    },
+    autoLocationText: {
+        fontSize: 16,
+        fontFamily: 'Avenir-Medium',
+        color: '#1A1919',
+        lineHeight: 22
+    },
+    autoLocationInput: {
+        borderWidth: 1,
+        marginLeft: 15.5,
+        marginRight: 15.5,
+        marginTop: 24.5,
+        textAlignVertical: 'top',
+        color: 'black'
+    },
+    searchLocationView: {
+        height: '80%',
+        paddingTop: 20,
+        flexGrow: 1
+    }
 })
