@@ -6,6 +6,7 @@ import {
     Switch,
     TextInput,
     PermissionsAndroid,
+    ScrollView,
 } from 'react-native';
 
 import { Colors, height, width } from '../../../Config';
@@ -220,15 +221,17 @@ const ChangeLocation = (props) => {
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
             }
-            {
-                <View>
-                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy' }}>Change Location</Text>
+            <ScrollView>
+                {
+                    <View>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy' }}>Change Location</Text>
+                        </View>
+                        {renderlocation()}
                     </View>
-                    {renderlocation()}
-                </View>
-            }
-            {renderSearchLocation()}
+                }
+                {renderSearchLocation()}
+            </ScrollView>
         </View>
     )
 }

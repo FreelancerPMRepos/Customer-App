@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, TextInput } from 'react-native';
 import Header from '../../../Components/Header';
 import { BASE_URL, Colors } from '../../../Config';
 import moment from 'moment';
@@ -11,7 +11,7 @@ const PastComplaint = ({ navigation, route, props }) => {
     const [isLoading, setLoading] = useState(false)
     const [complainData, setComplainData] = useState([]);
     const [repliesData, setRepliesData] = useState([]);
-    const [repliesView, setRepliesView] = useState(false);
+    const [message, setMessage] = useState('')
     const { data } = route.params
 
     const _onBack = () => navigation.goBack()
@@ -24,7 +24,6 @@ const PastComplaint = ({ navigation, route, props }) => {
         setLoading(true)
         axios.get(`${BASE_URL}/customer/complaint/list/${data.id}`)
             .then(res => {
-                console.log("s", res.data)
                 var list = []
                 if (res.data.length >= 0) {
                     for (var i in res.data) {
@@ -45,6 +44,7 @@ const PastComplaint = ({ navigation, route, props }) => {
     }
 
     const getReplies = (id, index) => {
+        setMessage('')
         setLoading(true)
         var list = []
         for (var i in complainData) {
@@ -56,7 +56,6 @@ const PastComplaint = ({ navigation, route, props }) => {
         }
         axios.get(`${BASE_URL}/comment/list/${id}`)
             .then(res => {
-                console.log("replies", res.data)
                 setRepliesData(res.data)
                 var temp = [];
                 for (var i in complainData) {
@@ -69,11 +68,32 @@ const PastComplaint = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e rrr', e)
+                console.log('e', e)
                 setLoading(false)
             })
     }
-    // console.log(':sd', complainData)
+
+    const _onReply = (id) => {
+        if(message == '') {
+            alert('Please eneter the message')
+        } else {
+            console.log("sd")
+            setLoading(true)
+            axios.post(`${BASE_URL}/comment`, {
+                comment: message,
+                complaint_id: id
+            })
+            .then(res => {
+                getComplainList()
+                setMessage('')
+                setLoading(false)
+            })
+            .catch(e => {
+                console.log('e rrr', e)
+               setLoading(false)
+            })
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -85,10 +105,10 @@ const PastComplaint = ({ navigation, route, props }) => {
             }
             {
                 complainData.length === 0 ?
-                    <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                    <View style={styles.noComplainView}>
                         <Text>No Past Complaints</Text>
                     </View> :
-                    <ScrollView style={styles.mainView}>
+                    <ScrollView style={styles.mainView} showsVerticalScrollIndicator={false}>
                         {
                             complainData.map((res, i) => {
                                 return (
@@ -98,7 +118,7 @@ const PastComplaint = ({ navigation, route, props }) => {
                                         <Pressable onPress={() => getReplies(res.id, i)}>
                                             {
                                                 res.isShown === true ?
-                                                    <Text style={{ fontFamily: 'Avenir-Black', lineHeight: 19, marginTop: 12, }}>Replies</Text>
+                                                    <Text style={styles.repliesText}>Replies</Text>
                                                     :
                                                     <Text style={styles.replies}>{res.commentsCount} Replies</Text>
                                             }
@@ -113,9 +133,9 @@ const PastComplaint = ({ navigation, route, props }) => {
                                                             repliesData.map((val, j) => {
                                                                 return (
                                                                     <View key={j}>
-                                                                        <Text style={{ fontFamily: 'Avenir-Heavy', marginTop: 4.5 }}>{val.name}</Text>
-                                                                        <Text style={{ fontFamily: 'Avenir-Book', marginTop: 1.5 }}>{val.comment}</Text>
-                                                                        <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', color: '#9E9E9E', marginTop: 9 }}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
+                                                                        <Text style={styles.name}>{val.name}</Text>
+                                                                        <Text style={styles.comment}>{val.comment}</Text>
+                                                                        <Text style={styles.date}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
                                                                         {
                                                                             repliesData.length > 1 ?
                                                                                 <View style={styles.horizontalLine} />
@@ -127,6 +147,12 @@ const PastComplaint = ({ navigation, route, props }) => {
                                                                 )
                                                             })
                                                     }
+                                                    <View style={styles.messageBox}>
+                                                        <TextInput style={styles.messageInput} placeholder={"Type Message.."}  onChangeText={text => setMessage(text)} value={message}/>
+                                                        <Pressable style={styles.sendButton} onPress={() => _onReply(res.id)}>
+                                                            <Text style={styles.sendButtonText}>Send</Text>
+                                                        </Pressable>
+                                                    </View>
                                                 </View> : null
                                         }
                                         <View style={styles.horizontalLine} />
@@ -170,11 +196,55 @@ const styles = StyleSheet.create({
         color: Colors.blueGreen,
         borderBottomWidth: 1,
         borderBottomColor: Colors.blueGreen,
-        width: 65
+        width: 60
     },
     horizontalLine: {
         borderBottomWidth: 1,
         marginTop: 10,
         borderBottomColor: Colors.spanishGreyLight
+    },
+    noComplainView: {
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        flex: 1
+    },
+    repliesText: {
+        fontFamily: 'Avenir-Black', 
+        lineHeight: 19, 
+        marginTop: 12,
+    },
+    name: {
+        fontFamily: 'Avenir-Heavy', 
+        marginTop: 4.5
+    },
+    comment: {
+        fontFamily: 'Avenir-Book', 
+        marginTop: 1.5
+    },
+    date: {
+        fontSize: 12, 
+        fontFamily: 'Avenir-Medium', 
+        color: '#9E9E9E', 
+        marginTop: 9
+    },
+    messageBox: {
+        marginTop: 17, 
+        flexDirection: 'row'
+    },
+    messageInput: {
+        borderWidth: 1, 
+        borderColor: '#979797', 
+        width: '75%'
+    },
+    sendButton: {
+        borderWidth: 1, 
+        marginLeft: 16
+    },
+    sendButtonText: {
+        textAlign: 'center', 
+        paddingTop: 12, 
+        paddingLeft: 18.5, 
+        paddingRight: 18.5, 
+        lineHeight: 19
     }
 })
