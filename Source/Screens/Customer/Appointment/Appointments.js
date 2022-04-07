@@ -90,7 +90,7 @@ const Appointments = ({navigation,props}) => {
                   }
                   <View style={styles.contentView}>
                     <Text style={styles.name}>{res?.style?.name == undefined ? res?.styletype?.name : res?.style?.name}</Text>
-                    <Text style={styles.upcomingDate}>{moment.utc(res?.booking_date,).local().add(0, 'days').calendar(null, {sameElse: 'DD MMM YYYY hh:mm A'})}</Text>
+                    <Text style={styles.upcomingDate}>{moment.utc(res?.booking_date,).local().add(0, 'days').calendar(null, {sameElse: 'ddd DD MMM YYYY hh:mm A'})}</Text>
                     <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'UPCOMING'})}>
                       <Text style={styles.bookingButtonText}>Look at booking</Text>
                     </Pressable>
@@ -131,7 +131,7 @@ const Appointments = ({navigation,props}) => {
                   }
                   <View style={styles.contentView}>
                     <Text style={styles.name}>{res?.style?.name === undefined ? res.service?.name : res?.style?.name}</Text>
-                    <Text style={styles.passedDate}>{moment.utc(res?.booking_date,).local().format("DD MMM YYYY hh:mm a")}</Text>
+                    <Text style={styles.passedDate}>{moment.utc(res?.booking_date,).local().format("ddd DD MMM YYYY hh:mm a")}</Text>
                     <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'PASSED'})}>
                       <Text style={styles.bookingButtonText}>Look at booking</Text>
                     </Pressable>

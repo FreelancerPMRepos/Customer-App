@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, TextInput } from 'react-native';
 import Header from '../../../Components/Header';
-import { BASE_URL, Colors } from '../../../Config';
+import { BASE_URL, Colors, width } from '../../../Config';
 import moment from 'moment';
 import Loader from '../../../Components/Loader';
 
@@ -74,7 +74,7 @@ const PastComplaint = ({ navigation, route, props }) => {
     }
 
     const _onReply = (id) => {
-        if(message == '') {
+        if (message == '') {
             alert('Please eneter the message')
         } else {
             console.log("sd")
@@ -83,15 +83,15 @@ const PastComplaint = ({ navigation, route, props }) => {
                 comment: message,
                 complaint_id: id
             })
-            .then(res => {
-                getComplainList()
-                setMessage('')
-                setLoading(false)
-            })
-            .catch(e => {
-                console.log('e rrr', e)
-               setLoading(false)
-            })
+                .then(res => {
+                    getComplainList()
+                    setMessage('')
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log('e rrr', e)
+                    setLoading(false)
+                })
         }
     }
 
@@ -113,7 +113,7 @@ const PastComplaint = ({ navigation, route, props }) => {
                             complainData.map((res, i) => {
                                 return (
                                     <View key={i}>
-                                        <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m a")}</Text>
+                                        <Text style={styles.dateTime}>{moment(res.created_at).format("D MMM YYYY h:m A")}</Text>
                                         <Text style={styles.complaint}>{res.complaint}</Text>
                                         <Pressable onPress={() => getReplies(res.id, i)}>
                                             {
@@ -135,7 +135,7 @@ const PastComplaint = ({ navigation, route, props }) => {
                                                                     <View key={j}>
                                                                         <Text style={styles.name}>{val.name}</Text>
                                                                         <Text style={styles.comment}>{val.comment}</Text>
-                                                                        <Text style={styles.date}>{moment(res.created_at).format("D MMM YYYY h:m")}</Text>
+                                                                        <Text style={styles.date}>{moment(res.created_at).format("D MMM YYYY h:m A")}</Text>
                                                                         {
                                                                             repliesData.length > 1 ?
                                                                                 <View style={styles.horizontalLine} />
@@ -148,7 +148,7 @@ const PastComplaint = ({ navigation, route, props }) => {
                                                             })
                                                     }
                                                     <View style={styles.messageBox}>
-                                                        <TextInput style={styles.messageInput} placeholder={"Type Message.."}  onChangeText={text => setMessage(text)} value={message}/>
+                                                        <TextInput style={styles.messageInput} placeholder={"Type Message.."} onChangeText={text => setMessage(text)} value={message} />
                                                         <Pressable style={styles.sendButton} onPress={() => _onReply(res.id)}>
                                                             <Text style={styles.sendButtonText}>Send</Text>
                                                         </Pressable>
@@ -204,47 +204,47 @@ const styles = StyleSheet.create({
         borderBottomColor: Colors.spanishGreyLight
     },
     noComplainView: {
-        justifyContent: 'center', 
-        alignItems: 'center', 
+        justifyContent: 'center',
+        alignItems: 'center',
         flex: 1
     },
     repliesText: {
-        fontFamily: 'Avenir-Black', 
-        lineHeight: 19, 
+        fontFamily: 'Avenir-Black',
+        lineHeight: 19,
         marginTop: 12,
     },
     name: {
-        fontFamily: 'Avenir-Heavy', 
+        fontFamily: 'Avenir-Heavy',
         marginTop: 4.5
     },
     comment: {
-        fontFamily: 'Avenir-Book', 
+        fontFamily: 'Avenir-Book',
         marginTop: 1.5
     },
     date: {
-        fontSize: 12, 
-        fontFamily: 'Avenir-Medium', 
-        color: '#9E9E9E', 
+        fontSize: 12,
+        fontFamily: 'Avenir-Medium',
+        color: '#9E9E9E',
         marginTop: 9
     },
     messageBox: {
-        marginTop: 17, 
-        flexDirection: 'row'
+        marginTop: 17,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     messageInput: {
-        borderWidth: 1, 
-        borderColor: '#979797', 
-        width: '75%'
+        borderWidth: 1,
+        borderColor: '#979797',
+        width: width * 0.63
     },
     sendButton: {
-        borderWidth: 1, 
-        marginLeft: 16
+        borderWidth: 1,
     },
     sendButtonText: {
-        textAlign: 'center', 
-        paddingTop: 12, 
-        paddingLeft: 18.5, 
-        paddingRight: 18.5, 
+        textAlign: 'center',
+        paddingTop: 12,
+        paddingLeft: width * 0.04,
+        paddingRight: width * 0.04,
         lineHeight: 19
     }
 })

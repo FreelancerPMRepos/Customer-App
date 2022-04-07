@@ -35,8 +35,9 @@ const sex_dropdown = ["MALE", "FEMALE"]
 const hair_length = ["SHORT", "MEDIUM", "LONG",]
 const color = ["YES", "NO",]
 
-const Settings = (props) => {
+const Settings = ({navigation,props}) => {
   const [isLoading, setLoading] = useState(false)
+  const [id, setId] = useState('')
   const [toggleCheckBox, setToggleCheckBox] = useState([])
   const [list, setList] = useState([]);
   const [userData, setUserData] = useState([]);
@@ -50,8 +51,12 @@ const Settings = (props) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    getService()
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      getService()
+    });
+
+    return unsubscribe;
+  }, [navigation])
 
 
   const getService = () => {
@@ -88,6 +93,7 @@ const Settings = (props) => {
     try {
       const jsonValue = await AsyncStorage.getItem('@user_details')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
+      setId(parData.id)
       axios.get(`${BASE_URL}/customer/detail/${parData.id}`)
         .then(res => {
           setUserData(res.data.user_detail)
@@ -219,7 +225,7 @@ const Settings = (props) => {
       interest: temp
     })
       .then(res => {
-       showMessageAlert(res.data.message)
+        showMessageAlert(res.data.message)
         setLoading(false)
       })
       .catch(e => {
@@ -246,12 +252,12 @@ const Settings = (props) => {
           <TextInput placeholder="zoe.corby@gmail.com" onChangeText={text => setEmail(text)} value={email} style={styles.textInputStyle} />
           <Text style={styles.commonText}>Password</Text>
           <TextInput placeholder="*********" onChangeText={text => setPassword(text)} value={password} style={styles.textInputStyle} />
-          <Pressable style={styles.loactionpasswordButton} onPress={() => props.navigation.navigate('ProfileResetPassword')}>
+          <Pressable style={styles.loactionpasswordButton} onPress={() => navigation.navigate('ProfileResetPassword')}>
             <Text style={styles.resetPasswordText}>Reset Password</Text>
           </Pressable>
           <Text style={styles.commonText}>Location</Text>
           <TextInput placeholder="Auto Location Enabled" onChangeText={text => setLocation(text)} value={location} style={styles.textInputStyle} />
-          <Pressable style={styles.loactionpasswordButton} onPress={() => props.navigation.navigate('ChangeLocation')}>
+          <Pressable style={styles.loactionpasswordButton} onPress={() => navigation.navigate('ChangeLocation', { id: id })}>
             <Text style={styles.changeLocationText}>Change Location</Text>
           </Pressable>
           <Text style={styles.servicesText}>Which services are you interested in?</Text>
@@ -344,10 +350,10 @@ const Settings = (props) => {
             <Text style={styles.saveButtonText}>Save</Text>
           </Pressable>
           <View style={styles.bottomButtonView}>
-            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'privacy' })}>
+            <Pressable onPress={() => navigation.navigate('PrivacyPolicy', { name: 'privacy' })}>
               <Text style={styles.privacyPolicyText}>Privacy Policy</Text>
             </Pressable>
-            <Pressable onPress={() => props.navigation.navigate('PrivacyPolicy', { name: 'terms' })}>
+            <Pressable onPress={() => navigation.navigate('PrivacyPolicy', { name: 'terms' })}>
               <Text style={styles.termsServiceText}>Terms Of Service</Text>
             </Pressable>
             <Pressable onPress={() => onLogout()}>

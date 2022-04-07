@@ -13,7 +13,6 @@ const ComplaintScreen = ({ navigation, route, props }) => {
     const [complaint, setComplaint] = useState('');
     const { data } = route.params
 
-    console.log("id", data)
 
     const _onBack = () => navigation.goBack()
 
@@ -23,6 +22,12 @@ const ComplaintScreen = ({ navigation, route, props }) => {
             alert('Please enter complaint')
         } else {
             setLoading(true)
+            console.log("sad",{
+                booking_id: data.id,
+                store_id: data.store.id,
+                complaint: complaint,
+                type: radioButton
+            })
             axios.post(`${BASE_URL}/complaint`, {
                 booking_id: data.id,
                 store_id: data.store.id,
@@ -90,7 +95,7 @@ const ComplaintScreen = ({ navigation, route, props }) => {
                     </View>
                     <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 28, marginTop: 24 }}>Complaint</Text>
                     <TextInput
-                        placeholder='Type your Complaint'
+                        placeholder='Type your complaint'
                         style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 28.5, marginRight: 24.5, marginTop: 6.5, textAlignVertical: 'top', }}
                         onChangeText={text => setComplaint(text)} value={complaint}
                         multiline={true}

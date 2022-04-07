@@ -54,7 +54,6 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     getNote();
   }, [])
 
-  console.log("ds",appointmentDetails)
 
   const getNote = () => {
     setLoading(true)
@@ -594,6 +593,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     )
   }
 
+
   return (
     <View style={styles.container}>
       {
@@ -638,7 +638,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
                   ratingBackgroundColor='#c8c7c8'
                   tintColor="#FFFFFF"
                   readonly={true}
-                  startingValue={4}
+                  startingValue={appointmentDetails.store.avg_rating}
                   imageSize={16}
                 //   onFinishRating={this.ratingCompleted}
                 />

@@ -318,11 +318,11 @@ const Home = (props) => {
                           }
                           <View style={styles.storeContentView}>
                             <View style={styles.contentView}>
-                              <View style={{ width: width * 0.35}}>
+                              <View style={{ width: width * 0.28}}>
                                 <Text style={styles.storeName}>{res.store_name}</Text>
                               </View>
                               <View style={styles.contentView}>
-                                <Text style={styles.time}>{moment.utc(res.opentime, "H").local().format('h a')}-{moment.utc(res.closetime, "H").local().format('h a')}</Text>
+                                <Text style={styles.time}>{moment.utc(res.opentime, "HH:mm:ss").local().format('hh:mm A')}-{moment.utc(res.closetime, "HH:mm:ss").local().format('hh:mm A')}</Text>
                                 {
                                   res.is_available == 1 ?
                                     <Text style={styles.timeText}> Open</Text>

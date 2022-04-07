@@ -7,30 +7,43 @@ import {
     TextInput,
     PermissionsAndroid,
     ScrollView,
+    Pressable,
 } from 'react-native';
 
-import { Colors, height, width } from '../../../Config';
+import { BASE_URL, Colors, height, width } from '../../../Config';
 import Header from '../../../Components/Header';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Geolocation from '@react-native-community/geolocation';
 import Geocoder from 'react-native-geocoding';
+import Loader from '../../../Components/Loader';
+import axios from 'axios';
+import { showMessageAlert } from '../../../Utils/Utility';
 
 Geocoder.init("AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E"); // use a valid API key
 
 const GOOGLE_PLACES_API_KEY = 'AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E';
 
-const ChangeLocation = (props) => {
+const ChangeLocation = ({ navigation, route, props }) => {
+    const [isLoading, setLoading] = useState(false)
     const [isEnabled, setIsEnabled] = useState(false);
     const [latitude, setLatitude] = useState('')
     const [longitude, setLongitude] = useState('')
     const [address, setAddress] = useState('')
+    const [searchAddress, setSearchAddress] = useState("")
     const [mark, setMark] = useState([])
     const [searchLatitude, setSearchLatitude] = useState('')
     const [searchLongitude, setSearchLongitude] = useState('')
     const [searchMark, setSearchMark] = useState([])
+    const { id } = route.params
 
-    const _onBack = () => props.navigation.goBack()
+    const _onBack = () => navigation.goBack()
+
+    useEffect(() => {
+        setIsEnabled(previousState => !previousState);
+        getCurrentLocation()
+    }, [])
+
 
     const toggleSwitch = () => {
         setAddress('')
@@ -39,6 +52,7 @@ const ChangeLocation = (props) => {
     }
 
     const getCurrentLocation = async () => {
+        setLoading(true)
         if (Platform.OS === 'ios') {
             getOneTimeLocation();
         } else {
@@ -62,35 +76,21 @@ const ChangeLocation = (props) => {
         }
     }
 
-    const getOneTimeLocation = async () => {
-        Geolocation.getCurrentPosition(
-            //Will give you the current location
-            (position) => {
-
-                //getting the Longitude from the location json
-                const currentLongitude =
-                    JSON.stringify(position.coords.longitude);
-                setLongitude(currentLongitude)
-                //getting the Latitude from the location json
-                const currentLatitude =
-                    JSON.stringify(position.coords.latitude);
-                setLatitude(currentLatitude)
-                Geocoder.from(currentLatitude, currentLongitude)
-                    .then(json => {
-                        var addressComponent = json.results[0].formatted_address;
-                        setAddress(addressComponent)
-                        setMark([{ latitude: currentLatitude, longitude: currentLongitude }])
-                    })
-                    .catch(error => console.warn(error));
-            },
-            (error) => {
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 30000,
-                maximumAge: 1000
-            },
-        );
+    const getOneTimeLocation = () => {
+        console.log("yaha aaya")
+        Geolocation.getCurrentPosition(info => {
+            console.log(info.coords)
+            setLongitude(info.coords.longitude)
+            setLatitude(info.coords.latitude)
+            Geocoder.from(info.coords.latitude, info.coords.longitude)
+                .then(json => {
+                    var addressComponent = json.results[0].formatted_address;
+                    setAddress(addressComponent)
+                    setMark([{ latitude: info.coords.latitude, longitude: info.coords.longitude }])
+                })
+                .catch(error => console.warn(error));
+        });
+        setLoading(false)
     };
 
     const renderlocation = () => {
@@ -126,6 +126,9 @@ const ChangeLocation = (props) => {
                                         ))}
                                 </MapView>
                             </View>
+                            <View style={{ marginTop: 70 }}>
+                                {renderSaveButton('ON')}
+                            </View>
                         </View>
                         :
                         null
@@ -149,7 +152,7 @@ const ChangeLocation = (props) => {
                                     language: 'en', // language of the results
                                 }}
                                 returnKeyType={'default'}
-                                onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng)}
+                                onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng, data)}
                                 onFail={(error) => console.error(error)}
                                 listViewDisplayed="auto"
                                 suppressDefaultStyles={true}
@@ -180,6 +183,13 @@ const ChangeLocation = (props) => {
                                 }}
                             />
                             {searchLatitude ? searchMap() : null}
+                            {
+                                searchLatitude ?
+                                    <View style={{ marginTop: 130 }}>
+                                        {renderSaveButton('OFF')}
+                                    </View>
+                                    : null
+                            }
                         </View>
                         :
                         null
@@ -188,7 +198,9 @@ const ChangeLocation = (props) => {
         )
     }
 
-    const setSearchLocation = (lat, lng) => {
+    const setSearchLocation = (lat, lng, data) => {
+        console.log("data", data)
+        setSearchAddress(data.description)
         setSearchMark([{ latitude: lat, longitude: lng }])
         setSearchLatitude(lat)
         setSearchLongitude(lng)
@@ -216,22 +228,72 @@ const ChangeLocation = (props) => {
         )
     }
 
+    const renderSaveButton = (key) => {
+        return (
+            <Pressable style={{ borderWidth: 1, marginLeft: 23, marginRight: 22 }} onPress={() => _onSave(key)}>
+                <Text style={{ textAlign: 'center', marginTop: 11.5, marginBottom: 11.5 }}>Save</Text>
+            </Pressable>
+        )
+    }
+
+    const _onSave = (key) => {
+        if (key == 'OFF') {
+            axios.put(`${BASE_URL}/customer`, {
+                id: id,
+                address: searchAddress,
+                latitude: searchLatitude,
+                longitude: searchLongitude
+            })
+                .then(res => {
+                    //  setUpcomingList(res.data)
+                    showMessageAlert('Location is updated successfully.')
+                   console.log("tres",res.data)
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log('er', e)
+                    setLoading(false)
+                })
+        } else {
+            axios.put(`${BASE_URL}/customer`, {
+                id: id,
+                address: address,
+                latitude: latitude,
+                longitude: longitude
+            })
+                .then(res => {
+                    //  setUpcomingList(res.data)
+                    showMessageAlert('Location is updated successfully.')
+                   console.log("tres",res.data)
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log('er', e)
+                    setLoading(false)
+                })
+        }
+    }
+
     return (
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
             }
-            <ScrollView>
-                {
+            {
+                isLoading == true ? <Loader /> :
                     <View>
-                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy' }}>Change Location</Text>
-                        </View>
-                        {renderlocation()}
+                        {
+                            <View>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy' }}>Change Location</Text>
+                                </View>
+                                {renderlocation()}
+                            </View>
+                        }
+                        {renderSearchLocation()}
                     </View>
-                }
-                {renderSearchLocation()}
-            </ScrollView>
+            }
+
         </View>
     )
 }

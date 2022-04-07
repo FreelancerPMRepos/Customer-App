@@ -86,8 +86,12 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (!isCancelled) {
             getStoreData();
             if (updatedName.fav != null && updatedName.fav.data != null && updatedName.fav.data != null && updatedName.fav.data.length > 0 && updatedName.fav.data[0].service) {
-                //  console.log("object", updatedName.fav.data[0].service)
                 setServiceId(updatedName.fav.data[0].service.id)
+                setServiceName(updatedName.fav.data[0].service.name)
+                if (updatedName.fav.data[0].styletype) {
+                    setServiceTypeId(updatedName.fav.data[0].styletype.id)
+                    setServiceTypeName(updatedName.fav.data[0].styletype.name)
+                }
             }
             setNextYear(new Date().getFullYear());
             setNextDate(new Date().getMonth());
@@ -113,9 +117,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 global.mark = [{ latitude: res.data.latitude, longitude: res.data.longitude }]
                 global.latitude = res.data.latitude
                 global.longitude = res.data.longitude
-                console.log("latitude", global.latitude)
-                console.log("longitude", global.longitude)
-                console.log("maek", global.mark)
                 var pdis = getPreciseDistance(
                     { latitude: res.data.latitude, longitude: res.data.longitude },
                     { latitude: global.CurrentLatitude, longitude: global.CurrentLongitude },
@@ -465,6 +466,10 @@ const StoreDescription = ({ navigation, route, props }) => {
             alert('Please select pick style.')
             setLoading(false)
             return false
+        } else if (hairdresserId == '') {
+            alert('Please select hairdresser.')
+            setLoading(false)
+            return false
         } else if (selectedDate == '') {
             alert('Please select date.')
             setLoading(false)
@@ -709,7 +714,6 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const onContinePay = () => {
-        dispatch(deleteSalon(updatedName.fav))
         setBookingDone(!bookingDone)
         navigation.navigate('PaymentScreen', { booking_id: bookingData.id, salon_name: storeData.store_name, employee_name: hairdresserName, date_time: `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}` })
     }
@@ -903,7 +907,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 />
                             </View>
                             <View style={{ flexDirection: 'row' }}>
-                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>{moment.utc(storeData.opentime, "H").local().format('h')}-{moment.utc(storeData.closetime, "H").local().format('h')}</Text>
+                                <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4 }}>{moment.utc(storeData.opentime, "HH:mm:ss").local().format('hh:mm A')}-{moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A')}</Text>
                                 {
                                     storeData?.is_available == 1 ?
                                         <Text style={{ fontSize: 12, fontFamily: 'Avenir-Medium', marginTop: 4, color: '#70CF2B' }}> Open</Text>
@@ -947,17 +951,11 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 {renderGender()}
                             </View>
                         }
-                        {
-                            updatedName.fav.data == null ?
-                                <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service</Text>
-                                    {renderService()}
+                        <View>
+                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service</Text>
+                            {renderService()}
 
-                                </View>
-                                :
-                                null
-
-                        }
+                        </View>
                         < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type</Text>
                         {renderServiceType()}
                         {
