@@ -24,6 +24,7 @@ import DrawerContent from '../Components/DrawerContent/index';
 // Main
 import Home from '../Screens/Customer/Main/Home';
 import Search from '../Screens/Customer/Main/Search';
+import SearchDetailScreen from '../Screens/Customer/Main/SearchDetailScreen';
 import Settings from '../Screens/Customer/Main/Settings';
 import StoreDescription from '../Screens/Customer/Main/StoreDescription';
 import PaymentScreen from '../Screens/Customer/Main/PaymentScreen';
@@ -174,7 +175,8 @@ const Routes = (props) => {
                     <Stack.Screen name="HairCuts" component={HairCuts} />
                     <Stack.Screen name="HairCutDescriptionScreen" component={HairCutDescriptionScreen} />
                     <Stack.Screen name="Search" component={Search} />
-                    <Stack.Screen name="Appointments" component={Appointments} />
+                    <Stack.Screen name="SearchDetailScreen" component={SearchDetailScreen} />
+                    <Stack.Screen name="Appointments" component={Appointments} /> 
                     <Stack.Screen name="AppointmentsDescriptionScreen" component={AppointmentsDescriptionScreen} />
                     <Stack.Screen name="Settings" component={Settings} />
                     <Stack.Screen name="StoreDescription" component={StoreDescription} />

@@ -20,6 +20,8 @@ import axios from 'axios';
 import Dialog, { DialogContent } from 'react-native-popup-dialog';
 import strings from '../../../Localization/strings';
 import { showMessageAlert } from '../../../Utils/Utility';
+import messaging from '@react-native-firebase/messaging';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 const HelloWorldApp = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,12 +42,46 @@ const HelloWorldApp = (props) => {
         getTopStyleList();
         getServiceList()
         getUserInfo()
+        requestUserPermission();
       }
     }
     return () => {
       isCancelled = true
     }
   }, [])
+
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      getFcmToken()
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
+  const getFcmToken = async () => {
+    console.log("ok")
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      //console.log(fcmToken);
+      console.log("Your Firebase Token is:", fcmToken);
+      axios.post(`${BASE_URL}/resigterdevicetoken`, {
+        token: fcmToken,
+        type: "ANDROID"
+      })
+      .then(res => {
+        console.log("response",res.data)
+      })
+      .catch(e => {
+        console.log('e', e)
+      })
+    } else {
+      console.log("Failed", "No token received");
+    }
+  }
 
   const getUserInfo = async () => {
     setLoading(true)
@@ -120,7 +156,7 @@ const HelloWorldApp = (props) => {
   }
 
   const _onFavourite = (id) => {
-    console.log("id",id)
+    console.log("id", id)
     setLoading(true)
     axios.post(`${BASE_URL}/favourite`, {
       style_id: id
@@ -185,26 +221,27 @@ const HelloWorldApp = (props) => {
           {
             topData?.top_cuts?.map((item, index) => {
               return (
-                <Pressable key={index} onPress={() => _onFavourite(item.style_id)}>
+                <Pressable key={index} onPress={() => props.navigation.navigate('SearchDetailScreen', { id: item.style_id })}>
                   <ImageBackground
                     style={styles.searchImage}
                     source={{
                       uri: `${item.upload_front_photo != null ? item.upload_front_photo : item.upload_back_photo != null ? item.upload_back_photo : item.upload_top_photo != null ? item.upload_top_photo : item.upload_right_photo != null ? item.upload_right_photo : item.upload_left_photo != null ? item.upload_left_photo : item.upload_left_photo}`,
                     }}
                   >
-                    {
-                      item.is_fav == 1 ?
-                        <Image
-                          style={styles.heartIcon}
-                          source={require('../../../Images/heart.png')}
-                        />
-                        :
-                        <Image
-                          style={styles.heartIcon}
-                          source={require('../../../Images/empty_heart.png')}
-                        />
-                    }
-
+                    <Pressable onPress={() => _onFavourite(item.style_id)}>
+                      {
+                        item.is_fav == 1 ?
+                          <Image
+                            style={styles.heartIcon}
+                            source={require('../../../Images/heart.png')}
+                          />
+                          :
+                          <Image
+                            style={styles.heartIcon}
+                            source={require('../../../Images/empty_heart.png')}
+                          />
+                      }
+                    </Pressable>
                   </ImageBackground>
                 </Pressable>
               )
@@ -223,13 +260,14 @@ const HelloWorldApp = (props) => {
           {
             topData?.top_styles?.map((item, index) => {
               return (
-                <Pressable key={index} onPress={() => _onFavourite(item.style_id)}>
+                <Pressable key={index} onPress={() => props.navigation.navigate('SearchDetailScreen', { id: item.style_id })}>
                   <ImageBackground
                     style={styles.searchImage}
                     source={{
                       uri: `${item.upload_front_photo != null ? item.upload_front_photo : item.upload_back_photo != null ? item.upload_back_photo : item.upload_top_photo != null ? item.upload_top_photo : item.upload_right_photo != null ? item.upload_right_photo : item.upload_left_photo != null ? item.upload_left_photo : item.upload_left_photo}`,
                     }}
                   >
+                    <Pressable onPress={() => _onFavourite(item.style_id)}>
                     {
                       item.is_fav == 1 ?
                         <Image
@@ -242,6 +280,7 @@ const HelloWorldApp = (props) => {
                           source={require('../../../Images/empty_heart.png')}
                         />
                     }
+                    </Pressable>
                   </ImageBackground>
                 </Pressable>
               )
@@ -313,13 +352,14 @@ const HelloWorldApp = (props) => {
         {
           topList?.map((res, index) => {
             return (
-              <Pressable key={index} onPress={() => _onFavourite(res.style_id)}>
+              <Pressable key={index} onPress={() => props.navigation.navigate('SearchDetailScreen', { id: res.style_id })}>
                 <ImageBackground
                   style={styles.searchImage}
                   source={{
                     uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
                   }}
                 >
+                  <Pressable onPress={() => _onFavourite(res.style_id)}>
                   {
                     res.is_fav == 1 ?
                       <Image
@@ -332,6 +372,7 @@ const HelloWorldApp = (props) => {
                         source={require('../../../Images/empty_heart.png')}
                       />
                   }
+                  </Pressable>
                 </ImageBackground>
               </Pressable>
             )

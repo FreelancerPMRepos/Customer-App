@@ -43,6 +43,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   const [nextYear, setNextYear] = useState(0);
   // Time
   const [time, setTime] = useState([]);
+  const [timeInterval, setTimeInterval] = useState('');
 
 
   const _onBack = () => navigation.goBack()
@@ -50,9 +51,11 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   useEffect(() => {
     setNextYear(new Date().getFullYear());
     setNextDate(new Date().getMonth());
-    getDateSlot();
+    getDateSlot(appointmentDetails.employee.id);
+    setTimeInterval(appointmentDetails.styletype.time)
     getNote();
   }, [])
+
 
 
   const getNote = () => {
@@ -93,9 +96,10 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   }
 
 
-  const getDateSlot = () => {
+  const getDateSlot = (id) => {
     setLoading(true)
-    axios.get(`${BASE_URL}/timeslot/list/${appointmentDetails.store.id}`)
+    //  axios.get(`${BASE_URL}/timeslot/list/${appointmentDetails.store.id}`)
+    axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
       .then(res => {
         setDateList(res.data.list)
         setLoading(false)
@@ -163,8 +167,8 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     var timeStops = [];
     for (var i in dateList) {
       if (dateList[i].day == DaysName[day]) {
-        startTime = dateList[i].open_time;
-        endTime = dateList[i].close_time;
+        startTime = dateList[i].employee_start_time;
+        endTime = dateList[i].employee_end_time;
         var openTime = moment(startTime, 'HH:mm');
         var closeTime = moment(endTime, 'HH:mm');
 
@@ -174,7 +178,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
 
         while (openTime <= closeTime) {
           timeStops.push(new moment(openTime).format('hh:mm A'));
-          openTime.add(30, 'minutes');
+          openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
         }
       }
     }

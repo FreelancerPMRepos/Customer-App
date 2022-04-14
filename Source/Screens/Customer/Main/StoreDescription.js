@@ -97,7 +97,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             setNextDate(new Date().getMonth());
             getServiceList();
             getHairdresserList();
-            getDateSlot();
+            //  getDateSlot();
             getData();
             //     Check();
         }
@@ -154,7 +154,9 @@ const StoreDescription = ({ navigation, route, props }) => {
         setSelectedDate(date)
         var proOpenTime = "";
         var proCloseTime = "";
+        console.log("pro", promotionTime)
         for (var i in promotionTime) {
+            console.log("tyu", promotionTime[i].day, DayShortCapsName[day])
             if (promotionTime[i].day == DayShortCapsName[day]) {
                 var startTime = promotionTime[i].open_time;
                 var endTime = promotionTime[i].close_time;
@@ -167,8 +169,8 @@ const StoreDescription = ({ navigation, route, props }) => {
         var timeStops = [];
         for (var i in dateList) {
             if (dateList[i].day == DaysName[day]) {
-                startTime = dateList[i].open_time;
-                endTime = dateList[i].close_time;
+                startTime = dateList[i].employee_start_time;
+                endTime = dateList[i].employee_end_time;
                 var openTime = moment(startTime, 'HH:mm');
                 var closeTime = moment(endTime, 'HH:mm');
 
@@ -195,10 +197,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                 }
                 var new_array = [];
                 for (var i in timeStops) {
-                    console.log("ds", moment.utc(new Date()).format('hh:mm A'))
                     if (moment(`${nextYear}-${nextDate + 1}-${date}`).format('YYYY-M-DD') === moment(new Date()).format('YYYY-M-DD')) {
                         if (moment(timeStops[i].date, 'hh:mm A').format('hh:mm A') >= moment.utc(new Date()).format('hh:mm A')) {
-                            console.log("andar aaya", timeStops[i].date)
                             new_array.push(timeStops[i])
 
                         }
@@ -232,7 +232,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             } else if (date.getDay() == 2) {
                 newObj.date2 = date.getDate();
                 newObj.is_open2 = getIsopen(date.getDay(), date);
-                console.log("ds", newObj.is_open2)
             } else if (date.getDay() == 3) {
                 newObj.date3 = date.getDate();
                 newObj.is_open3 = getIsopen(date.getDay(), date);
@@ -257,6 +256,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (moment(date).format('MM/DD/YYYY') >= moment(new Date()).format('MM/DD/YYYY')) {
             for (var i in dateList) {
                 if (dateList[i].day == DaysName[day]) {
+                    console.log(dateList[i].is_open + dateList[i].day + DaysName[day])
                     return dateList[i].is_open;
                 }
             }
@@ -265,9 +265,10 @@ const StoreDescription = ({ navigation, route, props }) => {
         return 0;
     }
 
-    const getDateSlot = () => {
+    const getDateSlot = (id) => {
         setLoading(true)
-        axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
+        //   axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
+        axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
             .then(res => {
                 setDateList(res.data.list)
                 setLoading(false)
@@ -407,9 +408,11 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onHairdresser = (res) => {
+        console.log("id", res.id)
         setHairdresserId(res.id)
         setHairdresserName(res.name)
         setHairdresserModal(!hairdresserModal)
+        getDateSlot(res.id)
     }
 
     const _onGender = (res) => {
@@ -796,6 +799,15 @@ const StoreDescription = ({ navigation, route, props }) => {
         navigation.navigate('HomeTabs', { screen: 'Home' })
     }
 
+    const _onDateClick = () => {
+        if (hairdresserId === '') {
+            alert('Please select hairdresser first.')
+        } else {
+            setDateModalVisible(!dateModalVisible)
+            getMonthDateDay(new Date().getFullYear(), new Date().getMonth())
+        }
+    }
+
     return (
         <View style={styles.container}>
             {
@@ -947,7 +959,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <View style={{ marginLeft: 27.5 }}>
                         {
                             <View>
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Gender</Text>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex</Text>
                                 {renderGender()}
                             </View>
                         }
@@ -1160,7 +1172,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         </Modal>
                         {renderBookingDone()}
                         <View style={{ flexDirection: 'row' }}>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => { setDateModalVisible(!dateModalVisible), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
+                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => _onDateClick()}>
                                 <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
                                 <Image
                                     style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
