@@ -163,6 +163,14 @@ const Home = (props) => {
     getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
   }
 
+
+  const resetFilter = () => {
+    setKeyword('')
+    setMiles(0)
+    getStoreList("", "", "", "", "", global.latitude, global.longitude)
+    setShowFilter(!showFilter)
+  }
+
   return (
     <View style={styles.container}>
 
@@ -259,6 +267,14 @@ const Home = (props) => {
                   //    onValueChange={(value) => getStoreList('', '', '', '', value, global.latitude, global.longitude)}
                     />
                   </View> : null
+              }
+              {
+                showFilter == true ? 
+                <View style={{top: 120, marginLeft: width * 0.64}}>
+                  <Pressable style={{backgroundColor: '#FFFFFF'}} onPress={() => resetFilter()}>
+                    <Text style={{fontSize: 12, fontFamily: 'Avenir-Book', marginTop: 5, marginBottom: 5, marginLeft: 15.5, marginRight: 15.5}}>Clear Filters</Text>
+                  </Pressable>
+                </View> : null
               }
               {
                 updatedName.fav.data == null ?
