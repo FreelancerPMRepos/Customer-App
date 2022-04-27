@@ -24,7 +24,7 @@ const Header = ({ leftIcon, onLeftIconPress, rightIcon, onRightIconPress, title,
                 <View style={styles.rightView}>
                     <Pressable onPress={onRightIconPress}>
                         {
-                            rightIcon === 'notification' &&  <FastImage resizeMode={FastImage.resizeMode.contain} source={require('../../Images/bell.png')} style={styles.bellLogo} />
+                            rightIcon === 'notification' &&  <FastImage resizeMode={FastImage.resizeMode.contain} source={require('../../Images/notification.png')} style={styles.bellLogo} />
                         }
                     </Pressable>
                 </View>
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
         marginLeft: 18
     },
     bellLogo: {
-        width: 27,
-        height: 28,
+        width: 26,
+        height: 26,
         marginRight: 18
     },
     rightView: {

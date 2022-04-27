@@ -7,10 +7,11 @@ import {
   Pressable,
   ScrollView
 } from 'react-native';
+
 import Header from '../../../Components/Header'
 import SelectDropdown from 'react-native-select-dropdown'
 import axios from 'axios';
-import { BASE_URL, IMAGE_URL, width } from '../../../Config';
+import { BASE_URL, width } from '../../../Config';
 import Loader from '../../../Components/Loader';
 import moment from 'moment';
 

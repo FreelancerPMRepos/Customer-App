@@ -19,7 +19,6 @@ import Loader from '../../Components/Loader';
 
 import {
   GoogleSignin,
-  statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
   LoginManager,
@@ -30,7 +29,6 @@ import {
 import axios from 'axios';
 import strings from '../../Localization/strings';
 import { showMessageAlert } from '../../Utils/Utility';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 GoogleSignin.configure({

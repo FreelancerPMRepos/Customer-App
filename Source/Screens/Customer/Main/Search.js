@@ -313,7 +313,7 @@ const HelloWorldApp = (props) => {
                   />
                 </Pressable>
               </View>
-              <View style={styles.serviceView}>
+              <ScrollView style={styles.serviceView} horizontal={true}>
                 {
                   serviceData.map((res, index) => {
                     return (
@@ -323,7 +323,7 @@ const HelloWorldApp = (props) => {
                     )
                   })
                 }
-              </View>
+              </ScrollView>
               <View style={styles.subTagView}>
                 {
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap' }} >

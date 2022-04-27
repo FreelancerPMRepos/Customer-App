@@ -9,6 +9,7 @@ import {
     Pressable,
     ScrollView
 } from 'react-native';
+
 import Header from '../../Components/Header';
 import { BASE_URL, width } from '../../Config/index'
 import Loader from '../../Components/Loader';

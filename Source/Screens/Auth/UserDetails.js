@@ -9,22 +9,12 @@ import {
   Pressable
 } from 'react-native';
 
-import { BASE_URL, isValidEmail, width } from '../../Config';
+import { isValidEmail, width } from '../../Config';
 import { useDispatch, useSelector } from 'react-redux';
-import { SET_USER } from '../../Actions/Types'
 
 import {
   GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {
-  LoginManager,
-  AccessToken,
-  GraphRequest,
-  GraphRequestManager
-} from 'react-native-fbsdk-next'
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocialSignup } from '../../Actions/AuthActions';
 
@@ -46,14 +36,12 @@ const UserDetails = (props) => {
   const [type, setType] = useState('');
   const dispatch = useDispatch()
   const auth = useSelector(state => state.auth)
-  const { isError } = auth
 
   useEffect(() => {
     GoogleSignin.configure()
     getData()
     getEmail()
     setEmail('')
-    //  dispatch(resetAuth())
   }, [])
 
   const getData = async () => {
@@ -63,7 +51,7 @@ const UserDetails = (props) => {
       setId(parData.social_id)
       setType(parData.type)
     } catch (e) {
-      // error reading value
+      console.log("e",e)
     }
   }
 
@@ -71,10 +59,8 @@ const UserDetails = (props) => {
     try {
       const value = await AsyncStorage.getItem('@google_email')
       setEmail(value)
-      // setId(parData.social_id)
-      // setType(parData.type)
     } catch (e) {
-      // error reading value
+      console.log("e",e)
     }
   }
 
@@ -99,18 +85,18 @@ const UserDetails = (props) => {
 
   const renderEmailView = () => {
     return (
-      <View style={{ width: width * 0.83, marginTop: 44 }}>
-        <Text style={{ color: "#FFFFFF" }}>Email</Text>
+      <View style={styles.emailView}>
+        <Text style={styles.emailText}>Email</Text>
         <TextInput placeholder="Enter Email" style={styles.input} placeholderTextColor='#FFFFFF' onChangeText={text => setEmail(text)} value={email} editable={type == 'GOOGLE' ? false : true} />
       </View>
     )
   }
 
 
-  const renderLoginButton = () => {
+  const renderSingupButton = () => {
     return (
-      <Pressable style={{ backgroundColor: '#FFFFFF', marginTop: 33, }} onPress={() => _onSignUp()}>
-        <Text style={{ marginLeft: 44, marginRight: 44, marginTop: 8, marginBottom: 8, fontFamily: 'Avenir Medium' }}>SIGN UP</Text>
+      <Pressable style={styles.signUpButton} onPress={() => _onSignUp()}>
+        <Text style={styles.signUpText}>SIGN UP</Text>
       </Pressable>
     )
   }
@@ -122,10 +108,10 @@ const UserDetails = (props) => {
           style={styles.tinyLogo}
           source={require('../../Images/logo.png')}
         />
-        <Text style={{ color: "#FFFFFF", fontSize: 16, fontFamily: 'Avenir Heavy' }}>Your Way. Every Time.</Text>
-        <Text style={{ color: "#FFFFFF", fontSize: 18, marginTop: 33, fontFamily: 'Avenir Heavy' }}>Sign Up</Text>
+        <Text style={styles.heading}>Your Way. Every Time.</Text>
+        <Text style={styles.subHeading}>Sign Up</Text>
         {renderEmailView()}
-        {renderLoginButton()}
+        {renderSingupButton()}
       </ImageBackground>
     </View>
   )
@@ -147,5 +133,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 11.5,
     color: '#FFFFFF'
+  },
+  emailView: {
+    width: width * 0.83, 
+    marginTop: 44
+  },
+  emailText: {
+    color: "#FFFFFF" 
+  },
+  signUpButton: {
+    backgroundColor: '#FFFFFF', 
+    marginTop: 33,
+  },
+  signUpText: {
+    marginLeft: 44, 
+    marginRight: 44, 
+    marginTop: 8, 
+    marginBottom: 8, 
+    fontFamily: 'Avenir Medium'
+  },
+  heading: {
+    color: "#FFFFFF", 
+    fontSize: 16, 
+    fontFamily: 'Avenir Heavy'
+  },
+  subHeading: {
+    color: "#FFFFFF", 
+    fontSize: 18, 
+    marginTop: 33, 
+    fontFamily: 'Avenir Heavy'
   }
 })

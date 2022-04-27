@@ -140,10 +140,9 @@ const RevenueMonth = (props) => {
               </View>
               <View style={{ borderColor: '#979797', flexDirection: 'row', borderBottomWidth: 1 }}>
                 {
-                  Days.map((res) => {
-                    //     console.log("dhf", res)
+                  Days.map((res, index) => {
                     return (
-                      <Text style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 50.5, color: '#1A1919' }}>{res}</Text>
+                      <Text key={index} style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 53.1, color: '#1A1919' }}>{res}</Text>
                     )
                   })
                 }
@@ -152,11 +151,10 @@ const RevenueMonth = (props) => {
                 <View style={{}}>
                   {
                     days.map((res, i) => {
-                    //  console.log("Asddsa", res.date2)
                       return (
-                        <View style={{ flexDirection: 'row' }}>
+                        <View key={i} style={{ flexDirection: 'row' }}>
                           <Pressable style={{ borderBottomWidth: 1, height: 45, borderLeftWidth: 1 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 49.0, color: '#1A1919' }}>{res.date} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -174,7 +172,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, height: 45 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 49.5, color: '#1A1919' }}>{res.date1} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date1} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -192,7 +190,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderBottomWidth: 1, borderLeftWidth: 1 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 50.0, lineHeight: 19, color: '#1A1919' }}>{res.date2} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, lineHeight: 19, color: '#1A1919' }}>{res.date2} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -210,7 +208,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, height: 45 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 49.5, color: '#1A1919' }}>{res.date3} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date3} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -228,7 +226,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, height: 45 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 49.5, color: '#1A1919' }}>{res.date4} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date4} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -246,7 +244,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, height: 45 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 49.5, color: '#1A1919' }}>{res.date5} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date5} </Text>
                             {
                               listData.map((val) => {
                                 return (
@@ -264,7 +262,7 @@ const RevenueMonth = (props) => {
                             }
                           </Pressable>
                           <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1 }}>
-                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 48.5, color: '#1A1919' }}>{res.date6} </Text>
+                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', width: 51.9, color: '#1A1919' }}>{res.date6} </Text>
                             {
                               listData.map((val) => {
                                 return (

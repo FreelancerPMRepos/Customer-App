@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Image, Pressable, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Image, Pressable, TouchableOpacity, ScrollView } from 'react-native';
 import { BASE_URL, Colors, height, width } from '../../../Config';
 import Header from '../../../Components/EmployeeHeader';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Styles = (props) => {
+const Styles = ({navigation,props}) => {
     const [serviceData, setServiceData] = useState([]);
     const [styleData, setStyleData] = useState([]);
     const [selectedService, setSelectedService] = useState('');
     const [selectedServiceId, setSelectedServiceId] = useState('');
 
 
-    const _onBack = () => props.navigation.goBack()
+    const _onBack = () => navigation.goBack()
 
     useEffect(() => {
-        getServiceList()
-    }, [])
+        const unsubscribe = navigation.addListener('focus', () => {
+            getServiceList()
+        });
+
+        return unsubscribe;
+    }, [navigation])
 
 
     const getServiceList = () => {
@@ -50,8 +54,8 @@ const Styles = (props) => {
                 <Header leftIcon="menu" onLeftIconPress={() => _onBack()} title={"Styles"} {...props} />
             }
             {
-                <View>
-                    <View style={{ backgroundColor: '#D8D8D8', marginLeft: 16, marginTop: 9, borderRadius: 5, flexDirection: 'row', marginRight: 10 }}>
+                <ScrollView style={{ marginBottom: 20 }}>
+                    <ScrollView style={{ backgroundColor: '#D8D8D8', marginLeft: 16, marginTop: 9, borderRadius: 5, flexDirection: 'row', marginRight: 10 }} horizontal={true}>
                         {
                             serviceData.map((res, index) => {
                                 return (
@@ -70,12 +74,12 @@ const Styles = (props) => {
                                 )
                             })
                         }
-                    </View>
+                    </ScrollView>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 9 }}>
                         {
                             styleData.map((res, index) => {
                                 return (
-                                    <Pressable key={index} onPress={() => props.navigation.navigate('StylesDescription', {id: res.id})}>
+                                    <Pressable key={index} onPress={() => navigation.navigate('StylesDescription', { id: res.id })}>
                                         {
                                             res.service.name == selectedService ?
                                                 <View>
@@ -96,12 +100,12 @@ const Styles = (props) => {
                             })
                         }
                     </View>
-                </View>
+                </ScrollView>
             }
             {
                 <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => props.navigation.navigate('AddStyle', { service_name: selectedService, service_id: selectedServiceId })}
+                    onPress={() => navigation.navigate('AddStyle', { service_name: selectedService, service_id: selectedServiceId })}
                     style={styles.touchableOpacityStyle}>
                     <Image
                         source={require('../../../Images/Group.png')}

@@ -20,7 +20,6 @@ import Geolocation from '@react-native-community/geolocation';
 
 import {
     GoogleSignin,
-    statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
     LoginManager,
@@ -84,23 +83,12 @@ const Login = (props) => {
     const getOneTimeLocation = async () => {
         setLoading(true)
         Geolocation.getCurrentPosition(
-            //Will give you the current location
             (position) => {
-
-                //getting the Longitude from the location json
                 const currentLongitude =
                     JSON.stringify(position.coords.longitude);
-
-                //getting the Latitude from the location json
                 const currentLatitude =
                     JSON.stringify(position.coords.latitude);
-
-                //Setting Longitude state
-
-                //Setting Longitude state
                 setLocation(currentLongitude, currentLatitude)
-                console.log("as", currentLongitude)
-      console.log('ds', currentLatitude)
                 setLoading(false)
             },
             (error) => {
@@ -118,9 +106,9 @@ const Login = (props) => {
         try {
             await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
             await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
-         } catch (e) {
-             // saving error
-         }
+        } catch (e) {
+            // saving error
+        }
     }
 
     const _onLogin = () => {
@@ -229,9 +217,7 @@ const Login = (props) => {
                 }
             },
             function (error) {
-                // this.setState({
-                //   btnFacebookLoading: false
-                // })
+               console.log("error",error)
             }
         )
     }

@@ -19,6 +19,7 @@ import Geocoder from 'react-native-geocoding';
 import Loader from '../../../Components/Loader';
 import axios from 'axios';
 import { showMessageAlert } from '../../../Utils/Utility';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 Geocoder.init("AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E"); // use a valid API key
 
@@ -247,7 +248,8 @@ const ChangeLocation = ({ navigation, route, props }) => {
                 .then(res => {
                     //  setUpcomingList(res.data)
                     showMessageAlert('Location is updated successfully.')
-                   console.log("tres",res.data)
+                    console.log("tres", res.data)
+                    setLocation(searchLongitude.toString(), searchLatitude.toString())
                     setLoading(false)
                 })
                 .catch(e => {
@@ -264,13 +266,23 @@ const ChangeLocation = ({ navigation, route, props }) => {
                 .then(res => {
                     //  setUpcomingList(res.data)
                     showMessageAlert('Location is updated successfully.')
-                   console.log("tres",res.data)
+                    console.log("tres", res.data)
+                    setLocation(longitude.toString(), latitude.toString())
                     setLoading(false)
                 })
                 .catch(e => {
                     console.log('er', e)
                     setLoading(false)
                 })
+        }
+    }
+
+    const setLocation = async (currentLongitude, currentLatitude) => {
+        try {
+            await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
+            await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
+        } catch (e) {
+            // saving error
         }
     }
 

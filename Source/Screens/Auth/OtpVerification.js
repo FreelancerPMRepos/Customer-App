@@ -6,6 +6,7 @@ import {
     Image,
     Pressable
 } from 'react-native';
+
 import Header from '../../Components/Header'
 import { BASE_URL, height, width } from '../../Config';
 import OTPInputView from '@twotalltotems/react-native-otp-input'

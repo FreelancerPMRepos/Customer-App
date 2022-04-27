@@ -69,6 +69,10 @@ const PerformanceScreen = (props) => {
             })
     }
 
+    const _onMenuPress = () => {
+        props.navigation.openDrawer()
+    }
+
     return (
         <View style={styles.container}>
             {
@@ -84,8 +88,8 @@ const PerformanceScreen = (props) => {
                             style={styles.imageStyle}
                             source={require('../../../Images/graph-icon.png')}
                         />
-                        <Text style={[styles.revenueTextStyle, { marginRight: 83 }]}>Revenue This Year</Text>
-                        <View style={{ justifyContent: 'center', marginRight: 31.25 }}>
+                        <Text style={[styles.revenueTextStyle, { width: '55%' }]}>Revenue This Year</Text>
+                        <View style={{ justifyContent: 'center', marginRight: 31.25, width: '25%' }}>
                             <Text style={styles.amountText}>${revenueListData.store_revenue_this_year}</Text>
                         </View>
                     </Pressable>
@@ -96,8 +100,8 @@ const PerformanceScreen = (props) => {
                             style={styles.imageStyle}
                             source={require('../../../Images/graph-icon.png')}
                         />
-                        <Text style={[styles.revenueTextStyle, { marginRight: 25 }]}>Revenue This Month (Aug)</Text>
-                        <View style={{ justifyContent: 'center', marginRight: 31 }}>
+                        <Text style={[styles.revenueTextStyle, {  width: '55%' }]}>Revenue This Month (Aug)</Text>
+                        <View style={{ justifyContent: 'center', marginRight: 31, width: '25%' }}>
                             <Text style={styles.amountText}>${revenueListData.store_revenue_this_month}</Text>
                         </View>
                     </Pressable>
@@ -108,8 +112,8 @@ const PerformanceScreen = (props) => {
                             style={styles.imageStyle}
                             source={require('../../../Images/graph-icon.png')}
                         />
-                        <Text style={[styles.revenueTextStyle, { marginRight: 67 }]}>Revenue This Week</Text>
-                        <View style={{ justifyContent: 'center', marginRight: 31 }}>
+                        <Text style={[styles.revenueTextStyle, { width: '55%' }]}>Revenue This Week</Text>
+                        <View style={{ justifyContent: 'center', marginRight: 31, width: '25%' }}>
                             <Text style={styles.amountText}>${revenueListData.store_revenue_this_week}</Text>
                         </View>
                     </Pressable>
@@ -229,12 +233,14 @@ const styles = StyleSheet.create({
     amountText: {
         fontSize: 18,
         fontFamily: 'Avenir-Black',
-        color: '#50C2C6'
+        color: '#50C2C6',
+        textAlign: 'right'
     },
     imageStyle: {
         marginTop: 17.25,
         marginLeft: 9.25,
-        marginBottom: 17.25
+        marginBottom: 17.25,
+        width: '10%',
     },
     revenueButton: {
         flexDirection: 'row',

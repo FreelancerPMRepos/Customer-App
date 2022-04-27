@@ -8,6 +8,7 @@ import {
     Pressable,
     Image
 } from 'react-native';
+
 import Header from '../../Components/Header'
 import { BASE_URL, height, isValidEmail, width } from '../../Config';
 import Loader from '../../Components/Loader';

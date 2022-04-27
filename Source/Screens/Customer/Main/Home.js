@@ -30,7 +30,7 @@ const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
 
-const Home = (props) => {
+const Home = ({ navigation, props }) => {
   const auth = useSelector(state => state.auth)
   const [viewHideShow, setViewHideShow] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -49,16 +49,19 @@ const Home = (props) => {
     let isCancelled = false;
     if (!isCancelled) {
       if (auth.access_token) {
-        setAuthToken(auth.access_token)
-        getUserInfo()
-        serviceList()
-        getlocation()
+        const unsubscribe = navigation.addListener('focus', () => {
+          setAuthToken(auth.access_token)
+          getUserInfo()
+          serviceList()
+          getlocation()
+        });
+        return unsubscribe;
       }
     }
     return () => {
       isCancelled = true
     }
-  }, [])
+  }, [navigation])
 
 
   const getlocation = async () => {
@@ -79,13 +82,13 @@ const Home = (props) => {
   }
 
   const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude) => {
-    { keyword ? '' : setLoading(true)}
+    { keyword ? '' : setLoading(true) }
     global.new_to_price = toprice === undefined ? '' : toprice
     global.new_from_price = fromPrice === undefined ? '' : fromPrice
     global.new_keyword = keyword === undefined ? '' : keyword
     global.new_service = serviceId === undefined ? '' : serviceId
     global.new_miles = miles === undefined ? '' : miles
-    console.log("api",`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
+    console.log("api", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
     axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
       .then(res => {
         setStoreList(res.data.list)
@@ -133,7 +136,7 @@ const Home = (props) => {
 
   const _onServiceChange = (item) => {
     setSelectedValue(item)
-    getStoreList('', '', '', item)
+    getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, item, global.new_miles, global.latitude, global.longitude)
   }
 
   const _onSearch = () => {
@@ -160,7 +163,7 @@ const Home = (props) => {
 
   const _onDrag = (value) => {
     setMiles(value)
-    getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
+   // getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
   }
 
 
@@ -257,24 +260,25 @@ const Home = (props) => {
                 showFilter == true ?
                   <View style={styles.sliderView}>
                     <Slider
-                      style={{ width: 360, height: 40 }}
+                      style={{ width: 360, height: 20, marginTop: 10 }}
                       minimumValue={0}
                       maximumValue={100}
                       minimumTrackTintColor="#A9A8A8"
                       maximumTrackTintColor="#A9A8A8"
                       value={miles}
-                      onSlidingComplete={(value) => _onDrag(value)}
-                  //    onValueChange={(value) => getStoreList('', '', '', '', value, global.latitude, global.longitude)}
+                      onSlidingComplete={(value) => getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)}
+                      onValueChange={(value) => _onDrag(value)}
                     />
+                    <Text style={{ textAlign: 'right', marginRight: 10, fontFamil: 'Avenir-Book', marginBottom: 10 }}>{miles} Miles</Text>
                   </View> : null
               }
               {
-                showFilter == true ? 
-                <View style={{top: 120, marginLeft: width * 0.64}}>
-                  <Pressable style={{backgroundColor: '#FFFFFF'}} onPress={() => resetFilter()}>
-                    <Text style={{fontSize: 12, fontFamily: 'Avenir-Book', marginTop: 5, marginBottom: 5, marginLeft: 15.5, marginRight: 15.5}}>Clear Filters</Text>
-                  </Pressable>
-                </View> : null
+                showFilter == true ?
+                  <View style={{ top: 115, marginLeft: width * 0.64, }}>
+                    <Pressable style={{ backgroundColor: '#FFFFFF' }} onPress={() => resetFilter()}>
+                      <Text style={{ fontSize: 12, fontFamily: 'Avenir-Book', marginTop: 5, marginBottom: 5, marginLeft: 15.5, marginRight: 15.5 }}>Clear Filters</Text>
+                    </Pressable>
+                  </View> : null
               }
               {
                 updatedName.fav.data == null ?
@@ -303,7 +307,7 @@ const Home = (props) => {
                     <Image source={require('../../../Images/arrowUp.png')} style={{ marginBottom: 20 }} />
                 }
               </Pressable>
-              <ScrollView style={{marginTop: 15}}>
+              <ScrollView style={{ marginTop: 15 }}>
                 {
                   storeList.length === 0 && isLoading === false ?
                     <View style={styles.noStoreAvailableView}>
@@ -320,7 +324,7 @@ const Home = (props) => {
                         }
                       }
                       return (
-                        <Pressable style={styles.store} key={index} onPress={() => props.navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
+                        <Pressable style={styles.store} key={index} onPress={() => navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
                           {
                             res.images.length == 0 ?
                               <Image
@@ -334,7 +338,7 @@ const Home = (props) => {
                           }
                           <View style={styles.storeContentView}>
                             <View style={styles.contentView}>
-                              <View style={{ width: width * 0.28}}>
+                              <View style={{ width: width * 0.28 }}>
                                 <Text style={styles.storeName}>{res.store_name}</Text>
                               </View>
                               <View style={styles.contentView}>
@@ -462,9 +466,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   pickStyleView: {
-    top: 95,
+    top: 125,
     backgroundColor: Colors.white,
-    marginLeft: width * 0.57,
+    marginLeft: width * 0.61,
     flexDirection: 'row'
   },
   pickStyleImage: {
@@ -500,7 +504,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderBottomWidth: 1,
     borderColor: '#979797',
-  //  justifyContent: 'space-between',
+    //  justifyContent: 'space-between',
   },
   noImage: {
     height: 83,

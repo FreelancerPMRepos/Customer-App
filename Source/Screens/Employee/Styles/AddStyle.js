@@ -423,7 +423,7 @@ const AddStyle = ({ navigation, route, props }) => {
         return (
             <View>
                 <Text style={styles.nameOfServiceText}>Name of Service</Text>
-                <TextInput placeholder='Enter Name Of Haircut' style={styles.enterNameInput} onChangeText={text => setServiceName(text)} value={serviceName} />
+                <TextInput placeholder='Name of Service' style={styles.enterNameInput} onChangeText={text => setServiceName(text)} value={serviceName} />
             </View>
         )
     }
@@ -543,7 +543,7 @@ const AddStyle = ({ navigation, route, props }) => {
                     inputContainerStyle={{ borderWidth: 1, marginLeft: 5, marginRight: 5, marginTop: 6.5 }}
                     tagStyle={{ backgroundColor: '#D8D8D8', height: 28 }}
                 />
-                <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginLeft: 16, marginTop: 15.67 }}>Enter comma after each tag</Text>
+                {/* <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginLeft: 16, marginTop: 15.67 }}>Enter comma after each tag</Text> */}
             </View>
         )
     }

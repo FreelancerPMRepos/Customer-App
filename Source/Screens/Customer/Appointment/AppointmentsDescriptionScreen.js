@@ -10,11 +10,12 @@ import {
   TextInput,
   ScrollView
 } from 'react-native';
+
 import Header from '../../../Components/Header'
-import { BASE_URL, Colors, IMAGE_URL, width } from '../../../Config';
-import { Rating, AirbnbRating } from 'react-native-ratings';
+import { BASE_URL, Colors, width } from '../../../Config';
+import { Rating } from 'react-native-ratings';
 import moment from 'moment';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { addSalon } from '../../../Actions/PickSalon'
 import Loader from '../../../Components/Loader';
 
@@ -66,7 +67,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
         setLoading(false)
       })
       .catch(e => {
-        console.log('e rrr', e)
+        console.log('e n', e)
         setLoading(false)
       })
   }
@@ -83,7 +84,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           setLoading(false)
         })
         .catch(e => {
-          console.log('e rrr', e)
+          console.log('e _onRebook', e)
           alert(`${e.response.data.message}.`)
           setLoading(false)
         })
@@ -97,6 +98,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
 
 
   const getDateSlot = (id) => {
+    console.log("object",`${BASE_URL}/employee/working/hour/list/${id}`)
     setLoading(true)
     //  axios.get(`${BASE_URL}/timeslot/list/${appointmentDetails.store.id}`)
     axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
@@ -105,7 +107,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
         setLoading(false)
       })
       .catch(e => {
-        console.log('e', e)
+        console.log('e getDateSlot', e)
         setLoading(false)
       })
   }
@@ -178,7 +180,8 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
 
         while (openTime <= closeTime) {
           timeStops.push(new moment(openTime).format('hh:mm A'));
-          openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
+          //openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
+          openTime.add('5', 'minutes');
         }
       }
     }
@@ -195,8 +198,6 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       setNextYear(nextYear)
       getMonthDateDay(nextYear, parseInt(nextDate) - 1)
     }
-    // setNextDate(nextDate - 1)
-    // getMonthDateDay()
   }
 
   const _onCalendarRight = () => {
@@ -235,7 +236,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           setLoading(false)
         })
         .catch(e => {
-          console.log('e', e)
+          console.log('e addNote', e)
           setLoading(false)
         })
     }
@@ -246,14 +247,11 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       .then(res => {
         setCancelModal(!cancelModal)
         _onBack()
-        //  props.navigation.addListener('willFocus', () =>  _onBack())
         alert(res.data.message)
-        //  setModalVisible(!modalVisible);
-        // setNote('');
         setLoading(false)
       })
       .catch(e => {
-        console.log('e', e)
+        console.log('e onCancelYes', e)
         setLoading(false)
       })
 
@@ -275,11 +273,10 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           setRescheduleModal(!resheduleModal)
           alert(res.data.message)
           _onBack()
-          // setNote('');
           setLoading(false)
         })
         .catch(e => {
-          console.log('e', e)
+          console.log('e _onReschedule', e)
           setLoading(false)
         })
     }
@@ -302,18 +299,18 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             {
               isLoading && <Loader />
             }
-            <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setModalVisible(!modalVisible)}>
+            <Pressable style={styles.crossButton} onPress={() => setModalVisible(!modalVisible)}>
               <Image
-                style={{ marginRight: 14.49, marginTop: 18.5 }}
+                style={styles.crossImage}
                 source={require('../../../Images/cross.png')}
               />
             </Pressable>
-            <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 14.5 }}>Add Note</Text>
-            <View style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, }}>
+            <Text style={styles.addNote}>Add Note</Text>
+            <View style={styles.addNoteInputView}>
               <TextInput placeholder="Type your note" style={{ textAlignVertical: 'top', }} multiline={true} numberOfLines={5} onChangeText={text => setNote(text)} value={note} />
             </View>
-            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 21, marginBottom: 26 }} onPress={() => addNote()}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginTop: 8.5, marginBottom: 7.5, textAlign: 'center' }}>ADD</Text>
+            <Pressable style={styles.addButton} onPress={() => addNote()}>
+              <Text style={styles.addButtonText}>ADD</Text>
             </Pressable>
           </View>
         </View>
@@ -334,32 +331,31 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end' }} onPress={() => setRescheduleModal(!resheduleModal)}>
+            <Pressable style={styles.crossButton} onPress={() => setRescheduleModal(!resheduleModal)}>
               <Image
-                style={{ marginRight: 14.49, marginTop: 18.5 }}
+                style={styles.crossImage}
                 source={require('../../../Images/cross.png')}
               />
             </Pressable>
-            <Text style={{ color: '#1A1919', fontSize: 18, fontFamily: 'Avenir-Heavy', textAlign: 'center' }}>Reschedule Appointment</Text>
-            {/* <TextInput placeholder="Type Your Note" style={{ borderWidth: 1, borderColor: '#979797', marginLeft: 13, marginTop: 13.5, marginRight: 12, height: 122 }} multiline={true} onChangeText={text => setNote(text)} value={note} /> */}
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 34 }}>
-              <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 130, justifyContent: 'space-between' }} onPress={() => { setDateModalVisible(!dateModalVisible), setRescheduleModal(!resheduleModal), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
-                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
+            <Text style={styles.resheduleText}>Reschedule Appointment</Text>
+            <View style={styles.dateView}>
+              <Pressable style={styles.storeCalendarButton} onPress={() => { setDateModalVisible(!dateModalVisible), setRescheduleModal(!resheduleModal), getMonthDateDay(new Date().getFullYear(), new Date().getMonth()) }}>
+                <Text style={styles.selectDateText}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
                 <Image
-                  style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
+                  style={styles.storeCalendarImage}
                   source={require('../../../Images/storeCalendar.png')}
                 />
               </Pressable>
-              <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible), setRescheduleModal(!resheduleModal) }}>
-                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
+              <Pressable style={styles.triangleButton} onPress={() => { time.length == 0 ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible), setRescheduleModal(!resheduleModal) }}>
+                <Text style={styles.selectedTimeText}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
                 <Image
-                  style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
+                  style={styles.triangeImage}
                   source={require('../../../Images/Triangle.png')}
                 />
               </Pressable>
             </View>
-            <Pressable style={{ borderWidth: 1, borderColor: '#171717', marginLeft: 96, marginRight: 96, marginTop: 34, marginBottom: 26 }} onPress={() => _onReschedule()}>
-              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', marginTop: 8.5, marginBottom: 7.5, textAlign: 'center' }}>Reschedule</Text>
+            <Pressable style={styles.resheduleButton} onPress={() => _onReschedule()}>
+              <Text style={styles.resheduleButtonText}>Reschedule</Text>
             </Pressable>
           </View>
         </View>
@@ -380,7 +376,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
       >
         <View style={[styles.centeredView, { justifyContent: 'center' }]}>
           <View style={styles.modalView}>
-            <View style={{ marginTop: 15, marginLeft: 10, marginRight: 10, marginBottom: 20 }}>
+            <View style={styles.dateModalMainViiew}>
               <Pressable onPress={() => setDateModalVisible(!dateModalVisible)}>
                 <Image
                   style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginBottom: 10 }}
@@ -395,7 +391,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
                   />
                 </Pressable>
                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 9, marginBottom: 10, lineHeight: 22 }}>
-                  {nextDate == 0 ? 'January' : nextDate == 1 ? 'February' : nextDate == 2 ? "March" : nextDate == 3 ? "April" : nextDate == 4 ? "May" : nextDate == 5 ? "June" : nextDate == 6 ? "July" : nextDate == 7 ? "August" : nextDate == 8 ? "September" : nextDate == 9 ? "Octomber" : nextDate == 10 ? "November" : "December"}
+                  {nextDate == 0 ? 'January' : nextDate == 1 ? 'February' : nextDate == 2 ? "March" : nextDate == 3 ? "April" : nextDate == 4 ? "May" : nextDate == 5 ? "June" : nextDate == 6 ? "July" : nextDate == 7 ? "August" : nextDate == 8 ? "September" : nextDate == 9 ? "October" : nextDate == 10 ? "November" : "December"}
                 </Text>
                 <Pressable onPress={() => _onCalendarRight()}>
                   <Image
@@ -414,7 +410,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
                 }
               </View>
               <View style={{ flexDirection: 'row' }}>
-                <View style={{}}>
+                <View>
                   {
                     days.map((res, i) => {
                       return (
@@ -523,9 +519,6 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
             alignSelf: 'center',
             justifyContent: 'center',
             backgroundColor: "white",
-            //  borderRadius: 20,
-            //    padding: 35,
-            //    alignItems: "center",
             shadowColor: "#000",
             shadowOffset: {
               width: 0,
@@ -767,4 +760,109 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5
   },
+  crossButton: {
+    justifyContent: 'flex-end', 
+    alignSelf: 'flex-end'
+  },
+  crossImage: {
+    marginRight: 14.49, 
+    marginTop: 18.5
+  },
+  addNote: {
+    color: '#1A1919', 
+    fontSize: 18, 
+    fontFamily: 'Avenir-Heavy', 
+    marginLeft: 14.5
+  },
+  addNoteInputView: {
+    borderWidth: 1, 
+    borderColor: '#979797', 
+    marginLeft: 13, 
+    marginTop: 13.5, 
+    marginRight: 12
+  },
+  addButton: {
+    borderWidth: 1, 
+    borderColor: '#171717', 
+    marginLeft: 96, 
+    marginRight: 96, 
+    marginTop: 21, 
+    marginBottom: 26
+  },
+  addButtonText: {
+    color: '#1A1919', 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Medium', 
+    marginTop: 8.5, 
+    marginBottom: 7.5, 
+    textAlign: 'center'
+  },
+  resheduleText: {
+    color: '#1A1919', 
+    fontSize: 18, 
+    fontFamily: 'Avenir-Heavy', 
+    textAlign: 'center'
+  },
+  dateView: {
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    marginTop: 34
+  },
+  storeCalendarButton: {
+    flexDirection: 'row', 
+    borderWidth: 1, 
+    borderColor: '#979797', 
+    height: 35, 
+    width: 130, 
+    justifyContent: 'space-between'
+  },
+  selectDateText: {
+    fontFamily: 'Avenir-Medium', 
+    marginLeft: 10.5, 
+    marginTop: 5
+  },
+  storeCalendarImage: {
+    marginLeft: 15, 
+    marginRight: 4.5, 
+    marginTop: 7.5
+  },
+  triangleButton: {
+    flexDirection: 'row', 
+    borderWidth: 1, 
+    borderColor: '#979797', 
+    marginLeft: 15, 
+    height: 35
+  },
+  selectedTimeText: {
+    fontFamily: 'Avenir-Medium', 
+    marginLeft: 10.5, 
+    marginTop: 5
+  },
+  triangeImage: {
+    marginTop: 15, 
+    marginLeft: 36, 
+    marginRight: 6.36
+  },
+  resheduleButton: {
+    borderWidth: 1, 
+    borderColor: '#171717', 
+    marginLeft: 96, 
+    marginRight: 96, 
+    marginTop: 34, 
+    marginBottom: 26
+  },
+  resheduleButtonText: {
+    color: '#1A1919', 
+    fontSize: 14, 
+    fontFamily: 'Avenir-Medium', 
+    marginTop: 8.5, 
+    marginBottom: 7.5, 
+    textAlign: 'center'
+  },
+  dateModalMainViiew: {
+    marginTop: 15, 
+    marginLeft: 10, 
+    marginRight: 10, 
+    marginBottom: 20
+  }
 })

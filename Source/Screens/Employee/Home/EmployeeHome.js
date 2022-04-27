@@ -5,7 +5,8 @@ import {
     Image,
     Pressable,
     Dimensions,
-    ScrollView
+    ScrollView,
+    StatusBar
 } from 'react-native';
 
 import Header from '../../../Components/EmployeeHeader';
@@ -24,23 +25,28 @@ let entireScreenWidth = Dimensions.get('window').width;
 
 EStyleSheet.build({ $rem: entireScreenWidth / 380 });
 
-const EmployeeHome = (props) => {
+const EmployeeHome = ({navigation,props}) => {
     const auth = useSelector(state => state.auth)
     const [dropdownValue, setDropdownValue] = useState('');
     const [appointmentData, setAppointmentData] = useState([]);
     const [userData, setUserData] = useState([]);
+    const [notificationCount, setNotificationCount] = useState('')
     const dispatch = useDispatch()
 
     useEffect(() => {
         let isCancelled = false;
         if (!isCancelled) {
             if (auth.access_token) {
-                setAuthToken(auth.access_token)
-                getUserInfo()
-                getAppointments('TODAY')
+                const unsubscribe = navigation.addListener('focus', () => {
+                    setAuthToken(auth.access_token)
+                    getUserInfo()
+                    getAppointments('TODAY')
+                    getNotificationCount()
+                });
+                return unsubscribe;
             }
         }
-    }, [])
+    }, [[navigation]])
 
     const getUserInfo = async () => {
         axios.get(`${BASE_URL}/users/me`)
@@ -62,8 +68,17 @@ const EmployeeHome = (props) => {
     const getAppointments = (value) => {
         axios.get(`${BASE_URL}/booking/employee?type=${value}`)
             .then(res => {
-                console.log("df",res.data)
+                console.log("df", res.data)
                 setAppointmentData(res.data)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+    const getNotificationCount = () => {
+        axios.get(`${BASE_URL}/notification/count/COUNT`)
+            .then(res => {
+                setNotificationCount(res.data.count)
             })
             .catch(e => {
                 console.log('e', e)
@@ -71,17 +86,29 @@ const EmployeeHome = (props) => {
     }
 
     const _onMenuPress = () => {
-        props.navigation.openDrawer()
+        navigation.openDrawer()
     }
 
     const _onNotify = () => {
-        props.navigation.navigate('Notification')
+        navigation.navigate('Notification')
     }
 
     return (
         <View style={styles.container}>
             {
-                <Header leftIcon="menu" onLeftIconPress={() => _onMenuPress()} title={"Appointments"} rightIcon="notification" onRightIconPress={() => _onNotify()} {...props} />
+                <View style={styles.header}>
+                    <StatusBar barStyle="dark-content" backgroundColor={Colors.black} />
+                    <View style={{ justifyContent: 'space-between', flexDirection: 'row', width: '100%' }}>
+                        <Pressable onPress={() => _onMenuPress()}>
+                            <Image source={require('../../../Images/menu.png')} style={{ marginLeft: 13 }} />
+                        </Pressable>
+                        <Text numberOfLines={1} style={styles.title}>Appointments</Text>
+                        <Pressable style={{ flexDirection: 'row' }} onPress={() => _onNotify()}>
+                            <Text style={{ backgroundColor: 'red', borderRadius: 18 / 2, width: 18, height: 18, textAlign: 'center', left: 6, bottom: 5, color: 'white' }}>{notificationCount}</Text>
+                            <Image source={require('../../../Images/notification.png')} style={{ marginRight: 13 }} />
+                        </Pressable>
+                    </View>
+                </View>
             }
             {
                 <ScrollView style={{ marginBottom: 10 }}>
@@ -107,20 +134,20 @@ const EmployeeHome = (props) => {
                             :
                             appointmentData?.map((res, index) => {
                                 return (
-                                    <Pressable key={index} style={styles.boxStyle} onPress={() => props.navigation.navigate('AppointmentDetails', { data: userData, id: res.id })}>
+                                    <Pressable key={index} style={styles.boxStyle} onPress={() => navigation.navigate('AppointmentDetails', { data: userData, id: res.id })}>
                                         {
-                                             res.user.image_url === null ? 
-                                             <Image
-                                             style={styles.profileImageStyle}
-                                             source={require('../../../Images/dummy.png')}
- 
-                                         />
-                                         :
-                                         <Image
-                                         style={styles.userImage}
-                                         source={{ uri: res.user.image_url}}
+                                            res.user.image_url === null ?
+                                                <Image
+                                                    style={styles.profileImageStyle}
+                                                    source={require('../../../Images/dummy.png')}
 
-                                     />
+                                                />
+                                                :
+                                                <Image
+                                                    style={styles.userImage}
+                                                    source={{ uri: res.user.image_url }}
+
+                                                />
                                         }
                                         <View style={styles.nameServiceBox}>
                                             <Text style={styles.nameStyle} numberOfLines={1}>{res.user.name}</Text>
@@ -187,7 +214,7 @@ const styles = EStyleSheet.create({
         marginBottom: "8.5rem",
         height: 55,
         width: 58,
-        borderRadius: 58/2
+        borderRadius: 58 / 2
     },
     nameStyle: {
         fontSize: "16rem",
@@ -217,5 +244,19 @@ const styles = EStyleSheet.create({
     },
     dropdownView: {
         marginLeft: "15.5rem"
-    }
+    },
+    header: {
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 70,
+        backgroundColor: Colors.black,
+        flexDirection: 'row',
+        height: 68,
+    },
+    title: {
+        fontSize: 18,
+        color: Colors.white,
+        fontWeight: 'bold',
+        marginRight: 30
+    },
 })
