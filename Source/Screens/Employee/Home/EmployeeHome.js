@@ -9,7 +9,6 @@ import {
     StatusBar
 } from 'react-native';
 
-import Header from '../../../Components/EmployeeHeader';
 import { BASE_URL, Colors, width } from '../../../Config';
 import SelectDropdown from 'react-native-select-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,6 +17,7 @@ import { setAuthToken } from '../../../Utils/setHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import Loader from '../../../Components/Loader';
 
 const countries = ["TODAY", "UPCOMING"]
 
@@ -25,7 +25,8 @@ let entireScreenWidth = Dimensions.get('window').width;
 
 EStyleSheet.build({ $rem: entireScreenWidth / 380 });
 
-const EmployeeHome = ({navigation,props}) => {
+const EmployeeHome = ({ navigation, props }) => {
+    const [isLoading, setLoading] = useState(false)
     const auth = useSelector(state => state.auth)
     const [dropdownValue, setDropdownValue] = useState('');
     const [appointmentData, setAppointmentData] = useState([]);
@@ -37,16 +38,14 @@ const EmployeeHome = ({navigation,props}) => {
         let isCancelled = false;
         if (!isCancelled) {
             if (auth.access_token) {
-                const unsubscribe = navigation.addListener('focus', () => {
-                    setAuthToken(auth.access_token)
-                    getUserInfo()
-                    getAppointments('TODAY')
-                    getNotificationCount()
-                });
-                return unsubscribe;
+                setAuthToken(auth.access_token)
+                getUserInfo()
+                setDropdownValue('TODAY')
+                getAppointments('TODAY')
+                getNotificationCount()
             }
         }
-    }, [[navigation]])
+    }, [])
 
     const getUserInfo = async () => {
         axios.get(`${BASE_URL}/users/me`)
@@ -66,13 +65,16 @@ const EmployeeHome = ({navigation,props}) => {
     }
 
     const getAppointments = (value) => {
+        setLoading(true)
         axios.get(`${BASE_URL}/booking/employee?type=${value}`)
             .then(res => {
                 console.log("df", res.data)
                 setAppointmentData(res.data)
+                setLoading(false)
             })
             .catch(e => {
                 console.log('e', e)
+                setLoading(false)
             })
     }
     const getNotificationCount = () => {
@@ -95,6 +97,9 @@ const EmployeeHome = ({navigation,props}) => {
 
     return (
         <View style={styles.container}>
+             {
+                isLoading && <Loader />
+            }
             {
                 <View style={styles.header}>
                     <StatusBar barStyle="dark-content" backgroundColor={Colors.black} />

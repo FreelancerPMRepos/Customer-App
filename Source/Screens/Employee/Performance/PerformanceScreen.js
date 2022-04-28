@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         color: Colors.black,
         marginTop: 21.25,
+        marginLeft: 10
     },
     amountText: {
         fontSize: 18,
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
-        elevation: 1
+        elevation: 1,
     },
     averageRatingText: {
         marginTop: 17.25,
