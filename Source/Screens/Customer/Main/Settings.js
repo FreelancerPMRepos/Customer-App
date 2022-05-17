@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 12.5,
     borderColor: '#979797',
-    height: 35,
+    height: 37,
     paddingLeft: 10.5
   },
   loactionpasswordButton: {

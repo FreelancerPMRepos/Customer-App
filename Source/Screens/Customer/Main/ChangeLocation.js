@@ -239,41 +239,49 @@ const ChangeLocation = ({ navigation, route, props }) => {
 
     const _onSave = (key) => {
         if (key == 'OFF') {
-            axios.put(`${BASE_URL}/customer`, {
-                id: id,
-                address: searchAddress,
-                latitude: searchLatitude,
-                longitude: searchLongitude
-            })
-                .then(res => {
-                    //  setUpcomingList(res.data)
-                    showMessageAlert('Location is updated successfully.')
-                    console.log("tres", res.data)
-                    setLocation(searchLongitude.toString(), searchLatitude.toString())
-                    setLoading(false)
+            if (searchLatitude) {
+                axios.put(`${BASE_URL}/customer`, {
+                    id: id,
+                    address: searchAddress,
+                    latitude: searchLatitude,
+                    longitude: searchLongitude
                 })
-                .catch(e => {
-                    console.log('er', e)
-                    setLoading(false)
-                })
+                    .then(res => {
+                        //  setUpcomingList(res.data)
+                        showMessageAlert('Location is updated successfully.')
+                        console.log("tres", res.data)
+                        setLocation(searchLongitude.toString(), searchLatitude.toString())
+                        setLoading(false)
+                    })
+                    .catch(e => {
+                        console.log('er', e)
+                        setLoading(false)
+                    })
+            } else {
+                showMessageAlert('Please add address.')
+            }
         } else {
-            axios.put(`${BASE_URL}/customer`, {
-                id: id,
-                address: address,
-                latitude: latitude,
-                longitude: longitude
-            })
-                .then(res => {
-                    //  setUpcomingList(res.data)
-                    showMessageAlert('Location is updated successfully.')
-                    console.log("tres", res.data)
-                    setLocation(longitude.toString(), latitude.toString())
-                    setLoading(false)
+            if (latitude) {
+                axios.put(`${BASE_URL}/customer`, {
+                    id: id,
+                    address: address,
+                    latitude: latitude,
+                    longitude: longitude
                 })
-                .catch(e => {
-                    console.log('er', e)
-                    setLoading(false)
-                })
+                    .then(res => {
+                        //  setUpcomingList(res.data)
+                        showMessageAlert('Location is updated successfully.')
+                        console.log("tres", res.data)
+                        setLocation(longitude.toString(), latitude.toString())
+                        setLoading(false)
+                    })
+                    .catch(e => {
+                        console.log('er', e)
+                        setLoading(false)
+                    })
+            } else {
+                showMessageAlert('Please add address')
+            }
         }
     }
 

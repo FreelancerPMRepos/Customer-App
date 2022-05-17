@@ -289,7 +289,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const getServiceList = () => {
         setLoading(true)
-        axios.get(`${BASE_URL}/service/all/list?store_id=${storeDetails.id}`)
+        axios.get(`${BASE_URL}/service/all/list2?store_id=${storeDetails.id}`)
             .then(res => {
                 setServiceList(res.data)
                 setLoading(false)
@@ -495,7 +495,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         //     return false
         // } 
         else if (hairdresserId == '') {
-            alert('Please select hairdresser.')
+            alert('Please select stylist.')
             setLoading(false)
             return false
         } else if (selectedDate == '') {
@@ -1013,30 +1013,30 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <View style={{ marginLeft: 27.5 }}>
                         {
                             <View>
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex</Text>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex *</Text>
                                 {renderGender()}
                             </View>
                         }
                         <View>
-                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service</Text>
+                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service *</Text>
                             {renderService()}
 
                         </View>
-                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type</Text>
+                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type *</Text>
                         {renderServiceType()}
                         {
                             updatedName.fav.data == null ?
                                 <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Pick Style</Text>
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Pick Style (Optional)</Text>
                                     {renderPickStyle()}
                                 </View>
                                 :
                                 null
                         }
 
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Hairdresser</Text>
+                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Stylist *</Text>
                         {renderHairDresser()}
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Date & Time</Text>
+                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Date & Time *</Text>
                         <Modal
                             animationType="slide"
                             transparent={true}

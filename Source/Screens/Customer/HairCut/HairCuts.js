@@ -31,6 +31,12 @@ const HelloWorldApp = ({ navigation, props }) => {
     setLoading(true)
     axios.get(`${BASE_URL}/all/favourite`)
       .then(res => {
+        global.is_data = false
+        for (var i in res.data) {
+          if (res.data[i].list.length > 0) {
+            global.is_data = true
+          }
+        }
         setList(res.data)
         setLoading(false)
       })
@@ -47,48 +53,54 @@ const HelloWorldApp = ({ navigation, props }) => {
       {
         isLoading && <Loader />
       }
+      <Text style={styles.heading}>Saved and Custom Styles</Text>
       {
-        <ScrollView style={{ marginBottom: 15 }}>
-          <Text style={styles.heading}>Saved and Custom Styles</Text>
-          {
-            list.map((res, index) => {
-              return (
-                <View key={index}>
-                  <Text style={styles.serviceName}>{res.name}</Text>
-                  <ScrollView style={styles.serviceView} horizontal={true} showsHorizontalScrollIndicator={false}>
-                    {
-                      res.list.map((val, index) => {
-                        return (
-                          <Pressable key={index} onPress={() => navigation.navigate('HairCutDescriptionScreen', { id: val.style_id })}>
-                            <ImageBackground
-                              style={styles.serviceImage}
-                              source={{
-                                uri: `${val.upload_front_photo}`,
-                              }}
-                            >
-                              {
-                                val.is_custom === 1 ?
-                                  <Image
-                                    style={styles.sciscorImage}
-                                    source={require('../../../Images/scisor.png')}
-                                  />
-                                  :
-                                  <Image
-                                    style={styles.sciscorImage}
-                                    source={require('../../../Images/heart.png')}
-                                  />
-                              }
-                            </ImageBackground>
-                          </Pressable>
-                        )
-                      })
-                    }
-                  </ScrollView>
-                </View>
-              )
-            })
-          }
-        </ScrollView>
+        global.is_data === false ?
+          <View style={{ justifyContent: 'center', alignSelf: 'center', alignItems: 'center',flex: 1 }}>
+            <Text style={{ textAlign: 'center' }}>You don't have any current style saved... Search for some!</Text>
+          </View>
+          :
+          <ScrollView style={{ marginBottom: 15, }}>
+            {
+              list.map((res, index) => {
+                return (
+                  res.list.length == 0 ? null :
+                    <View key={index}>
+                      <Text style={styles.serviceName}>{res.list.length == 0 ? null : res.name}</Text>
+                      <ScrollView style={styles.serviceView} horizontal={true} showsHorizontalScrollIndicator={false}>
+                        {
+                          res.list.map((val, index) => {
+                            return (
+                              <Pressable key={index} onPress={() => navigation.navigate('HairCutDescriptionScreen', { id: val.style_id })}>
+                                <ImageBackground
+                                  style={styles.serviceImage}
+                                  source={{
+                                    uri: `${val.upload_front_photo}`,
+                                  }}
+                                >
+                                  {
+                                    val.is_custom === 1 ?
+                                      <Image
+                                        style={styles.sciscorImage}
+                                        source={require('../../../Images/scisor.png')}
+                                      />
+                                      :
+                                      <Image
+                                        style={styles.sciscorImage}
+                                        source={require('../../../Images/heart.png')}
+                                      />
+                                  }
+                                </ImageBackground>
+                              </Pressable>
+                            )
+                          })
+                        }
+                      </ScrollView>
+                    </View>
+                )
+              })
+            }
+          </ScrollView>
       }
     </View>
   )
