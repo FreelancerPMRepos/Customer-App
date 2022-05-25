@@ -13,8 +13,12 @@ import { BASE_URL, Colors } from '../../../Config';
 import { Rating } from 'react-native-ratings';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loader from '../../../Components/Loader';
+
+var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const PerformanceScreen = (props) => {
+    const [isLoading, setLoading] = useState(false)
     const [revenueListData, setRevenueListData] = useState([]);
     const [ratingData, setRatingData] = useState([]);
     const [reviewsData, setReviewsData] = useState([]);
@@ -24,40 +28,43 @@ const PerformanceScreen = (props) => {
 
     useEffect(() => {
         getRevenue();
-        getRating();
-        getReviews();
+
     }, [])
 
     const getRevenue = async () => {
+        setLoading(true)
         const value = await AsyncStorage.getItem('@user_details')
         const user_data = value != null ? JSON.parse(value) : null;
         setUserId(user_data.id)
         axios.get(`${BASE_URL}/revenue?employee_id=${user_data.id}`)
             .then(res => {
                 setRevenueListData(res.data)
-                // setLoading(false)
+                setLoading(false)
+                getRating(user_data.id);
+                getReviews(user_data.id);
             })
             .catch(e => {
                 console.log('e', e)
-                //  setLoading(false)
+                setLoading(false)
             })
     }
 
-    const getRating = () => {
-        axios.get(`${BASE_URL}/employee/average/review/list/${userId}`)
+    const getRating = (id) => {
+        setLoading(true)
+        axios.get(`${BASE_URL}/employee/average/review/list/${id}`)
             .then(res => {
-                console.log('res', res.data)
+                console.log('res fds', res.data)
                 setRatingData(res.data)
-                // setLoading(false)
+                setLoading(false)
             })
             .catch(e => {
-                console.log('e', e)
-                //  setLoading(false)
+                console.log('er', e)
+                setLoading(false)
             })
     }
 
-    const getReviews = () => {
-        axios.get(`${BASE_URL}/employee/review/list/${userId}`)
+    const getReviews = (id) => {
+        axios.get(`${BASE_URL}/employee/review/list/${id}`)
             .then(res => {
                 console.log('res', res.data)
                 setReviewsData(res.data)
@@ -79,6 +86,9 @@ const PerformanceScreen = (props) => {
                 <Header leftIcon="menu" onLeftIconPress={() => _onBack()} title={"My Performance"} {...props} />
             }
             {
+                isLoading && <Loader />
+            }
+            {
                 <ScrollView style={styles.mainView} showsVerticalScrollIndicator={false}>
                     <Text style={styles.title}>My Performance</Text>
 
@@ -90,7 +100,7 @@ const PerformanceScreen = (props) => {
                         />
                         <Text style={[styles.revenueTextStyle, { width: '55%' }]}>Revenue This Year</Text>
                         <View style={{ justifyContent: 'center', marginRight: 31.25, width: '25%' }}>
-                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_year}</Text>
+                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_year?.toFixed(2)}</Text>
                         </View>
                     </Pressable>
 
@@ -100,9 +110,9 @@ const PerformanceScreen = (props) => {
                             style={styles.imageStyle}
                             source={require('../../../Images/graph-icon.png')}
                         />
-                        <Text style={[styles.revenueTextStyle, {  width: '55%' }]}>Revenue This Month (Aug)</Text>
+                        <Text style={[styles.revenueTextStyle, { width: '55%' }]}>Revenue This Month ({months[new Date().getMonth()]})</Text>
                         <View style={{ justifyContent: 'center', marginRight: 31, width: '25%' }}>
-                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_month}</Text>
+                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_month?.toFixed(2)}</Text>
                         </View>
                     </Pressable>
 
@@ -114,7 +124,7 @@ const PerformanceScreen = (props) => {
                         />
                         <Text style={[styles.revenueTextStyle, { width: '55%' }]}>Revenue This Week</Text>
                         <View style={{ justifyContent: 'center', marginRight: 31, width: '25%' }}>
-                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_week}</Text>
+                            <Text style={styles.amountText}>${revenueListData.store_revenue_this_week?.toFixed(2)}</Text>
                         </View>
                     </Pressable>
                     <Text style={styles.reviewAndRatingText}>Reviews & Ratings</Text>

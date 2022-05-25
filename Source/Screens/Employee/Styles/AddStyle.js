@@ -75,7 +75,6 @@ const AddStyle = ({ navigation, route, props }) => {
             })
     }
 
-
     const _onCheck = (name, index) => {
         var temp = []
         for (var i in serviceTagData) {
@@ -481,7 +480,7 @@ const AddStyle = ({ navigation, route, props }) => {
 
     const renderThirdRowImages = () => {
         return (
-            <View style={styles.row}>
+            <View style={{ marginLeft: 27}}>
                 <Pressable style={styles.imageView} onPress={() => selectImage('top')}>
                     <Image
                         style={images.top.assets ? styles.captureImage : styles.firstImage}
@@ -542,8 +541,9 @@ const AddStyle = ({ navigation, route, props }) => {
                     tags={tags}
                     inputContainerStyle={{ borderWidth: 1, marginLeft: 5, marginRight: 5, marginTop: 6.5 }}
                     tagStyle={{ backgroundColor: '#D8D8D8', height: 28 }}
+                    keysForTag={','}
                 />
-                {/* <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginLeft: 16, marginTop: 15.67 }}>Enter comma after each tag</Text> */}
+                <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginLeft: 16, marginTop: 15.67 }}>Enter comma after each tag</Text>
             </View>
         )
     }
@@ -567,8 +567,8 @@ const AddStyle = ({ navigation, route, props }) => {
             }
             {
                 <ScrollView>
-                    <View style={{ flexDirection: 'row', marginLeft: 13, marginTop: 14 }}>
-                        <View style={{ flexDirection: 'row' }}>
+                    <View style={{ flexDirection: 'row', marginLeft: 13, marginTop: 14, width: '100%' }}>
+                        <View style={{ flexDirection: 'row', width: '31%' }}>
                             <CheckBox
                                 disabled={false}
                                 value={toggleCheckBox.men}
@@ -576,7 +576,7 @@ const AddStyle = ({ navigation, route, props }) => {
                             />
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>Men</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', marginLeft: 54 }}>
+                        <View style={{ flexDirection: 'row', width: '30%' }}>
                             <CheckBox
                                 disabled={false}
                                 value={toggleCheckBox.women}
@@ -595,7 +595,7 @@ const AddStyle = ({ navigation, route, props }) => {
                         }}
                     />
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Black', color: '#1A1919', marginLeft: 16, marginTop: 9, lineHeight: 22 }}>Stylist Level</Text>
-                    <View style={{ flexDirection: 'row', marginLeft: 13, marginTop: 14 }}>
+                    <View style={{ flexDirection: 'row', marginLeft: 13, marginTop: 14, justifyContent: 'space-between', marginRight: 20 }}>
                         <View style={{ flexDirection: 'row' }}>
                             <CheckBox
                                 disabled={false}
@@ -604,7 +604,7 @@ const AddStyle = ({ navigation, route, props }) => {
                             />
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>Junior</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', marginLeft: 15 }}>
+                        <View style={{ flexDirection: 'row', }}>
                             <CheckBox
                                 disabled={false}
                                 value={toggleCheckBox.experienced}
@@ -612,7 +612,7 @@ const AddStyle = ({ navigation, route, props }) => {
                             />
                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>Experienced</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', marginLeft: 15 }}>
+                        <View style={{ flexDirection: 'row' }}>
                             <CheckBox
                                 disabled={false}
                                 value={toggleCheckBox.senior}
@@ -635,18 +635,18 @@ const AddStyle = ({ navigation, route, props }) => {
                             return (
                                 <View key={i}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Black', color: '#1A1919', marginLeft: 16, marginTop: 9, lineHeight: 22 }}>{res.name}</Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: width * 0.96 }}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginLeft: 13, marginRight: 10}}>
                                         {
                                             res.styles.map((val, j) => {
                                                 return (
-                                                    <View key={j} style={{ flexDirection: 'row', marginLeft: 15, marginRight: 10, width: width * 0.14 }}>
+                                                    <View key={j} style={{ flexDirection: 'row'}}>
                                                         <CheckBox
                                                             // key={j}
                                                             disabled={false}
                                                             value={val.isChecked}
                                                             onValueChange={(newValue) => _onCheck(res.name, j)}
                                                         />
-                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>{val.name}</Text>
+                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6}}>{val.name}</Text>
                                                     </View>
                                                 )
                                             })
@@ -663,7 +663,7 @@ const AddStyle = ({ navigation, route, props }) => {
                     {renderThirdRowImages()}
                     {renderDescription()}
                     {renderMaterial()}
-                    {renderKeywords()}
+                    {page === 'Detail' ? null : renderKeywords()}
                     {renderConfirmButton()}
                     {ChooseImage()}
                 </ScrollView>
@@ -679,7 +679,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white
     },
     row: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        justifyContent: 'space-evenly'
     },
     nameOfServiceText: {
         fontSize: 16,
@@ -699,11 +700,11 @@ const styles = StyleSheet.create({
     imageView: {
         borderWidth: 1,
         borderStyle: 'dashed',
-        marginLeft: 16.5,
-        marginTop: 17.5
+        marginTop: 17.5,
+        width: 165
     },
     captureImage: {
-        height: 150, width: 170
+        height: 150
     },
     firstImage: {
         marginLeft: width * 0.16,

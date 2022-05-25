@@ -251,6 +251,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
                         showMessageAlert('Location is updated successfully.')
                         console.log("tres", res.data)
                         setLocation(searchLongitude.toString(), searchLatitude.toString())
+                        _onBack()
                         setLoading(false)
                     })
                     .catch(e => {
@@ -273,6 +274,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
                         showMessageAlert('Location is updated successfully.')
                         console.log("tres", res.data)
                         setLocation(longitude.toString(), latitude.toString())
+                        _onBack()
                         setLoading(false)
                     })
                     .catch(e => {

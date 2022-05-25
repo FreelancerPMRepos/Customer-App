@@ -72,12 +72,12 @@ const HelloWorldApp = (props) => {
         token: fcmToken,
         type: "ANDROID"
       })
-      .then(res => {
-        console.log("response",res.data)
-      })
-      .catch(e => {
-        console.log('e', e)
-      })
+        .then(res => {
+          console.log("response", res.data)
+        })
+        .catch(e => {
+          console.log('e', e)
+        })
     } else {
       console.log("Failed", "No token received");
     }
@@ -268,18 +268,18 @@ const HelloWorldApp = (props) => {
                     }}
                   >
                     <Pressable onPress={() => _onFavourite(item.style_id)}>
-                    {
-                      item.is_fav == 1 ?
-                        <Image
-                          style={styles.heartIcon}
-                          source={require('../../../Images/heart.png')}
-                        />
-                        :
-                        <Image
-                          style={styles.heartIcon}
-                          source={require('../../../Images/empty_heart.png')}
-                        />
-                    }
+                      {
+                        item.is_fav == 1 ?
+                          <Image
+                            style={styles.heartIcon}
+                            source={require('../../../Images/heart.png')}
+                          />
+                          :
+                          <Image
+                            style={styles.heartIcon}
+                            source={require('../../../Images/empty_heart.png')}
+                          />
+                      }
                     </Pressable>
                   </ImageBackground>
                 </Pressable>
@@ -360,18 +360,18 @@ const HelloWorldApp = (props) => {
                   }}
                 >
                   <Pressable onPress={() => _onFavourite(res.style_id)}>
-                  {
-                    res.is_fav == 1 ?
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/heart.png')}
-                      />
-                      :
-                      <Image
-                        style={styles.heartIcon}
-                        source={require('../../../Images/empty_heart.png')}
-                      />
-                  }
+                    {
+                      res.is_fav == 1 ?
+                        <Image
+                          style={styles.heartIcon}
+                          source={require('../../../Images/heart.png')}
+                        />
+                        :
+                        <Image
+                          style={styles.heartIcon}
+                          source={require('../../../Images/empty_heart.png')}
+                        />
+                    }
                   </Pressable>
                 </ImageBackground>
               </Pressable>
@@ -397,13 +397,19 @@ const HelloWorldApp = (props) => {
           {
             search === '' && global.key === '' ?
               <View>
-                {TopCuts()}
-                {PopularStyles()}
+                {topData?.top_cuts?.length == 0 ? null : TopCuts()}
+                {topData?.top_styles?.length == 0 ? null : PopularStyles()}
               </View>
               :
               data()
           }
         </ScrollView>
+      }
+      {
+        topData?.top_cuts?.length == 0 && topData?.top_styles?.length == 0 ?
+          <View style={styles.errorView}>
+            <Text style={{ textAlign: 'center' }}>No Data Found</Text>
+          </View> : null
       }
       {TagModal()}
     </View>
@@ -567,5 +573,10 @@ const styles = StyleSheet.create({
     paddingBottom: 7,
     paddingLeft: 22,
     paddingRight: 21
+  },
+  errorView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: 200
   }
 })

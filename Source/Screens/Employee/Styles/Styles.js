@@ -67,7 +67,7 @@ const Styles = ({navigation,props}) => {
                                                 </Pressable>
                                                 :
                                                 <Pressable onPress={() => _onSelectService(res)}>
-                                                    <Text style={{ fontFamily: 'Avenir-Heavy', lineHeight: 19, marginTop: 19, marginLeft: 25 }}>{res.name}</Text>
+                                                    <Text style={{ fontFamily: 'Avenir-Heavy', lineHeight: 19, marginTop: 19, marginLeft: 15, marginRight: 10 }}>{res.name}</Text>
                                                 </Pressable>
                                         }
                                     </View>
@@ -89,7 +89,7 @@ const Styles = ({navigation,props}) => {
                                                             uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
                                                         }}
                                                     />
-                                                    <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20, width: 104 }}>{res.name}</Text>
+                                                    <Text style={{ fontFamily: 'Avenir-Heavy', color: '#1A1919', marginLeft: 20, width: 104, textAlign: 'center' }}>{res.name}</Text>
                                                 </View>
                                                 :
                                                 null

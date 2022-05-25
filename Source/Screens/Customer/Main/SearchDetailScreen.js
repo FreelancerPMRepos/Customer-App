@@ -38,13 +38,16 @@ const SearchDetailScreen = ({ navigation, route, props }) => {
             .then(res => {
                 console.log("fd", res.data)
                 setList(res.data)
-                var arrValues = ""
+                var arrValues = []
                 var finalValues = ""
                 if (res.data.style_tags) {
                     for (var i in res.data.style_tags) {
-                        arrValues += res.data.style_tags[i].values
+                        var temp = res.data.style_tags[i].values.split("|")
+                        for (var j in temp) {
+                            arrValues.push(temp[j])
+                        }
                     }
-                    finalValues = arrValues.split('|')
+                    finalValues = arrValues
                 }
                 console.log("finalValues", finalValues)
                 setTagList(finalValues)
@@ -213,11 +216,12 @@ const SearchDetailScreen = ({ navigation, route, props }) => {
                     <Text style={[styles.title, { marginTop: 15 }]}>Style Tags</Text>
                     {
                         tagList[0] === "" ?
-                            <Text style={{marginLeft: 25, marginTop: 10}}>No Style Tags</Text>
+                            <Text style={{ marginLeft: 25, marginTop: 10 }}>No Style Tags</Text>
                             :
                             <View style={{ borderWidth: 1, marginLeft: 16.5, marginRight: 14.5, marginTop: 13.5, marginBottom: 27.5, flexDirection: 'row', flexWrap: 'wrap' }}>
                                 {
                                     tagList?.map((res) => {
+                                        console.log("sd", res)
                                         return (
                                             <View style={{ backgroundColor: '#D8D8D8', marginLeft: 7.5, marginTop: 6.5, marginBottom: 5.5 }}>
                                                 <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', color: '#1A1919', lineHeight: 22, marginLeft: 8, marginTop: 6, marginRight: 16, marginBottom: 5 }}>{res}</Text>

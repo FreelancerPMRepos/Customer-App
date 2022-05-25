@@ -12,6 +12,7 @@ import { BASE_URL, Colors, width } from '../../../Config';
 import Header from '../../../Components/EmployeeHeader';
 import axios from 'axios';
 import moment from 'moment';
+import { showMessageAlert } from '../../../Utils/Utility';
 
 const AppointmentDetails = ({ navigation, route, props }) => {
     const [appointmentData, setAppointmentData] = useState([]);
@@ -36,6 +37,13 @@ const AppointmentDetails = ({ navigation, route, props }) => {
             })
     }
 
+    const onCustomStyle = () => {
+        if (appointmentData?.service?.id) {
+            navigation.navigate('AddStyle', { service_name: appointmentData?.service?.name, service_id: appointmentData?.service?.id, page: 'Detail', userId: appointmentData?.user?.id })
+        } else {
+            showMessageAlert('No Service there')
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -118,7 +126,7 @@ const AppointmentDetails = ({ navigation, route, props }) => {
                                 }}
                             />
                         </View>
-                        <Pressable style={styles.buttonStyle} onPress={() => navigation.navigate('AddStyle', { service_name: appointmentData?.style?.service?.name, service_id: appointmentData?.style?.service?.id, page: 'Detail', userId: appointmentData?.user?.id })}>
+                        <Pressable style={styles.buttonStyle} onPress={() => onCustomStyle()}>
                             <Text style={styles.buttonText}>Add Custom Hairstyle</Text>
                         </Pressable>
                     </View>

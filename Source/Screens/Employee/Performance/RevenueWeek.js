@@ -98,11 +98,11 @@ const RevenueWeek = (props) => {
                                         {
                                             weekDate.map((val) => {
                                                 return (
-                                                    <View style={{ borderRightWidth: 1, flexWrap: 'wrap', borderColor: '#979797', width: '14.2%' }}>
-                                                        <Text style={{ color: '#1A1919', fontFamily: 'Avenir-Heavy', lineHeight: 19, fontSize: 12, textAlign: 'right', }}>{moment(val).format('DD')}</Text>
+                                                    <View style={{ borderRightWidth: 1, flexWrap: 'wrap', borderColor: '#979797', width: '14.2%', }}>
+                                                        <Text style={{ color: '#1A1919', fontFamily: 'Avenir-Heavy', lineHeight: 19, fontSize: 12, textAlign: 'left', paddingLeft: 1 }}>{moment(val).format('DD')}</Text>
                                                         {
                                                             moment(val).format('DD') == moment(res.date).format('DD') ?
-                                                                <Text style={{ color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, paddingBottom: 5.5, }}>{kFormatter(res.revenue)}</Text>
+                                                                <Text style={{ color: '#50C2C6', fontFamily: 'Avenir-Black', paddingBottom: 5.5, paddingLeft: 1 }}>${kFormatter(res.revenue)}</Text>
                                                                 :
                                                                 null
                                                         }

@@ -1,6 +1,13 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Text, View, Pressable, StyleSheet, Image } from 'react-native';
+import { 
+  Text, 
+  View, 
+  Pressable, 
+  StyleSheet, 
+  Image
+} from 'react-native';
+
 import Header from '../../../Components/EmployeeHeader';
 import { BASE_URL, Colors, width } from '../../../Config';
 import moment from 'moment';
@@ -13,24 +20,25 @@ const RevenueMonth = (props) => {
   const [isLoading, setLoading] = useState(false)
   const [listData, setListData] = useState([]);
   const [days, setDays] = useState([]);
-  const [nextDate, setNextDate] = useState(0);
-  const [nextYear, setNextYear] = useState(0);
+  const [storeId, setStoreId] = useState('');
+  const [employeeId, setEmploteeId] = useState('');
+  const [nextDate, setNextDate] = useState();
+  const [nextYear, setNextYear] = useState();
 
   const _onBack = () => props.navigation.goBack()
 
   useEffect(() => {
     setNextYear(new Date().getFullYear());
-    setNextDate(new Date().getMonth());
+    setNextDate(new Date().getMonth() + 1);
     getMonthDateDay(new Date().getFullYear(), new Date().getMonth())
     getUser();
   }, [])
 
-  const getData = (id, storeId) => {
+  const getData = (id, storeId, month, year) => {
     setLoading(true)
-    console.log("sd",`${BASE_URL}/revenue/month?date=${nextDate}-${nextYear}&employee_id=${id}&store_id=${storeId}`)
-    axios.get(`${BASE_URL}/revenue/month?date=${nextDate}-${nextYear}&employee_id=${id}&store_id=${storeId}`)
+    console.log("sd",`${BASE_URL}/revenue/month?date=${month}-${year}&employee_id=${id}&store_id=${storeId}`)
+    axios.get(`${BASE_URL}/revenue/month?date=${month}-${year}&employee_id=${id}&store_id=${storeId}`)
       .then(res => {
-        console.log('res', res.data)
         setListData(res.data)
         setLoading(false)
       })
@@ -44,8 +52,9 @@ const RevenueMonth = (props) => {
     try {
       const jsonValue = await AsyncStorage.getItem('@user_details')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
-      console.log("jdfhughs", parData.id)
-      getData(parData.id, parData.store_id)
+      setStoreId(parData.store_id)
+      setEmploteeId(parData.id)
+      getData(parData.id, parData.store_id, new Date().getMonth() +1, new Date().getFullYear())
     } catch (e) {
       // error reading value
     }
@@ -55,7 +64,6 @@ const RevenueMonth = (props) => {
   const getMonthDateDay = (year, date) => {
     var year = year;
     var month = date;
-    //  console.log("object", year, date)
     var date = new Date(year, month, 1);
     var days = [];
     var newObj = {};
@@ -64,25 +72,18 @@ const RevenueMonth = (props) => {
         days.push(newObj);
         newObj = {};
         newObj.date = date.getDate();
-        //   newObj.is_open = getIsopen(date.getDay());
       } else if (date.getDay() == 1) {
         newObj.date1 = date.getDate();
-        //   newObj.is_open1 = getIsopen(date.getDay());
       } else if (date.getDay() == 2) {
         newObj.date2 = date.getDate();
-        //  newObj.is_open2 = getIsopen(date.getDay());
       } else if (date.getDay() == 3) {
         newObj.date3 = date.getDate();
-        //   newObj.is_open3 = getIsopen(date.getDay());
       } else if (date.getDay() == 4) {
         newObj.date4 = date.getDate();
-        //  newObj.is_open4 = getIsopen(date.getDay());
       } else if (date.getDay() == 5) {
         newObj.date5 = date.getDate();
-        //   newObj.is_open5 = getIsopen(date.getDay());
       } else if (date.getDay() == 6) {
         newObj.date6 = date.getDate();
-        //   newObj.is_open6 = getIsopen(date.getDay());
       }
 
       date.setDate(date.getDate() + 1);
@@ -97,32 +98,29 @@ const RevenueMonth = (props) => {
       setNextDate("11")
       setNextYear(nextYear - 1)
       getMonthDateDay(nextYear - 1, 11)
-      getData()
+      getData(employeeId, storeId, "11", nextYear - 1)
     } else {
+      console.log("nextDate",nextDate)
       setNextDate(parseInt(nextDate) - 1)
+      console.log("object",parseInt(nextDate) - 1)
       setNextYear(nextYear)
       getMonthDateDay(nextYear, parseInt(nextDate) - 1)
-      getData()
+      getData(employeeId, storeId, parseInt(nextDate) - 1, nextYear)
     }
-    // setNextDate(nextDate - 1)
-    // getMonthDateDay()
   }
 
   const _onCalendarRight = () => {
-    console.log("das", nextDate)
-    console.log("fsdg", nextYear)
     if (nextDate == 11) {
-      //    console.log("As")
       setNextDate('0')
       setNextYear(nextYear + 1)
       getMonthDateDay(nextYear + 1, 0)
-      getData()
+      getData(employeeId, storeId, '0', nextYear + 1)
     } else {
-      //   console.log(nextDate + 1)
       setNextDate(parseInt(nextDate) + 1)
+      console.log("asd",parseInt(nextDate) + 1)
       setNextYear(nextYear)
       getMonthDateDay(nextYear, parseInt(nextDate) + 1)
-      getData()
+      getData(employeeId, storeId, parseInt(nextDate) + 1, nextYear)
     }
   }
 
@@ -151,7 +149,7 @@ const RevenueMonth = (props) => {
                   />
                 </Pressable>
                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 9, marginBottom: 10, lineHeight: 22 }}>
-                  {nextDate == 0 ? 'January' : nextDate == 1 ? 'February' : nextDate == 2 ? "March" : nextDate == 3 ? "April" : nextDate == 4 ? "May" : nextDate == 5 ? "June" : nextDate == 6 ? "July" : nextDate == 7 ? "August" : nextDate == 8 ? "September" : nextDate == 9 ? "October" : nextDate == 10 ? "November" : "December"}
+                  {nextDate == 1 ? 'January' : nextDate == 2 ? 'February' : nextDate == 3 ? "March" : nextDate == 4 ? "April" : nextDate == 5 ? "May" : nextDate == 6 ? "June" : nextDate == 7 ? "July" : nextDate == 8 ? "August" : nextDate == 9 ? "September" : nextDate == 10 ? "October" : nextDate == 11 ? "November" : "December"}
                 </Text>
                 <Pressable onPress={() => _onCalendarRight()}>
                   <Image
@@ -198,7 +196,7 @@ const RevenueMonth = (props) => {
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{  }}>
                                     {
                                       moment(val.date).format('DD') == res.date1 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>
@@ -211,12 +209,12 @@ const RevenueMonth = (props) => {
                               })
                             }
                           </Pressable>
-                          <Pressable style={{ borderBottomWidth: 1, borderLeftWidth: 1, width: '14.28%' }}>
+                          <Pressable style={{ borderBottomWidth: 1, borderLeftWidth: 1, height: 45, width: '14.28%' }}>
                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', lineHeight: 19, color: '#1A1919' }}>{res.date2} </Text>
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{  }}>
                                     {
                                       moment(val.date).format('DD') == res.date2 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>
@@ -234,7 +232,7 @@ const RevenueMonth = (props) => {
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{  }}>
                                     {
                                       moment(val.date).format('DD') == res.date3 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>
@@ -252,7 +250,7 @@ const RevenueMonth = (props) => {
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{  }}>
                                     {
                                       moment(val.date).format('DD') == res.date4 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>
@@ -270,7 +268,7 @@ const RevenueMonth = (props) => {
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{ }}>
                                     {
                                       moment(val.date).format('DD') == res.date5 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>
@@ -283,12 +281,12 @@ const RevenueMonth = (props) => {
                               })
                             }
                           </Pressable>
-                          <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1, width: '14.28%' }}>
+                          <Pressable style={{ borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1,  height: 45, width: '14.28%' }}>
                             <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'right', color: '#1A1919' }}>{res.date6} </Text>
                             {
                               listData.map((val) => {
                                 return (
-                                  <View style={{ marginBottom: 6 }}>
+                                  <View style={{  }}>
                                     {
                                       moment(val.date).format('DD') == res.date6 ?
                                         <Text style={{ textAlign: 'center', color: '#50C2C6', fontFamily: 'Avenir-Black', lineHeight: 19, fontSize: 12 }}>${kFormatter(val.revenue)}</Text>

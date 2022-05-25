@@ -19,6 +19,7 @@ import { deleteSalon } from '../../../Actions/PickSalon'
 import Loader from '../../../Components/Loader';
 import { getPreciseDistance } from 'geolib';
 import MapView, { Marker } from 'react-native-maps';
+import Dialog, { DialogContent } from 'react-native-popup-dialog';
 
 const Days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -32,6 +33,7 @@ const genderList = ["Men", "Women"]
 const StoreDescription = ({ navigation, route, props }) => {
     const updatedName = useSelector(state => state)
     const [isLoading, setLoading] = useState(false)
+    const [belowView, setBelowView] = useState(false)
     const dispatch = useDispatch()
     const [serviceList, setServiceList] = useState([]);
     const [serviceTypeList, setServiceTypeList] = useState([]);
@@ -39,6 +41,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [dateList, setDateList] = useState([]);
     const [pickStyleList, setPickStyleList] = useState([]);
     const [promotionTime, setPromotionTime] = useState([]);
+    const [userDataMe, setUserData] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
     const [pickStyleModal, setPickStyleModal] = useState(false);
@@ -94,6 +97,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             getHairdresserList();
             //  getDateSlot();
             getData();
+            userData();
             //     Check();
         }
         return () => {
@@ -101,7 +105,25 @@ const StoreDescription = ({ navigation, route, props }) => {
         }
     }, [])
 
-
+    const userData = () => {
+        setLoading(true)
+        axios.get(`${BASE_URL}/users/me`)
+            .then(res => {
+                setUserData(res)
+                if (res.data.gender != '') {
+                    if (res.data.gender == "FEMALE")
+                    setGenderName('Women')
+                    else if (res.data.gender == "MALE") {
+                     setGenderName('Men')
+                    }
+                }
+                setLoading(false)
+            })
+            .catch(e => {
+                console.log('e', e)
+                setLoading(false)
+            })
+    }
 
     const getStoreData = () => {
         setLoading(true)
@@ -150,12 +172,11 @@ const StoreDescription = ({ navigation, route, props }) => {
         var proOpenTime = "";
         var proCloseTime = "";
         for (var i in promotionTime) {
-            if (promotionTime[i].day == DayShortCapsName[day]) {
-                console.log("promotionTime[i].open_time", promotionTime[i].open_time, promotionTime[i].close_time)
+            if (promotionTime[i].day == DaysName[day]) {
                 var startTime = promotionTime[i].open_time;
                 var endTime = promotionTime[i].close_time;
                 proOpenTime = moment(startTime, 'HH:mm').add(-1, 'minutes');
-                proCloseTime = moment(endTime, 'HH:mm').add(1, 'minutes');;
+                proCloseTime = moment(endTime, 'HH:mm').add(1, 'minutes');
             }
         }
         var startTime = "";
@@ -190,9 +211,10 @@ const StoreDescription = ({ navigation, route, props }) => {
 
                 }
                 var new_array = [];
+                var currentDate = moment(new Date())
                 for (var i in timeStops) {
                     if (moment(`${nextYear}-${nextDate + 1}-${date}`).format('YYYY-M-DD') === moment(new Date()).format('YYYY-M-DD')) {
-                        if (moment(timeStops[i].date, 'hh:mm A').format('hh:mm A') >= moment.utc(new Date()).format('hh:mm A')) {
+                        if (moment(timeStops[i].date, 'hh:mm A') >= currentDate) {
                             new_array.push(timeStops[i])
 
                         }
@@ -201,6 +223,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     }
 
                 }
+                console.log("asd",new_array)
             }
         }
         setLoading(false)
@@ -277,6 +300,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         setLoading(true)
         axios.get(`${BASE_URL}/promotion/timeslot/list/${id}`)
             .then(res => {
+                console.log("rtr", res.data)
                 setPromotionTime(res.data)
                 setLoading(false)
             })
@@ -292,6 +316,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/service/all/list2?store_id=${storeDetails.id}`)
             .then(res => {
                 setServiceList(res.data)
+                console.log("SERVICE",res.data)
                 setLoading(false)
             })
             .catch(e => {
@@ -366,6 +391,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             getPromotionTimeList()
             setServiceDiscount(data.discount)
         }
+        setBelowView(true)
     }
 
     const onService = () => {
@@ -436,7 +462,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         }
     }
 
-    console.log("date list", dateList)
 
     const _onGender = (res) => {
         setGenderName(res)
@@ -476,11 +501,12 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const _onBook = () => {
         setLoading(true)
-        if (genderName == '') {
-            alert('Please select sex.')
-            setLoading(false)
-            return false
-        } else if (serviceId == '') {
+        // if (genderName == '') {
+        //     alert('Please select sex.')
+        //     setLoading(false)
+        //     return false
+        // } else
+        if (serviceId == '') {
             alert('Please select service.')
             setLoading(false)
             return false
@@ -508,26 +534,39 @@ const StoreDescription = ({ navigation, route, props }) => {
             return false
         } else {
             var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
-            axios.post(`${BASE_URL}/booking`, {
-                store_id: storeDetails.id,
-                employee_id: hairdresserId,
-                customer_id: userDetails.id,
-                service_id: serviceId,
-                style_type_id: serviceTypeId,
-                style_id: pickStyleId,
-                gender: genderName,
-                booking_date: moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss"),
-            })
-                .then(res => {
-                    setBookingData(res.data)
-                    setBookingDone(!bookingDone)
-                    setLoading(false)
+            var bookingDate = moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss")
+            if (bookingDate) {
+                console.log("df", {
+                    store_id: storeDetails.id,
+                    employee_id: hairdresserId,
+                    customer_id: userDetails.id,
+                    service_id: serviceId,
+                    style_type_id: serviceTypeId,
+                    style_id: pickStyleId,
+                    gender: genderName,
+                    booking_date: bookingDate,
                 })
-                .catch(e => {
-                    console.log('e', e)
-                    alert(e.response.data.message)
-                    setLoading(false)
+                axios.post(`${BASE_URL}/booking`, {
+                    store_id: storeDetails.id,
+                    employee_id: hairdresserId,
+                    customer_id: userDetails.id,
+                    service_id: serviceId,
+                    style_type_id: serviceTypeId,
+                    style_id: pickStyleId,
+                    gender: genderName,
+                    booking_date: bookingDate,
                 })
+                    .then(res => {
+                        setBookingData(res.data)
+                        setBookingDone(!bookingDone)
+                        setLoading(false)
+                    })
+                    .catch(e => {
+                        console.log('e', e)
+                        alert(e.response.data.message)
+                        setLoading(false)
+                    })
+            }
         }
     }
 
@@ -603,11 +642,11 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                 <Pressable key={index} onPress={() => service(res)}>
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
-                                                        {
+                                                        {/* {
                                                             res.discount === false ? null :
                                                                 <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>Available Discount</Text>
 
-                                                        }
+                                                        } */}
                                                     </View>
                                                     <View
                                                         style={{
@@ -721,6 +760,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         )
     }
 
+
     const renderHairDresser = () => {
         var any = { "id": "001", "name": "Any" }
         return (
@@ -745,7 +785,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                     </Pressable>
                                     {
                                         hairdresserList.length == 0 ?
-                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>No Hairdresser Available</Text> :
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>No Stylist Available</Text> :
                                             hairdresserList.map((res, index) => {
                                                 return (
                                                     <Pressable key={index} onPress={() => _onHairdresser(res)}>
@@ -778,73 +818,74 @@ const StoreDescription = ({ navigation, route, props }) => {
     const renderBookingDone = () => {
 
         return (
-            <Modal
-                animationType='slide'
-                transparent={true}
+            <Dialog
                 visible={bookingDone}
-                onRequestClose={() => {
-                    Alert.alert("Modal has been closed.");
+                onTouchOutside={() => {
                     setBookingDone(!bookingDone);
                 }}
-            >
-                <View style={[styles.centeredView, { justifyContent: 'center' }]}>
-                    <View style={styles.modalView}>
-                        <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 15, marginRight: 12.5 }} onPress={() => setBookingDone(!bookingDone)}>
-                            <Image
-                                style={{}}
-                                source={require('../../../Images/cross.png')}
-                            />
-                        </Pressable>
-                        <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 111, marginTop: 0.75 }}>Booking Details</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Name</Text>
-                            <Text style={{ fontSize: 16 }}>{serviceName}</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Type</Text>
-                            <Text style={{ fontSize: 16 }}>{serviceTypeName}</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Price</Text>
-                            <Text style={{ fontSize: 16 }}>{bookingData.service_price} USD</Text>
-                        </View>
-                        {
-                            bookingData.experience_charges === 0 ?
-                                null
-                                :
+                dialogStyle={{ width: '90%' }}>
+                <DialogContent>
+                    <View >
+                        <View style={{}}>
+                            <View style={{}}>
+                                <Pressable style={{ justifyContent: 'flex-end', alignSelf: 'flex-end', marginTop: 15, marginRight: 12.5 }} onPress={() => setBookingDone(!bookingDone)}>
+                                    <Image
+                                        style={{}}
+                                        source={require('../../../Images/cross.png')}
+                                    />
+                                </Pressable>
+                                <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 111, marginTop: 0.75 }}>Booking Details</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Experience Charges</Text>
-                                    <Text style={{ fontSize: 16 }}>{bookingData.experience_charges} USD</Text>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Name</Text>
+                                    <Text style={{ fontSize: 16 }}>{serviceName}</Text>
                                 </View>
-                        }
-                        {
-                            bookingData.senior_charges === 0 ?
-                                null
-                                :
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Senior Charges</Text>
-                                    <Text style={{ fontSize: 16 }}>{bookingData.senior_charges} USD</Text>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Type</Text>
+                                    <Text style={{ fontSize: 16 }}>{serviceTypeName}</Text>
                                 </View>
-                        }
-                        {
-                            bookingData.discount === 0 ?
-                                null
-                                :
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Discount</Text>
-                                    <Text style={{ fontSize: 16 }}>{bookingData.discount} USD</Text>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Price</Text>
+                                    <Text style={{ fontSize: 16 }}>{Number(bookingData.service_price)} USD</Text>
                                 </View>
-                        }
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium', fontFamily: 'Avenir-Heavy' }}>Total Charges</Text>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{bookingData.paid_amount} USD</Text>
+                                {/* {
+                                    bookingData.experience_charges === 0 ?
+                                        null
+                                        :
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Experience Charges</Text>
+                                            <Text style={{ fontSize: 16 }}>{bookingData.experience_charges} USD</Text>
+                                        </View>
+                                } */}
+                                {/* {
+                                    bookingData.senior_charges === 0 ?
+                                        null
+                                        :
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Senior Charges</Text>
+                                            <Text style={{ fontSize: 16 }}>{bookingData.senior_charges} USD</Text>
+                                        </View>
+                                } */}
+                                {
+                                    bookingData.discount === 0 ?
+                                        null
+                                        :
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Discount</Text>
+                                            <Text style={{ fontSize: 16 }}>{bookingData.discount} USD</Text>
+                                        </View>
+                                }
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium', fontFamily: 'Avenir-Heavy' }}>Total Charges</Text>
+                                    <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy' }}>{(Number(bookingData.paid_amount)).toFixed(2)} USD</Text>
+                                </View>
+                                <Pressable style={{ borderWidth: 1, marginLeft: 80, marginRight: 80, marginTop: 26.5, marginBottom: 30 }} onPress={() => onContinePay()}>
+                                    <Text style={{ textAlign: 'center', marginTop: 12.59, marginBottom: 12.59, fontFamily: 'Avenir-Medium' }}>Continue and Pay</Text>
+                                </Pressable>
+                            </View>
                         </View>
-                        <Pressable style={{ borderWidth: 1, marginLeft: 80, marginRight: 80, marginTop: 26.5, marginBottom: 30 }} onPress={() => onContinePay()}>
-                            <Text style={{ textAlign: 'center', marginTop: 12.59, marginBottom: 12.59, fontFamily: 'Avenir-Medium' }}>Continue and Pay</Text>
-                        </Pressable>
                     </View>
-                </View>
-            </Modal>
+                </DialogContent>
+            </Dialog>
         )
     }
 
@@ -947,8 +988,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 }} style={{ height: 83, width: 71 }} />
                         }
                         <View style={{ marginLeft: 15 }}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium' }}>{storeData.store_name}</Text>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '80%' }}>
+                                <Text style={{ color: '#1A1919', fontSize: 15, fontFamily: 'Avenir-Medium', width: '50%' }}>{storeData.store_name}</Text>
                                 {
                                     updatedName.fav.data == null || updatedName.fav.data[1] == undefined ?
                                         null
@@ -1013,7 +1054,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <View style={{ marginLeft: 27.5 }}>
                         {
                             <View>
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex *</Text>
+                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex (Optional)</Text>
                                 {renderGender()}
                             </View>
                         }
@@ -1022,21 +1063,48 @@ const StoreDescription = ({ navigation, route, props }) => {
                             {renderService()}
 
                         </View>
-                        < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type *</Text>
-                        {renderServiceType()}
                         {
-                            updatedName.fav.data == null ?
+                            belowView == true ?
                                 <View>
-                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Pick Style (Optional)</Text>
-                                    {renderPickStyle()}
+                                    < Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Service Type *</Text>
+                                    {renderServiceType()}
+                                    {
+                                        updatedName.fav.data == null ?
+                                            <View>
+                                                <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Pick Style (Optional)</Text>
+                                                {renderPickStyle()}
+                                            </View>
+                                            :
+                                            null
+                                    }
+
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Stylist *</Text>
+                                    {renderHairDresser()}
+                                    <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Date & Time *</Text>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => _onDateClick()}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
+                                            <Image
+                                                style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
+                                                source={require('../../../Images/storeCalendar.png')}
+                                            />
+                                        </Pressable>
+                                        <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 || selectedDate == '' ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible) }}>
+                                            <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
+                                            <Image
+                                                style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
+                                                source={require('../../../Images/Triangle.png')}
+                                            />
+                                        </Pressable>
+                                    </View>
+                                    <Pressable style={{ borderWidth: 1, marginLeft: 95.5, marginRight: 123, marginTop: 24, marginBottom: 24 }}>
+                                        <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 9.5, marginBottom: 6.5, lineHeight: 19 }} onPress={() => _onBook()}>BOOK NOW</Text>
+                                    </Pressable>
                                 </View>
-                                :
-                                null
+                                : null
                         }
 
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Stylist *</Text>
-                        {renderHairDresser()}
-                        <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7.5, marginBottom: 7.5 }}>Date & Time *</Text>
+
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -1225,25 +1293,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                             </View>
                         </Modal>
                         {renderBookingDone()}
-                        <View style={{ flexDirection: 'row' }}>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', height: 35, width: 133, justifyContent: 'space-between' }} onPress={() => _onDateClick()}>
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedDate == '' ? 'Select' : `${selectedDate} ${nextDate == 0 ? 'Jan' : nextDate == 1 ? 'Feb' : nextDate == 2 ? "Mar" : nextDate == 3 ? "Apr" : nextDate == 4 ? "May" : nextDate == 5 ? "Jun" : nextDate == 6 ? "Jul" : nextDate == 7 ? "Aug" : nextDate == 8 ? "Sep" : nextDate == 9 ? "Oct" : nextDate == 10 ? "Nov" : "Dec"} ${nextYear}`}</Text>
-                                <Image
-                                    style={{ marginLeft: 15, marginRight: 4.5, marginTop: 7.5 }}
-                                    source={require('../../../Images/storeCalendar.png')}
-                                />
-                            </Pressable>
-                            <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 || selectedDate == '' ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible) }}>
-                                <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
-                                <Image
-                                    style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
-                                    source={require('../../../Images/Triangle.png')}
-                                />
-                            </Pressable>
-                        </View>
-                        <Pressable style={{ borderWidth: 1, marginLeft: 95.5, marginRight: 123, marginTop: 24, marginBottom: 24 }}>
-                            <Text style={{ fontFamily: 'Avenir-Medium', textAlign: 'center', marginTop: 9.5, marginBottom: 6.5, lineHeight: 19 }} onPress={() => _onBook()}>BOOK NOW</Text>
-                        </Pressable>
                     </View>
                 </ScrollView>
             }

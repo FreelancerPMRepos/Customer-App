@@ -18,7 +18,7 @@ import moment from 'moment';
 
 const countries = ["Chronological"]
 
-const Appointments = ({navigation,props}) => {
+const Appointments = ({ navigation, props }) => {
   const [list, setList] = useState([]);
   const [upcomingList, setUpcomingList] = useState([]);
   const [isLoading, setLoading] = useState(false)
@@ -71,36 +71,42 @@ const Appointments = ({navigation,props}) => {
         <ScrollView style={{ marginBottom: 10 }}>
           <Text style={styles.upcomingTextStyle}>Upcoming</Text>
           {
-            upcomingList.map((res, index) => {
-              return (
-                <View style={styles.row} key={index}>
-                  {
-                    res?.style?.upload_front_photo == null
-                      ?
-                      <Image
-                        style={styles.noImageStyle}
-                        source={require('../../../Images/noImage.jpg')}
-                      />
-                      :
-                      <Image
-                        style={styles.imageStyle}
-                        source={{
-                          uri: `${res?.style?.upload_front_photo}`,
-                        }}
-                      />
-                  }
-                  <View style={styles.contentView}>
-                    <Text style={styles.name}>{res?.style?.name == undefined ? res?.styletype?.name : res?.style?.name}</Text>
-                    <Text style={styles.upcomingDate}>{moment.utc(res?.booking_date,).local().add(0, 'days').calendar(null, {sameElse: 'ddd DD MMM YYYY hh:mm A'})}</Text>
-                    <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'UPCOMING'})}>
-                      <Text style={styles.bookingButtonText}>Look at booking</Text>
-                    </Pressable>
+            upcomingList.length == 0 ?
+              <View style={styles.errorView}>
+                <Text>No Upcoming Bookings</Text>
+              </View>
+              :
+              upcomingList.map((res, index) => {
+                console.log("res",res)
+                return (
+                  <View style={styles.row} key={index}>
+                    {
+                      res?.style?.upload_front_photo == null
+                        ?
+                        <Image
+                          style={styles.noImageStyle}
+                          source={require('../../../Images/noImage.jpg')}
+                        />
+                        :
+                        <Image
+                          style={styles.imageStyle}
+                          source={{
+                            uri: `${res?.style?.upload_front_photo}`,
+                          }}
+                        />
+                    }
+                    <View style={styles.contentView}>
+                      <Text style={styles.name}>{res?.style?.name == undefined ? res?.styletype?.name : res?.style?.name}</Text>
+                      <Text style={styles.upcomingDate}>{moment.utc(res?.booking_date,).local().add(0, 'days').calendar(null, { sameElse: 'ddd DD MMM YYYY hh:mm A' })}</Text>
+                      <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'UPCOMING' })}>
+                        <Text style={styles.bookingButtonText}>Look at booking</Text>
+                      </Pressable>
+                    </View>
                   </View>
-                </View>
-              )
-            })
+                )
+              })
           }
-          <View style={styles.horizontalLine}/>
+          <View style={styles.horizontalLine} />
           <View style={styles.passedTopView}>
             <Text style={styles.upcomingTextStyle}>Passed</Text>
             <SelectDropdown
@@ -112,34 +118,39 @@ const Appointments = ({navigation,props}) => {
             />
           </View>
           {
-            list.map((res, index) => {
-              return (
-                <View style={styles.row} key={index}>
-                  {
-                    res?.style?.upload_front_photo == null
-                      ?
-                      <Image
-                        style={styles.noImageStyle}
-                        source={require('../../../Images/noImage.jpg')}
-                      />
-                      :
-                      <Image
-                        style={styles.imageStyle}
-                        source={{
-                          uri: `${res?.style?.upload_front_photo}`,
-                        }}
-                      />
-                  }
-                  <View style={styles.contentView}>
-                    <Text style={styles.name}>{res?.style?.name === undefined ? res.service?.name : res?.style?.name}</Text>
-                    <Text style={styles.passedDate}>{moment.utc(res?.booking_date,).local().format("ddd DD MMM YYYY hh:mm a")}</Text>
-                    <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'PASSED'})}>
-                      <Text style={styles.bookingButtonText}>Look at booking</Text>
-                    </Pressable>
+            list.length == 0 ?
+              <View style={styles.errorView}>
+                <Text>No Passed Bookings</Text>
+              </View>
+              :
+              list.map((res, index) => {
+                return (
+                  <View style={styles.row} key={index}>
+                    {
+                      res?.style?.upload_front_photo == null
+                        ?
+                        <Image
+                          style={styles.noImageStyle}
+                          source={require('../../../Images/noImage.jpg')}
+                        />
+                        :
+                        <Image
+                          style={styles.imageStyle}
+                          source={{
+                            uri: `${res?.style?.upload_front_photo}`,
+                          }}
+                        />
+                    }
+                    <View style={styles.contentView}>
+                      <Text style={styles.name}>{res?.style?.name === undefined ? res.service?.name : res?.style?.name}</Text>
+                      <Text style={styles.passedDate}>{moment.utc(res?.booking_date,).local().format("ddd DD MMM YYYY hh:mm a")}</Text>
+                      <Pressable style={styles.bookingButton} onPress={() => navigation.navigate('AppointmentsDescriptionScreen', { appointmentDetails: res, type: 'PASSED' })}>
+                        <Text style={styles.bookingButtonText}>Look at booking</Text>
+                      </Pressable>
+                    </View>
                   </View>
-                </View>
-              )
-            })
+                )
+              })
           }
         </ScrollView>
       }
@@ -164,48 +175,48 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir-Medium'
   },
   noImageStyle: {
-    height: 118, 
-    width: 103, 
-    marginLeft: 26, 
-    marginTop: 14, 
+    height: 118,
+    width: 103,
+    marginLeft: 26,
+    marginTop: 14,
     resizeMode: 'contain'
   },
   imageStyle: {
-    marginLeft: 26, 
-    marginTop: 14, 
-    height: 118, 
+    marginLeft: 26,
+    marginTop: 14,
+    height: 118,
     width: 103,
   },
   contentView: {
-    marginTop: 23, 
+    marginTop: 23,
     marginLeft: 25
   },
   name: {
-    color: '#1A1919', 
-    fontSize: 16, 
+    color: '#1A1919',
+    fontSize: 16,
     fontFamily: 'Avenir-Heavy'
   },
   upcomingDate: {
-    color: '#1A1919', 
-    marginTop: 2, 
-    lineHeight: 19, 
+    color: '#1A1919',
+    marginTop: 2,
+    lineHeight: 19,
     fontFamily: 'Avenir-Medium',
   },
   bookingButton: {
-    borderWidth: 1, 
-    marginTop: 10.5, 
+    borderWidth: 1,
+    marginTop: 10.5,
     width: width * 0.4
   },
   bookingButtonText: {
-    color: '#1A1919', 
-    marginTop: 8.5, 
-    marginBottom: 8.5, 
-    textAlign: 'center', 
+    color: '#1A1919',
+    marginTop: 8.5,
+    marginBottom: 8.5,
+    textAlign: 'center',
     fontFamily: 'Avenir-Medium'
   },
   passedDate: {
-    color: '#1A1919', 
-    marginTop: 2 , 
+    color: '#1A1919',
+    marginTop: 2,
     lineHeight: 19
   },
   horizontalLine: {
@@ -216,16 +227,21 @@ const styles = StyleSheet.create({
     marginRight: 25
   },
   passedTopView: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginRight: 33
   },
   dropdownButton: {
-    backgroundColor: 'white', 
-    borderWidth: 1, 
-    borderColor: '#171717', 
-    height: 35, 
-    marginTop: 30, 
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#171717',
+    height: 35,
+    marginTop: 30,
     width: 166
+  },
+  errorView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30
   }
 })

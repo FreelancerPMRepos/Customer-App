@@ -109,7 +109,7 @@ const EmployeeHome = ({ navigation, props }) => {
                         </Pressable>
                         <Text numberOfLines={1} style={styles.title}>Appointments</Text>
                         <Pressable style={{ flexDirection: 'row' }} onPress={() => _onNotify()}>
-                            <Text style={{ backgroundColor: 'red', borderRadius: 18 / 2, width: 18, height: 18, textAlign: 'center', left: 6, bottom: 5, color: 'white' }}>{notificationCount}</Text>
+                            <Text style={{ backgroundColor: 'red', borderRadius: 18 / 2, width: 18, height: 18, textAlign: 'center', left: 2, bottom: 5, color: 'white', fontSize: 12 }}>{notificationCount}</Text>
                             <Image source={require('../../../Images/notification.png')} style={{ marginRight: 13 }} />
                         </Pressable>
                     </View>

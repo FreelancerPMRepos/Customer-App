@@ -42,7 +42,7 @@ const Home = ({ navigation, props }) => {
   const dispatch = useDispatch()
   const [keyboardStatus, setKeyboardStatus] = useState();
   const [keyword, setKeyword] = useState('')
-  const [miles, setMiles] = useState(0)
+  const [miles, setMiles] = useState(10)
 
 
   useEffect(() => {
@@ -260,9 +260,9 @@ const Home = ({ navigation, props }) => {
                 showFilter == true ?
                   <View style={styles.sliderView}>
                     <Slider
-                      style={{ width: 360, height: 20, marginTop: 10 }}
-                      minimumValue={0}
-                      maximumValue={100}
+                      style={{ width: width * 0.88, height: 20, marginTop: 10 }}
+                      minimumValue={10}
+                      maximumValue={20}
                       minimumTrackTintColor="#A9A8A8"
                       maximumTrackTintColor="#A9A8A8"
                       value={miles}
@@ -285,7 +285,7 @@ const Home = ({ navigation, props }) => {
                   null
                   :
                   <View style={styles.pickStyleView}>
-                    <Image source={{ uri: updatedName.fav.data.upload_front_photo }} style={styles.pickStyleImage} />
+                    <Image source={{ uri: updatedName.fav.data.upload_front_photo != null ? updatedName.fav.data.upload_front_photo : updatedName.fav.data.upload_back_photo != null ? updatedName.fav.data.upload_back_photo : updatedName.fav.data.upload_top_photo != null ? updatedName.fav.data.upload_top_photo : updatedName.fav.data.upload_right_photo != null ? updatedName.fav.data.upload_right_photo : updatedName.fav.data.upload_left_photo != null ? updatedName.fav.data.upload_left_photo : updatedName.fav.data.upload_left_photo}} style={styles.pickStyleImage} />
                     <Pressable onPress={() => _onSalonCancel()}>
                       <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
                     </Pressable>
@@ -338,7 +338,7 @@ const Home = ({ navigation, props }) => {
                           }
                           <View style={styles.storeContentView}>
                             <View style={styles.contentView}>
-                              <View style={{ width: width * 0.28 }}>
+                              <View style={{width: 90}}>
                                 <Text style={styles.storeName}>{res.store_name}</Text>
                               </View>
                               <View style={styles.contentView}>
@@ -468,8 +468,10 @@ const styles = StyleSheet.create({
   pickStyleView: {
     top: 125,
     backgroundColor: Colors.white,
-    marginLeft: width * 0.61,
-    flexDirection: 'row'
+    marginLeft: width * 0.56,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   pickStyleImage: {
     height: 60,
@@ -479,7 +481,6 @@ const styles = StyleSheet.create({
     marginBottom: 5.5
   },
   crossImage: {
-    marginTop: 20,
     marginLeft: 10,
     marginRight: 14
   },
@@ -499,12 +500,13 @@ const styles = StyleSheet.create({
   },
   store: {
     flexDirection: 'row',
-    marginLeft: width * 0.03,
-    marginTop: height * 0.05,
-    marginRight: 10,
+    marginLeft: 10,
+  //  marginRight: 50,
+    marginTop: height * 0.02,
     borderBottomWidth: 1,
     borderColor: '#979797',
-    //  justifyContent: 'space-between',
+  
+    width: '100%'
   },
   noImage: {
     height: 83,

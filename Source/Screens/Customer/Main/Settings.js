@@ -260,7 +260,7 @@ const Settings = ({navigation,props}) => {
           <Pressable style={styles.loactionpasswordButton} onPress={() => navigation.navigate('ChangeLocation', { id: id })}>
             <Text style={styles.changeLocationText}>Change Location</Text>
           </Pressable>
-          <Text style={styles.servicesText}>Which services are you interested in?</Text>
+          <Text style={styles.servicesText}>Which services you are interested in?</Text>
           <View style={{ flexWrap: 'wrap' }}>
             <FlatList
               data={list}
@@ -296,6 +296,7 @@ const Settings = ({navigation,props}) => {
             }}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
+            rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={sex}
@@ -317,6 +318,7 @@ const Settings = ({navigation,props}) => {
             }}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
+            rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairLength}
@@ -338,6 +340,7 @@ const Settings = ({navigation,props}) => {
             }}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
+            rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairColor}
@@ -437,11 +440,14 @@ const styles = StyleSheet.create({
   },
   dropdown1RowTxtStyle: {
     color: "#444",
-    textAlign: "left"
+    textAlign: "left",
   },
   saveButton: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20.59
+    marginTop: 20.59,
+    alignItems: 'center',
+    width: '15%',
+    alignSelf: 'center'
   }
 })
