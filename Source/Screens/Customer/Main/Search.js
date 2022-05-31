@@ -68,6 +68,7 @@ const HelloWorldApp = (props) => {
     if (fcmToken) {
       //console.log(fcmToken);
       console.log("Your Firebase Token is:", fcmToken);
+      global.fcm_token = fcmToken;
       axios.post(`${BASE_URL}/resigterdevicetoken`, {
         token: fcmToken,
         type: "ANDROID"
@@ -87,6 +88,7 @@ const HelloWorldApp = (props) => {
     setLoading(true)
     axios.get(`${BASE_URL}/users/me`)
       .then(res => {
+        console.log("res",res.data)
         try {
           const jsonValue = JSON.stringify(res.data)
           AsyncStorage.setItem('@user_details', jsonValue)

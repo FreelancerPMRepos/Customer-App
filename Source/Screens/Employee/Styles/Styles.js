@@ -62,7 +62,7 @@ const Styles = ({navigation,props}) => {
                                     <View key={index}>
                                         {
                                             res.name == selectedService ?
-                                                <Pressable style={{ backgroundColor: '#141313', borderRadius: 5, marginLeft: 10, marginTop: 11, marginBottom: 10 }} onPress={() => setSelectedService(res)}>
+                                                <Pressable style={{ backgroundColor: '#141313', borderRadius: 5, marginLeft: 10, marginTop: 11, marginBottom: 10 }} >
                                                     <Text style={{ color: '#FFFFFF', marginLeft: 14, marginRight: 13, marginTop: 8, marginBottom: 7, fontFamily: 'Avenir-Heavy', lineHeight: 19 }}>{res.name}</Text>
                                                 </Pressable>
                                                 :

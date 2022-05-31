@@ -65,10 +65,11 @@ export const socialLogin = (token) => {
 }
 
 export const SocialSignup = (payload) => {
-    console.log("ASdf")
+    console.log("ASdf",payload)
     return async (dispatch) => {
         axios.post(`${BASE_URL}/social/signup`, payload)
             .then(res => {
+                console.log("res",res)
                 if (res.data.error) {
                     dispatch({ type: AUTH_ERROR, payload: { error: res.error } })
                 } else {

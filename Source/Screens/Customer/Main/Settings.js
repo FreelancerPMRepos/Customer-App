@@ -31,7 +31,7 @@ import {
 import SelectDropdown from 'react-native-select-dropdown';
 import { showMessageAlert } from '../../../Utils/Utility';
 
-const sex_dropdown = ["MALE", "FEMALE"]
+const sex_dropdown = ["MEN", "WOMEN"]
 const hair_length = ["SHORT", "MEDIUM", "LONG",]
 const color = ["YES", "NO",]
 
@@ -94,13 +94,20 @@ const Settings = ({navigation,props}) => {
       const jsonValue = await AsyncStorage.getItem('@user_details')
       const parData = jsonValue != null ? JSON.parse(jsonValue) : null;
       setId(parData.id)
+      console.log("fd",parData.id)
       axios.get(`${BASE_URL}/customer/detail/${parData.id}`)
         .then(res => {
+          console.log("res",res.data)
           setUserData(res.data.user_detail)
           setName(res.data.user_detail.name)
           setEmail(res.data.user_detail.email)
           setLocation(res.data.user_detail.address)
-          setSex(res.data.user_detail.gender)
+          if (res.data.user_detail.gender == 'MALE') {
+            setSex('MEN')
+          } else if (res.data.user_detail.gender == 'FEMALE') {
+            setSex('WOMEN')
+          }
+         
           setHairLength(res.data.user_detail.hair_length)
           setHairColor(res.data.user_detail.hair_colour_is_natural)
           setSex(res.data.user_detail.gender)
@@ -153,7 +160,7 @@ const Settings = ({navigation,props}) => {
 
   const _log = () => {
     setLoading(true)
-    axios.delete(`${BASE_URL}/logout`)
+    axios.delete(`${BASE_URL}/logout/${global.fcm_token}`)
       .then(res => {
         console.log('res', res.data)
         dispatch(resetAuth())
@@ -214,12 +221,23 @@ const Settings = ({navigation,props}) => {
         temp.push(res.id)
       }
     })
+    var gender = sex == 'MEN' ? 'MALE' : sex == 'WOMEN' ? 'FEMALE' : null
+    console.log("data",{
+      id: parData.id,
+      name: name,
+      email: email,
+      address: location,
+      gender: gender,
+      hair_length: hairLength,
+      hair_colour_is_natural: hairColor,
+      interest: temp
+    })
     axios.put(`${BASE_URL}/customer`, {
       id: parData.id,
       name: name,
       email: email,
       address: location,
-      gender: sex,
+      gender: gender,
       hair_length: hairLength,
       hair_colour_is_natural: hairColor,
       interest: temp
@@ -256,7 +274,7 @@ const Settings = ({navigation,props}) => {
             <Text style={styles.resetPasswordText}>Reset Password</Text>
           </Pressable>
           <Text style={styles.commonText}>Location</Text>
-          <TextInput placeholder="Auto Location Enabled" onChangeText={text => setLocation(text)} value={location} style={styles.textInputStyle} />
+          <TextInput placeholder="Auto Location Enabled" onChangeText={text => setLocation(text)} value={location} style={styles.textInputStyle} editable={false}/>
           <Pressable style={styles.loactionpasswordButton} onPress={() => navigation.navigate('ChangeLocation', { id: id })}>
             <Text style={styles.changeLocationText}>Change Location</Text>
           </Pressable>
@@ -298,7 +316,7 @@ const Settings = ({navigation,props}) => {
             rowTextStyle={styles.dropdown1RowTxtStyle}
             rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
+            buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={sex}
             onSelect={(selectedItem, index) => {
               setSex(selectedItem)
@@ -320,7 +338,7 @@ const Settings = ({navigation,props}) => {
             rowTextStyle={styles.dropdown1RowTxtStyle}
             rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
+            buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairLength}
             onSelect={(selectedItem, index) => {
               setHairLength(selectedItem)
@@ -342,7 +360,7 @@ const Settings = ({navigation,props}) => {
             rowTextStyle={styles.dropdown1RowTxtStyle}
             rowStyle={{height: 30}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
-            buttonStyle={{ height: 35, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
+            buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairColor}
             onSelect={(selectedItem, index) => {
               setHairColor(selectedItem)
@@ -429,8 +447,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 12.5,
     borderColor: '#979797',
-    height: 37,
-    paddingLeft: 10.5
+    height: 42,
+    paddingLeft: 10.5,
   },
   loactionpasswordButton: {
     justifyContent: 'flex-end',
@@ -447,7 +465,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 20.59,
     alignItems: 'center',
-    width: '15%',
+    width: '18%',
     alignSelf: 'center'
   }
 })

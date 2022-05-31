@@ -65,8 +65,10 @@ const ChangeLocation = ({ navigation, route, props }) => {
                         message: 'This App needs to Access your location',
                     },
                 );
+                console.log("granted",granted)
                 if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                     //To Check, If Permission is granted
+                    console.log("Permission Enabled")
                     getOneTimeLocation();
                 } else {
                     showMessageAlert('Permission Denied')
@@ -80,7 +82,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
     const getOneTimeLocation = () => {
         console.log("yaha aaya")
         Geolocation.getCurrentPosition(info => {
-            console.log(info.coords)
+            console.log("info.coords",info.coords)
             setLongitude(info.coords.longitude)
             setLatitude(info.coords.latitude)
             Geocoder.from(info.coords.latitude, info.coords.longitude)
@@ -89,7 +91,13 @@ const ChangeLocation = ({ navigation, route, props }) => {
                     setAddress(addressComponent)
                     setMark([{ latitude: info.coords.latitude, longitude: info.coords.longitude }])
                 })
-                .catch(error => console.warn(error));
+                .catch(error =>  {
+                    console.log("sd",error)
+                });
+        }, error => {
+            showMessageAlert('Please Enable the mobile location')
+            setIsEnabled(false)
+            _onBack()
         });
         setLoading(false)
     };

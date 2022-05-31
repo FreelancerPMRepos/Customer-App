@@ -540,7 +540,7 @@ const AddStyle = ({ navigation, route, props }) => {
                     updateState={updateTagState}
                     tags={tags}
                     inputContainerStyle={{ borderWidth: 1, marginLeft: 5, marginRight: 5, marginTop: 6.5 }}
-                    tagStyle={{ backgroundColor: '#D8D8D8', height: 28 }}
+                    tagStyle={{ backgroundColor: '#D8D8D8', height: 32 }}
                     keysForTag={','}
                 />
                 <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Medium', lineHeight: 22, marginLeft: 16, marginTop: 15.67 }}>Enter comma after each tag</Text>

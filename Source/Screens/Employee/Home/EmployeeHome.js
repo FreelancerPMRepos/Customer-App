@@ -18,6 +18,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Loader from '../../../Components/Loader';
+import messaging from '@react-native-firebase/messaging';
 
 const countries = ["TODAY", "UPCOMING"]
 
@@ -43,9 +44,44 @@ const EmployeeHome = ({ navigation, props }) => {
                 setDropdownValue('TODAY')
                 getAppointments('TODAY')
                 getNotificationCount()
+                requestUserPermission();
             }
         }
     }, [])
+
+    const requestUserPermission = async () => {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            getFcmToken()
+            console.log('Authorization status:', authStatus);
+        }
+    }
+
+    const getFcmToken = async () => {
+        console.log("ok")
+        const fcmToken = await messaging().getToken();
+        if (fcmToken) {
+            //console.log(fcmToken);
+            console.log("Your Firebase Token is:", fcmToken);
+            global.fcm_token = fcmToken;
+            axios.post(`${BASE_URL}/resigterdevicetoken`, {
+                token: fcmToken,
+                type: "ANDROID"
+            })
+                .then(res => {
+                    console.log("response", res.data)
+                })
+                .catch(e => {
+                    console.log('e', e)
+                })
+        } else {
+            console.log("Failed", "No token received");
+        }
+    }
 
     const getUserInfo = async () => {
         axios.get(`${BASE_URL}/users/me`)
@@ -97,7 +133,7 @@ const EmployeeHome = ({ navigation, props }) => {
 
     return (
         <View style={styles.container}>
-             {
+            {
                 isLoading && <Loader />
             }
             {

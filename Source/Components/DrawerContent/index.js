@@ -45,7 +45,7 @@ const DrawerContent = (props) => {
     }
 
     const _log = () => {
-        axios.delete(`${BASE_URL}/logout`)
+        axios.delete(`${BASE_URL}/logout/${global.fcm_token}`)
             .then(res => {
                 console.log('res', res.data)
                 dispatch(resetAuth())

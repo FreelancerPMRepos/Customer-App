@@ -89,8 +89,8 @@ const StylesDescription = ({ navigation, route, props }) => {
                             <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, color: '#141313', marginRight: 10 }}>{styleData.name}</Text>
                         </View>
                         <View style={{width: '50%'}}>
-                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', color: '#141313', lineHeight: 22 }}>Stylist Level</Text>
-                            <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, color: '#141313' }}>{styleData.stylist_level}</Text>
+                            <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', color: '#141313', lineHeight: 22, width: '80%' }}>Stylist Level</Text>
+                            <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, color: '#141313', width: '80%' }}>{styleData.stylist_level}</Text>
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', marginLeft: 16, justifyContent: 'space-between', marginRight: 90, marginTop: 14 }}>
