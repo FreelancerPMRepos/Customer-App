@@ -169,67 +169,86 @@ const StoreDescription = ({ navigation, route, props }) => {
     const getTime = (date, day) => {
         setLoading(true)
         setSelectedDate(date)
-        var proOpenTime = "";
-        var proCloseTime = "";
-      //  console.log("promotionTime", promotionTime)
-        for (var i in promotionTime) {
-            if (promotionTime[i].day == DaysName[day]) {
-             //   console.log("d", DaysName[day], promotionTime[i].day)
-              //  console.log("anadar aaya")
-                var startTime = promotionTime[i].open_time;
-                var endTime = promotionTime[i].close_time;
-                proOpenTime = moment(startTime, 'HH:mm').add(-1, 'minutes');
-                proCloseTime = moment(endTime, 'HH:mm').add(1, 'minutes');
-            }
-        }
-        var startTime = "";
-        var endTime = "";
-        var timeStops = [];
         for (var i in dateList) {
             if (dateList[i].day == DaysName[day]) {
-                startTime = dateList[i].employee_start_time;
-                endTime = dateList[i].employee_end_time;
-                var openTime = moment(startTime, 'HH:mm');
-                var closeTime = moment(endTime, 'HH:mm');
-
-                if (closeTime.isBefore(openTime)) {
-                    closeTime.add(1, 'day');
+                var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
+                var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
+                for (var i in next_slot) {
+                    new_array.push(next_slot[i])
                 }
 
-                while (openTime <= closeTime) {
-                    var obj = {
-                        date: moment(openTime).format('hh:mm A'),
-                        temp: moment(openTime, 'HH:mm'),
-                        isOffer: false
-                    }
-
-                    if (proCloseTime != "" && proOpenTime != "") {
-                        if (obj.temp.isBefore(proCloseTime) && obj.temp.isAfter(proOpenTime)) {
-                            obj.isOffer = true;
-                        }
-                    }
-                    timeStops.push(obj);
-                    // openTime.add(timeInterval == '' ? '30' : `${timeInterval}`, 'minutes');
-                    openTime.add('5', 'minutes');
-
-                }
-                var new_array = [];
-                var currentDate = moment(new Date())
-                for (var i in timeStops) {
-                    if (moment(`${nextYear}-${nextDate + 1}-${date}`).format('YYYY-M-DD') === moment(new Date()).format('YYYY-M-DD')) {
-                        if (moment(timeStops[i].date, 'hh:mm A') >= currentDate) {
-                            new_array.push(timeStops[i])
-
-                        }
-                    } else {
-                        new_array.push(timeStops[i])
-                    }
-
-                }
             }
         }
         setLoading(false)
         setTime(new_array)
+    }
+
+    const getEmployeeTimeData = (employeeStartTime, employeeEndTime, promotion_timeslot, day, date) => {
+
+        var startTime = employeeStartTime;
+        var endTime = employeeEndTime;
+        var openTime = moment(startTime, 'HH:mm');
+        var closeTime = moment(endTime, 'HH:mm');
+
+        if (closeTime.isBefore(openTime)) {
+            closeTime.add(1, 'day');
+        }
+        var timeStops = [];
+        var isToday = false;
+        if (moment(`${nextYear}-${nextDate + 1}-${date}`).format('YYYY-M-DD') === moment(new Date()).format('YYYY-M-DD')) {
+            isToday = true;
+        }
+
+        var currentDate = moment(new Date()).utc();
+        currentDate = moment(currentDate).format('DD/MM/YYYY hh:mm A')
+        currentDate = moment(currentDate, 'DD/MM/YYYY hh:mm A');
+
+        while (openTime <= closeTime) {
+
+
+            var obj = {
+                date: moment(openTime).format('hh:mm A'),
+                temp: moment(openTime, 'HH:mm'),
+                isOffer: false,
+            }
+
+
+            if (isToday == true) {
+                if (obj.temp <= currentDate) {
+                    openTime.add('5', 'minutes');
+                    continue;
+                }
+            }
+
+            var discount = getDiscount(obj.temp, promotion_timeslot, day);
+            if (discount && discount > 0) {
+                obj.isOffer = true;
+                obj.discount = discount;
+            }
+
+            timeStops.push(obj);
+            openTime.add('5', 'minutes');
+
+        }
+
+        return timeStops;
+    }
+
+    const getDiscount = (temp, timeslot, day) => {
+        var discount = 0;
+        for (var i in timeslot) {
+            if (timeslot[i].day == day && timeslot[i].close_time != "" && timeslot[i].open_time != "" && timeslot[i].is_open == 1) {
+                var openTime = moment(timeslot[i].open_time, 'HH:mm');
+                var closeTime = moment(timeslot[i].close_time, 'HH:mm');
+                if (temp.isBefore(closeTime) && temp.isAfter(openTime)) {
+                    if (discount < timeslot[i].discount) {
+                        discount = timeslot[i].discount;
+                    }
+                }
+            }
+        }
+
+        return discount;
     }
 
     const getMonthDateDay = (year, date) => {
@@ -411,6 +430,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const _onServiceType = (res) => {
+        setServiceTypeDiscount('')
         setServiceTypeId(res.id)
         setServiceTypeName(res.name)
         if (res.discount === false) {
@@ -421,8 +441,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         setTimeInterval(res.time)
         setServiceTypeModal(!serviceTypeModal)
         setPromotionTime(res.promotion_timeslot)
-        console.log("object", res.promotion_timeslot)
-        //    getPromotionTimeList(res.promotion_id)
     }
 
     const _onPickStyle = (res) => {
@@ -542,7 +560,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
             var bookingDate = moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss")
             if (bookingDate) {
-                console.log("Booking",{
+                console.log("Booking", {
                     store_id: storeDetails.id,
                     employee_id: hairdresserId,
                     customer_id: userDetails.id,
@@ -1266,7 +1284,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                             res.isOffer == true ?
                                                                 <Pressable style={{ flexDirection: 'row' }} onPress={() => _onTime(moment.utc(res.date, 'hh:mm A').local().format('hh:mm A'))}>
                                                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Medium', marginTop: 13, color: '#EB2C47' }}>{moment.utc(res.date, 'hh:mm A').local().format('hh:mm A')}</Text>
-                                                                    <Text style={{ marginTop: 20, marginLeft: 4, fontSize: 10, fontFamily: 'Avenir-Medium', lineHeight: 14, color: '#EB2C47' }}>{serviceTypeDiscount}% Discount</Text>
+                                                                    <Text style={{ marginTop: 20, marginLeft: 4, fontSize: 10, fontFamily: 'Avenir-Medium', lineHeight: 14, color: '#EB2C47' }}>{res.discount}% Discount</Text>
                                                                 </Pressable>
                                                                 :
                                                                 <Pressable onPress={() => _onTime(moment.utc(res.date, 'hh:mm A').local().format('hh:mm A'))}>

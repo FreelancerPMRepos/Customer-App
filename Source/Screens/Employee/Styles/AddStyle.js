@@ -22,11 +22,13 @@ const AddStyle = ({ navigation, route, props }) => {
     const [images, setImages] = useState({ front: {}, back: {}, right: {}, left: {}, top: {} })
     const [uploadingImage, setUploadingImage] = useState([]);
     const [serviceTagData, setServiceTagData] = useState([])
+    const [placeholder, setPlaceholder] = useState([])
     const [serviceName, setServiceName] = useState('')
     const [description, setDescription] = useState('')
     const [material, setMaterial] = useState('')
     const [modalVisible, setModalVisible] = useState(false);
     const [imageType, setImageType] = useState('')
+    const [minimumUpload, setMinimumUpload] = useState('')
     const [userData, setUserData] = useState()
     const [tags, setTags] = useState({ tag: '', tagsArray: [] })
     const { service_name } = route.params
@@ -38,6 +40,7 @@ const AddStyle = ({ navigation, route, props }) => {
 
     useEffect(() => {
         getServiceTag()
+        getPlaceholder()
         getData()
     }, [])
 
@@ -69,6 +72,28 @@ const AddStyle = ({ navigation, route, props }) => {
 
                 }
                 setServiceTagData(serviceTags)
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+
+    const getPlaceholder = () => {
+        axios.get(`${BASE_URL}/placeholder/${service_id}`)
+            .then(res => {
+                setPlaceholder(res.data)
+                getMinimumUpload()
+            })
+            .catch(e => {
+                console.log('e', e)
+            })
+    }
+
+
+    const getMinimumUpload = () => {
+        axios.get(`${BASE_URL}/services/${service_id}`)
+            .then(res => {
+                setMinimumUpload(res.data.min_upload)
             })
             .catch(e => {
                 console.log('e', e)
@@ -279,7 +304,7 @@ const AddStyle = ({ navigation, route, props }) => {
         } else if (serviceName == '') {
             showMessageAlert('Please enter service name')
             return false
-        } else if (count < 2) {
+        } else if (count < minimumUpload) {
             console.log("count", count)
             showMessageAlert('Please select atleast two images')
             return false
@@ -431,7 +456,7 @@ const AddStyle = ({ navigation, route, props }) => {
         return (
             <View>
                 <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, marginLeft: 16, marginTop: 9.5, color: '#1A1919' }}>Service Photos</Text>
-                <Text style={{ fontFamily: 'Avenir-Heavy', lineHeight: 19, color: '#1A1919', marginLeft: 16, }}>(Min 2)</Text>
+                <Text style={{ fontFamily: 'Avenir-Heavy', lineHeight: 19, color: '#1A1919', marginLeft: 16, }}>(Min {minimumUpload})</Text>
             </View>
         )
     }
@@ -439,20 +464,26 @@ const AddStyle = ({ navigation, route, props }) => {
     const renderFirstRowImages = () => {
         return (
             <View style={styles.row}>
-                <Pressable style={styles.imageView} onPress={() => selectImage('front')} >
-                    <Image
-                        style={images.front.assets ? styles.captureImage : styles.firstImage}
-                        source={images.front.assets ? { uri: images.front.assets[0].uri, isStatic: true } : require('../../../Images/upload_front_photo.png')}
-                    />
-                    {images.front.assets ? null : <Text style={styles.uploadImageText}>Upload Front Photo</Text>}
-                </Pressable>
-                <Pressable style={styles.imageView} onPress={() => selectImage('back')}>
-                    <Image
-                        style={images.back.assets ? styles.captureImage : styles.secondImage}
-                        source={images.back.assets ? { uri: images.back.assets[0].uri, isStatic: true } : require('../../../Images/upload_back_photo.png')}
-                    />
-                    {images.back.assets ? null : <Text style={styles.uploadImageText}>Upload Back Photo</Text>}
-                </Pressable>
+                {
+                    placeholder[0] ?
+                        <Pressable style={styles.imageView} onPress={() => selectImage('front')} >
+                            <Image
+                                style={images.front.assets ? styles.captureImage : { height: 90 }}
+                                source={images.front.assets ? { uri: images.front.assets[0].uri, isStatic: true } : { uri: placeholder[0].image_url }}
+                            />
+                            {images.front.assets ? null : <Text style={styles.uploadImageText}>{placeholder[0].title}</Text>}
+                        </Pressable> : null
+                }
+                {
+                    placeholder[1] ?
+                        <Pressable style={styles.imageView} onPress={() => selectImage('back')}>
+                            <Image
+                                style={images.back.assets ? styles.captureImage : { height: 90 }}
+                                source={images.back.assets ? { uri: images.back.assets[0].uri, isStatic: true } : { uri: placeholder[1].image_url }}
+                            />
+                            {images.back.assets ? null : <Text style={styles.uploadImageText}>{placeholder[1].title}</Text>}
+                        </Pressable> : null
+                }
             </View>
         )
     }
@@ -460,34 +491,43 @@ const AddStyle = ({ navigation, route, props }) => {
     const renderSecondRowImages = () => {
         return (
             <View style={styles.row}>
-                <Pressable style={styles.imageView} onPress={() => selectImage('right')}>
-                    <Image
-                        style={images.right.assets ? styles.captureImage : styles.firstImage}
-                        source={images.right.assets ? { uri: images.right.assets[0].uri, isStatic: true } : require('../../../Images/upload_right_photo.png')}
-                    />
-                    {images.right.assets ? null : <Text style={styles.uploadImageText}>Upload Right Photo</Text>}
-                </Pressable>
-                <Pressable style={styles.imageView} onPress={() => selectImage('left')}>
-                    <Image
-                        style={images.left.assets ? styles.captureImage : styles.secondImage}
-                        source={images.left.assets ? { uri: images.left.assets[0].uri, isStatic: true } : require('../../../Images/upload_left_photo.png')}
-                    />
-                    {images.left.assets ? null : <Text style={styles.uploadImageText}>Upload Left Photo</Text>}
-                </Pressable>
+                {
+                    placeholder[2] ?
+                        <Pressable style={styles.imageView} onPress={() => selectImage('right')}>
+                            <Image
+                                style={images.right.assets ? styles.captureImage : { height: 90 }}
+                                source={images.right.assets ? { uri: images.right.assets[0].uri, isStatic: true } : { uri: placeholder[2].image_url }}
+                            />
+                            {images.right.assets ? null : <Text style={styles.uploadImageText}>{placeholder[2].title}</Text>}
+                        </Pressable> : null
+                }
+                {
+                    placeholder[3] ?
+                        <Pressable style={styles.imageView} onPress={() => selectImage('left')}>
+                            <Image
+                                style={images.left.assets ? styles.captureImage : { height: 90 }}
+                                source={images.left.assets ? { uri: images.left.assets[0].uri, isStatic: true } : { uri: placeholder[3].image_url }}
+                            />
+                            {images.left.assets ? null : <Text style={styles.uploadImageText}>{placeholder[3].title}</Text>}
+                        </Pressable> : null
+                }
             </View>
         )
     }
 
     const renderThirdRowImages = () => {
         return (
-            <View style={{ marginLeft: 27}}>
-                <Pressable style={styles.imageView} onPress={() => selectImage('top')}>
-                    <Image
-                        style={images.top.assets ? styles.captureImage : styles.firstImage}
-                        source={images.top.assets ? { uri: images.top.assets[0].uri, isStatic: true } : require('../../../Images/upload_top_photo.png')}
-                    />
-                    {images.top.assets ? null : <Text style={styles.uploadImageText}>Upload Top Photo</Text>}
-                </Pressable>
+            <View style={{ marginLeft: 27 }}>
+                {
+                    placeholder[4] ?
+                        <Pressable style={styles.imageView} onPress={() => selectImage('top')}>
+                            <Image
+                                style={images.top.assets ? styles.captureImage : { height: 90 }}
+                                source={images.top.assets ? { uri: images.top.assets[0].uri, isStatic: true } : { uri: placeholder[4].image_url }}
+                            />
+                            {images.top.assets ? null : <Text style={styles.uploadImageText}>{placeholder[4].title}</Text>}
+                        </Pressable> : null
+                }
             </View>
         )
     }
@@ -635,18 +675,18 @@ const AddStyle = ({ navigation, route, props }) => {
                             return (
                                 <View key={i}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Black', color: '#1A1919', marginLeft: 16, marginTop: 9, lineHeight: 22 }}>{res.name}</Text>
-                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginLeft: 13, marginRight: 10}}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginLeft: 13, marginRight: 10 }}>
                                         {
                                             res.styles.map((val, j) => {
                                                 return (
-                                                    <View key={j} style={{ flexDirection: 'row'}}>
+                                                    <View key={j} style={{ flexDirection: 'row' }}>
                                                         <CheckBox
                                                             // key={j}
                                                             disabled={false}
                                                             value={val.isChecked}
                                                             onValueChange={(newValue) => _onCheck(res.name, j)}
                                                         />
-                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6}}>{val.name}</Text>
+                                                        <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', lineHeight: 22, color: '#1A1919', marginTop: 6 }}>{val.name}</Text>
                                                     </View>
                                                 )
                                             })
