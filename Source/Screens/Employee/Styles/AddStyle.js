@@ -296,7 +296,7 @@ const AddStyle = ({ navigation, route, props }) => {
         }
 
         if (toggleCheckBox.men == false && toggleCheckBox.women == false) {
-            showMessageAlert('Please select gender')
+            showMessageAlert('Please select sex')
             return false
         } else if (toggleCheckBox.junior == false && toggleCheckBox.experienced == false && toggleCheckBox.senior == false) {
             showMessageAlert('Please select stylist level')
