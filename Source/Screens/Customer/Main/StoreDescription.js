@@ -171,14 +171,24 @@ const StoreDescription = ({ navigation, route, props }) => {
         setLoading(true)
         setSelectedDate(date)
         for (var i in dateList) {
-            if (dateList[i].day == DaysName[day]) {
-                var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
-                var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
-                for (var i in next_slot) {
-                    new_array.push(next_slot[i])
-                }
+            if (dateList[i].employee_id) {
+                console.log("In if")
+                if (dateList[i].day == DaysName[day]) {
+                    var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
+                    var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
+                    for (var i in next_slot) {
+                        new_array.push(next_slot[i])
+                    }
 
+                }
+            } else {
+                console.log("In Else")
+                if (dateList[i].day == DaysName[day]) {
+                    console.log("Opne",dateList[i].open_time)
+                    var new_array = getEmployeeTimeData(dateList[i].open_time, dateList[i].close_time, promotionTime, dateList[i].day, date)
+                }
             }
+
         }
         setLoading(false)
         setTime(new_array)
@@ -307,16 +317,29 @@ const StoreDescription = ({ navigation, route, props }) => {
         console.log("id", id)
         setLoading(true)
         //    axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
-        axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
-            .then(res => {
-                setDateList(res.data.list)
-                console.log('res.data.list', res.data.list)
-                setLoading(false)
-            })
-            .catch(e => {
-                console.log('e getDateSlot', e)
-                setLoading(false)
-            })
+        if (id == '001') {
+            axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
+                .then(res => {
+                    setDateList(res.data.list)
+                    console.log('res.data.list', res.data.list)
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log('e getDateSlot', e)
+                    setLoading(false)
+                })
+        } else {
+            axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
+                .then(res => {
+                    setDateList(res.data.list)
+                    console.log('res.data.list', res.data.list)
+                    setLoading(false)
+                })
+                .catch(e => {
+                    console.log('e getDateSlot', e)
+                    setLoading(false)
+                })
+        }
     }
 
     const getPromotionTimeList = (id) => {
@@ -400,18 +423,18 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         temp.push(local_data[j].discount)
                                     }
                                 }
-                                var largest= 0;
+                                var largest = 0;
                                 if (temp.length > 0) {
-                                    for (k=0; k<=largest; k++) {
+                                    for (k = 0; k <= largest; k++) {
                                         if (temp[i] > largest) {
-                                            var largest=temp[k];
+                                            var largest = temp[k];
                                         }
                                     }
                                 }
                                 res.data[i].total_discount = largest;
                             }
                         }
-                        console.log("largest",res.data)
+                        console.log("largest", res.data)
                         setIsServiceTypeDiscount(true)
                         setServiceTypeList(res.data)
                     }
