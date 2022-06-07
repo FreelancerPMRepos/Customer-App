@@ -70,6 +70,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [selectedTime, setSelectedTime] = useState('');
     const [overallDistance, setOverallDistance] = useState('');
     const [bookingData, setBookingData] = useState([]);
+    const [isServiceTypeDiscount, setIsServiceTypeDiscount] = useState(false);
     // Date
     const [days, setDays] = useState([]);
     const [nextDate, setNextDate] = useState(0);
@@ -380,15 +381,39 @@ const StoreDescription = ({ navigation, route, props }) => {
             console.log("DATA", storeDetails.id, serviceId)
             axios.get(`${BASE_URL}/style/type/list/?store_id=${storeDetails.id}&service_id=${serviceId}`)
                 .then(res => {
-                    setServiceTypeList(res.data)
                     if (res.data.length == 0) {
                         alert('No service type available.')
                     } else {
+                        setServiceTypeList(res.data)
                         setServiceTypeModal(!serviceTypeModal)
                         setModalVisible(false)
                         setGenderModal(false)
                         setPickStyleModal(false)
                         setHairdresserModal(false)
+                        var today = moment(new Date()).format('dddd');
+                        var temp = [];
+                        for (var i in res.data) {
+                            if (res.data[i].promotion_timeslot) {
+                                var local_data = res.data[i].promotion_timeslot;
+                                for (var j in local_data) {
+                                    if (local_data[j].day == today && local_data[j].is_open == 1) {
+                                        temp.push(local_data[j].discount)
+                                    }
+                                }
+                                var largest= 0;
+                                if (temp.length > 0) {
+                                    for (k=0; k<=largest; k++) {
+                                        if (temp[i] > largest) {
+                                            var largest=temp[k];
+                                        }
+                                    }
+                                }
+                                res.data[i].total_discount = largest;
+                            }
+                        }
+                        console.log("largest",res.data)
+                        setIsServiceTypeDiscount(true)
+                        setServiceTypeList(res.data)
                     }
                 })
                 .catch(e => {
@@ -433,11 +458,11 @@ const StoreDescription = ({ navigation, route, props }) => {
         setServiceTypeDiscount('')
         setServiceTypeId(res.id)
         setServiceTypeName(res.name)
-        if (res.discount === false) {
+        // if (res.discount === false) {
 
-        } else {
-            setServiceTypeDiscount(res.discount)
-        }
+        // } else {
+        //     setServiceTypeDiscount(res.discount)
+        // }
         setTimeInterval(res.time)
         setServiceTypeModal(!serviceTypeModal)
         setPromotionTime(res.promotion_timeslot)
@@ -716,9 +741,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
                                                         {
-                                                            res.discount === false ? null
+                                                            res.total_discount == 0 ? null
                                                                 :
-                                                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.discount}% Discount</Text>
+                                                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.total_discount}% Discount</Text>
                                                         }
                                                     </View>
                                                     <View
