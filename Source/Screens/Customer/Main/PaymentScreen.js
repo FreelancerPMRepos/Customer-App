@@ -1,70 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Alert, TextInput } from 'react-native';
 import Header from '../../../Components/Header';
-import Stripe from 'react-native-stripe-api';
 import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
 import axios from 'axios';
 import { BASE_URL } from '../../../Config';
 import Loader from '../../../Components/Loader';
+import { useStripe } from '@stripe/stripe-react-native';
 
 const PaymentScreen = ({ navigation, route, props }) => {
     const [isLoading, setLoading] = useState(false)
     const [cardData, setCardData] = useState('');
+    const [ephemeralKey, setEphemeralKey] = useState('');
+    const [customerId, setCustomerId] = useState('')
+    const [clientSecret, setClientSecret] = useState('');
     const { booking_id, salon_name, employee_name, date_time } = route.params
-    console.log("booking_id", booking_id)
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
     const _onBack = () => navigation.goBack()
 
-    const getData = async () => {
-        setLoading(true)
-        if (cardData.valid === true) {
-            // setLoading(true)
-            const apiKey = 'pk_test_51JVfvXCnUpBJoNDHFLOyPrzRvBarz4oXWCCARl2UDVJJXdvBmCjSNkbrZN2lgqOEIiMpD7dngcowDCMR704rStrs00pQ4HmrW4';
-            const client = new Stripe('sk_test_51JVfvXCnUpBJoNDH82KAk5JeMK7ucpYXxc7XwNJRLlU0Oy7AvgGD6SFTiDaNTDwHiTC3NXw4H7tR0MsGBiNSMbpi00aJJGfEvz');
-            let Expiry = cardData.values.expiry.slice(0, 2)
-            let Year = cardData.values.expiry.slice(3, 6)
-            try {
-                const token = await client.createToken({
-                    number: cardData.values.number,
-                    exp_month: Expiry,
-                    exp_year: Year,
-                    cvc: cardData.values.cvc,
-                });
-                if (token.id) {
-                    console.log("asdf", token.id, booking_id);
-                    axios.post(`${BASE_URL}/payment/getway`, {
-                        booking_id: booking_id,
-                        stripeToken: token.id,
-                    })
-                        .then(res => {
-                            console.log("payment response", res.data)
-                            navigation.navigate('BookingSuccessfullScreen', { transaction_id: res.data.transaction_id, booking_id: booking_id, salon_name: salon_name, employee_name: employee_name, date_time: date_time })
-                            setLoading(false)
-                        })
-                        .catch(e => {
-                            console.log('e', e)
-                            alert(e.response.data.message)
-                            setLoading(false)
-                        })
+    useEffect(() => {
+        fetchPaymentIntentClientSecret()
+    }, [])
 
-                    // _onPostToken(token.id, productArray, productPrice)
-                }
-                else {
-                    // setLoading(false)
-                    alert(token.error.code)
-                    setLoading(false)
-                }
+    const fetchPaymentIntentClientSecret = async () => {
+        axios.post(`${BASE_URL}/create/payment/intent`, {
+            booking_id: booking_id
+        })
+            .then(res => {
+                console.log("res", res.data)
+                setClientSecret(res.data.client_secret)
+                setEphemeralKey(res.data.ephemeralKey)
+                setCustomerId(res.data.customer)
+                initializePaymentSheet(res.data.client_secret)
+            })
+            .catch(e => {
+                console.log('e', e)
+                alert(e.response.data.message)
+            })
+    }
 
-            } catch (err) {
-                console.log('e', err)
-                // setLoading(false)
-                setLoading(false)
-            }
+    const initializePaymentSheet = async (clientSecret) => {
+        const { error } = await initPaymentSheet({
+            paymentIntentClientSecret: clientSecret,
+            merchantDisplayName: 'Hairkut',
+            googlePay: true,
+            merchantCountryCode: 'US',
+            testEnv: true, // use test environment
+        });
+        if (error) {
+            // Error in payment
+            // Show error alert
+            Alert.alert(error)
         } else {
-            alert('Card details are invalid.')
-            setLoading(false)
+            // Show payment sheet
+            openPaymentSheet();
         }
     }
+
+    const openPaymentSheet = async () => {
+        const {error} = await presentPaymentSheet();
+    
+        if (error) {
+          // Error in payment
+          // Show error alert
+          Alert.alert(error)
+        } else {
+          // Payment done
+          // Call success api for backend only
+        //   depositSuccess();
+        }
+      };
+
+    // const pay = async () => {
+    //     console.log("Here")
+    //     const { error } = await presentPaymentSheet();
+
+    //     if (error) {
+    //         Alert.alert(`Error code: ${error.code}`, error.message);
+    //     } else {
+    //         Alert.alert('Success', 'Your order is confirmed!');
+    //     }
+    // };
 
 
     return (
@@ -76,17 +92,9 @@ const PaymentScreen = ({ navigation, route, props }) => {
                 isLoading && <Loader />
             }
             {
-                <View>
-                    {/* <View style={{ backgroundColor: '#1A1919', marginLeft: 10, marginRight: 10, borderRadius: 8, paddingTop: 100, paddingLeft: 20, paddingRight: 20 }}>
-                    </View>
-                    <Pressable style={{ backgroundColor: '#1A1919', marginLeft: 90, marginRight: 90, marginTop: 50, borderRadius: 5 }} onPress={() => getData()}>
-                        <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 8, marginBottom: 7 }}>Pay Now</Text>
-                    </Pressable> */}
-                    <View style={{marginLeft: 11, marginRight: 20}}>
-                        <CreditCardInput onChange={form => setCardData(form)} />
-                    </View>
-                    <Pressable style={{ backgroundColor: '#1A1919', marginLeft: 90, marginRight: 90, marginTop: 50, borderRadius: 5 }} onPress={() => getData()}>
-                        <Text style={{ color: '#FFFFFF', textAlign: 'center', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 8, marginBottom: 7 }}>Pay Now</Text>
+                <View style={styles.mainView}>
+                    <Pressable style={styles.button} onPress={() => pay()}>
+                        <Text style={styles.buttonText}>Pay</Text>
                     </Pressable>
                 </View>
             }
@@ -99,5 +107,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white'
+    },
+    mainView: {
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    button: {
+        backgroundColor: 'black',
+        width: '20%',
+        height: '24%',
+        justifyContent: 'center',
+        borderRadius: 10
+    },
+    buttonText: {
+        color: 'white',
+        textAlign: 'center'
     }
 })

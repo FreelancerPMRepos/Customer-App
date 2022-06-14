@@ -14,7 +14,6 @@ import Header from '../../../Components/Header'
 import { BASE_URL, Colors, height, width } from '../../../Config';
 import { useDispatch } from 'react-redux'
 import { addSalon } from '../../../Actions/PickSalon'
-import FastImage from 'react-native-fast-image'
 
 
 const HairCutDescriptionScreen = ({ navigation, route, props }) => {
@@ -133,7 +132,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               list.upload_front_photo == null ?
                 null
                 :
-                <FastImage
+                <Image
                   style={styles.frontImage}
                   source={{
                     uri: list.upload_front_photo,
@@ -144,7 +143,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               list.upload_back_photo == null ?
                 null
                 :
-                <FastImage
+                <Image
                   style={styles.backImage}
                   source={{
                     uri: list.upload_back_photo,
@@ -155,7 +154,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               list.upload_right_photo == null ?
                 null
                 :
-                <FastImage
+                <Image
                   style={styles.rightImage}
                   source={{
                     uri: list.upload_right_photo,
@@ -166,7 +165,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               list.upload_left_photo == null ?
                 null
                 :
-                <FastImage
+                <Image
                   style={styles.leftImage}
                   source={{
                     uri: list.upload_left_photo,
@@ -177,7 +176,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
               list.upload_top_photo === null ?
                 null
                 :
-                <FastImage
+                <Image
                   style={styles.topImage}
                   source={{
                     uri: list.upload_top_photo,

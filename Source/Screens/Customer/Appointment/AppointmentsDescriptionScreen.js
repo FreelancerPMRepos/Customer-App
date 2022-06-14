@@ -50,6 +50,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   const _onBack = () => navigation.goBack()
 
   useEffect(() => {
+    console.log("appointmentDetails",appointmentDetails)
     setNextYear(new Date().getFullYear());
     setNextDate(new Date().getMonth());
     getDateSlot(appointmentDetails.employee.id);
@@ -627,6 +628,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{moment.utc(appointmentDetails?.booking_date,).local().add(0, 'days').calendar(null, { sameElse: 'DD MMM YYYY hh:mm A' })}</Text>
               <Text style={{ color: '#1A1919', fontSize: 16, fontFamily: 'Avenir-Heavy', marginTop: 14.67, lineHeight: 22 }}>Location</Text>
               <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{appointmentDetails?.store?.store_name}</Text>
+              <Text style={{ color: '#1A1919', fontSize: 14, fontFamily: 'Avenir-Medium', lineHeight: 19 }}>{appointmentDetails?.store?.address}</Text>
               <View style={{ marginTop: 13, justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                 <Rating
                   type='custom'

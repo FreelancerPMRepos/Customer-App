@@ -1,7 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, View, Text, StatusBar } from 'react-native';
+import { Pressable, StyleSheet, View, Text, StatusBar, Image } from 'react-native';
 import { Colors, width } from '../../Config';
-import FastImage from 'react-native-fast-image'
 
 const Header = ({ leftIcon, onLeftIconPress, rightIcon, onRightIconPress, title, ...props }) => {
     return (
@@ -11,10 +10,10 @@ const Header = ({ leftIcon, onLeftIconPress, rightIcon, onRightIconPress, title,
                 <View style={styles.column}>
                     <Pressable onPress={onLeftIconPress}>
                         {
-                            leftIcon === 'menu' && <FastImage resizeMode={FastImage.resizeMode.contain} source={require('../../Images/menu.png')} style={styles.tinyLogo} />
+                            leftIcon === 'menu' && <Image resizeMode={'contain'} source={require('../../Images/menu.png')} style={styles.tinyLogo} />
                         }
                         {
-                            leftIcon === 'back' && <FastImage resizeMode={FastImage.resizeMode.contain} style={styles.tinyLogo} source={require('../../Images/back-arrow_white.png')} />
+                            leftIcon === 'back' && <Image resizeMode={'contain'} style={styles.tinyLogo} source={require('../../Images/back-arrow_white.png')} />
                         }
                     </Pressable>
                 </View>
@@ -24,7 +23,7 @@ const Header = ({ leftIcon, onLeftIconPress, rightIcon, onRightIconPress, title,
                 <View style={styles.rightView}>
                     <Pressable onPress={onRightIconPress}>
                         {
-                            rightIcon === 'notification' &&  <FastImage resizeMode={FastImage.resizeMode.contain} source={require('../../Images/notification.png')} style={styles.bellLogo} />
+                            rightIcon === 'notification' &&  <Image resizeMode={'contain'} source={require('../../Images/notification.png')} style={styles.bellLogo} />
                         }
                     </Pressable>
                 </View>

@@ -60,6 +60,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [userDetails, setUserDetails] = useState('');
     const [timeInterval, setTimeInterval] = useState('');
     const [serviceTypeDiscount, setServiceTypeDiscount] = useState('');
+    const [serviceTypePrice, setServiceTypePrice] = useState('')
     const [serviceDiscount, setServiceDiscount] = useState('');
     const { storeDetails } = route.params
     const { page } = route.params
@@ -71,6 +72,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [overallDistance, setOverallDistance] = useState('');
     const [bookingData, setBookingData] = useState([]);
     const [isServiceTypeDiscount, setIsServiceTypeDiscount] = useState(false);
+    const [fees, setFees] = useState('')
     // Date
     const [days, setDays] = useState([]);
     const [nextDate, setNextDate] = useState(0);
@@ -96,10 +98,9 @@ const StoreDescription = ({ navigation, route, props }) => {
             setNextDate(new Date().getMonth());
             getServiceList();
             getHairdresserList();
-            //  getDateSlot();
             getData();
             userData();
-            //     Check();
+            getServiceTypeFees();
         }
         return () => {
             isCancelled = true
@@ -167,6 +168,19 @@ const StoreDescription = ({ navigation, route, props }) => {
         }
     }
 
+    const getServiceTypeFees = () => {
+        setLoading(true)
+        axios.get(`${BASE_URL}/setting/list`)
+            .then(res => {
+                setLoading(false)
+                setFees(res.data.fee)
+            })
+            .catch(e => {
+                console.log('e', e)
+                setLoading(false)
+            })
+    }
+
     const getTime = (date, day) => {
         setLoading(true)
         setSelectedDate(date)
@@ -184,7 +198,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             } else {
                 console.log("In Else")
                 if (dateList[i].day == DaysName[day]) {
-                    console.log("Opne",dateList[i].open_time)
+                    console.log("Opne", dateList[i].open_time)
                     var new_array = getEmployeeTimeData(dateList[i].open_time, dateList[i].close_time, promotionTime, dateList[i].day, date)
                 }
             }
@@ -256,6 +270,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         discount = timeslot[i].discount;
                     }
                 }
+
             }
         }
 
@@ -401,11 +416,13 @@ const StoreDescription = ({ navigation, route, props }) => {
         if (serviceId == '') {
             alert('Please select service first.')
         } else {
+            setLoading(true)
             console.log("DATA", storeDetails.id, serviceId)
             axios.get(`${BASE_URL}/style/type/list/?store_id=${storeDetails.id}&service_id=${serviceId}`)
                 .then(res => {
                     if (res.data.length == 0) {
                         alert('No service type available.')
+                        setLoading(false)
                     } else {
                         setServiceTypeList(res.data)
                         setServiceTypeModal(!serviceTypeModal)
@@ -433,15 +450,22 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 }
                                 res.data[i].total_discount = largest;
                             }
+                            var male_total_price = res.data[i].male_price + ((res.data[i].male_price / 100) * fees)
+                            var female_total_price = res.data[i].female_price + (res.data[i].female_price / 100) * fees
+                            res.data[i].total_male_price = male_total_price;
+                            res.data[i].total_female_price = female_total_price;
                         }
+
                         console.log("largest", res.data)
                         setIsServiceTypeDiscount(true)
                         setServiceTypeList(res.data)
+                        setLoading(false)
                     }
                 })
                 .catch(e => {
                     console.log('e', e)
                     alert('No service type available.')
+                    setLoading(false)
                 })
         }
     }
@@ -481,11 +505,12 @@ const StoreDescription = ({ navigation, route, props }) => {
         setServiceTypeDiscount('')
         setServiceTypeId(res.id)
         setServiceTypeName(res.name)
-        // if (res.discount === false) {
-
-        // } else {
-        //     setServiceTypeDiscount(res.discount)
-        // }
+        if (res.total_discount == 0) {
+            var price = genderName == 'Men' ? res.total_male_price : genderName == 'Women' ? res.total_female_price : res.total_male_price > res.total_female_price ? res.total_male_price : res.total_female_price
+            setServiceTypePrice(price)
+        } else {
+            setServiceTypeDiscount(res.total_discount)
+        }
         setTimeInterval(res.time)
         setServiceTypeModal(!serviceTypeModal)
         setPromotionTime(res.promotion_timeslot)
@@ -536,6 +561,11 @@ const StoreDescription = ({ navigation, route, props }) => {
 
 
     const _onGender = (res) => {
+        setServiceTypeDiscount('')
+        setServiceTypeId('')
+        setServiceTypeName('')
+        setServiceTypePrice('')
+        setServiceTypeDiscount('')
         setGenderName(res)
         setGenderModal(!genderModal)
     }
@@ -608,16 +638,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
             var bookingDate = moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss")
             if (bookingDate) {
-                console.log("Booking", {
-                    store_id: storeDetails.id,
-                    employee_id: hairdresserId,
-                    customer_id: userDetails.id,
-                    service_id: serviceId,
-                    style_type_id: serviceTypeId,
-                    style_id: pickStyleId,
-                    gender: genderName,
-                    booking_date: bookingDate,
-                })
                 axios.post(`${BASE_URL}/booking`, {
                     store_id: storeDetails.id,
                     employee_id: hairdresserId,
@@ -747,7 +767,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <View style={{ flexDirection: 'row' }}>
                         {
                             serviceTypeDiscount ?
-                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>{serviceTypeDiscount}% Discount</Text> : null
+                                <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>{serviceTypeDiscount}% Discount</Text> :
+                                <Text style={{marginTop: 5, marginRight: 60}}>{serviceTypePrice ? `$` + serviceTypePrice : null}</Text>
                         }
                         <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
@@ -764,7 +785,8 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res.name}</Text>
                                                         {
-                                                            res.total_discount == 0 ? null
+                                                            res.total_discount == 0 ?
+                                                                <Text style={{ marginTop: 10, marginRight: 80 }}>${genderName == 'Men' ? res.total_male_price : genderName == 'Women' ? res.total_female_price : res.total_male_price > res.total_female_price ? res.total_male_price : res.total_female_price}</Text>
                                                                 :
                                                                 <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>{res.total_discount}% Discount</Text>
                                                         }
@@ -917,7 +939,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 </View>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Price</Text>
-                                    <Text style={{ fontSize: 16 }}>{Number(bookingData.service_price)} USD</Text>
+                                    <Text style={{ fontSize: 16 }}>{Number(bookingData.service_price).toFixed(2)} USD</Text>
                                 </View>
                                 {
                                     bookingData.discount === 0 ?
@@ -925,7 +947,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         :
                                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
                                             <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Discount</Text>
-                                            <Text style={{ fontSize: 16 }}>{bookingData.discount} USD</Text>
+                                            <Text style={{ fontSize: 16 }}>{Number(bookingData.discount).toFixed(2)} USD</Text>
                                         </View>
                                 }
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
@@ -1052,8 +1074,11 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         </Pressable>
                                 }
                             </View>
+                            <View style={{ width: width * 0.65 }}>
+                                <Text>{storeData.address}</Text>
+                            </View>
                             <Text style={styles.miles}>{overallDistance} Miles</Text>
-                            <View style={{ marginRight: 186 }}>
+                            <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                 <Rating
                                     type='custom'
                                     ratingCount={5}
@@ -1066,7 +1091,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 />
                             </View>
                             <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.time}>{moment.utc(storeData.opentime, "HH:mm:ss").local().format('hh:mm A')}-{moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A')}</Text>
+                                <Text style={styles.time}>{moment.utc(storeData.opentime, "HH:mm:ss").local().format('hh:mm A')}-{moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A')} </Text>
                                 <Text style={[styles.time, { color: storeData?.is_available == 1 ? '#70CF2B' : '#E73E3E' }]}>{storeData?.is_available == 1 ? 'Open' : 'Closed'} </Text>
                             </View>
                         </View>

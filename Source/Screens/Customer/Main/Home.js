@@ -25,9 +25,12 @@ import moment from 'moment';
 import Slider from '@react-native-community/slider';
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
+
+const GOOGLE_PLACES_API_KEY = 'AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E';
 
 
 const Home = ({ navigation, props }) => {
@@ -50,10 +53,12 @@ const Home = ({ navigation, props }) => {
     if (!isCancelled) {
       if (auth.access_token) {
         const unsubscribe = navigation.addListener('focus', () => {
-          setAuthToken(auth.access_token)
-          getUserInfo()
-          serviceList()
-          getlocation()
+          setTimeout(() => {
+            setAuthToken(auth.access_token)
+            getUserInfo()
+            serviceList()
+            getlocation()
+          }, 1000)
         });
         return unsubscribe;
       }
@@ -71,7 +76,7 @@ const Home = ({ navigation, props }) => {
       global.longitude = longitude
       global.latitude = latitude
       {
-        global.longitude ? getStoreList("", "", "", "", "", latitude, longitude) : null
+        global.longitude ? getStoreList("", "", "", "", "", latitude, longitude, updatedName.fav.data) : null
       }
       if (value !== null) {
         alert('Not getting current location')
@@ -81,15 +86,17 @@ const Home = ({ navigation, props }) => {
     }
   }
 
-  const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude) => {
+  const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude, store_id) => {
     { keyword ? '' : setLoading(true) }
+    console.log("df")
     global.new_to_price = toprice === undefined ? '' : toprice
     global.new_from_price = fromPrice === undefined ? '' : fromPrice
     global.new_keyword = keyword === undefined ? '' : keyword
     global.new_service = serviceId === undefined ? '' : serviceId
     global.new_miles = miles === undefined ? '' : miles
-    console.log("api", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
-    axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}`)
+    id = store_id == null ? '' : store_id == "NULL" ? '' : store_id.id
+    console.log("d", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}&store_id=${id}`)
+    axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${latitude}&longitude=${longitude}&store_id=${id}`)
       .then(res => {
         setStoreList(res.data.list)
         setLoading(false)
@@ -100,9 +107,12 @@ const Home = ({ navigation, props }) => {
       })
   }
 
-
   const _onSalonCancel = async () => {
     dispatch(deleteSalon(updatedName.fav))
+    setTimeout(() => {
+      getStoreList("", "", "", "", "", global.latitude, global.longitude, 'NULL')
+    }, 1000)
+
   }
 
   const getUserInfo = async () => {
@@ -121,7 +131,7 @@ const Home = ({ navigation, props }) => {
   }
 
   const _onPriceFilter = (fromPrice, toprice) => {
-    getStoreList(fromPrice, toprice, global.new_keyword, global.new_service, global.new_miles, global.latitude, global.longitude)
+    getStoreList(fromPrice, toprice, global.new_keyword, global.new_service, global.new_miles, global.latitude, global.longitude, "NULL")
   }
 
   const serviceList = () => {
@@ -136,11 +146,12 @@ const Home = ({ navigation, props }) => {
 
   const _onServiceChange = (item) => {
     setSelectedValue(item)
-    getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, item, global.new_miles, global.latitude, global.longitude)
+    getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, item, global.new_miles, global.latitude, global.longitude, "NULL")
   }
 
   const _onSearch = () => {
-    console.log("In search")
+    console.log("here")
+    setShowFilter(false)
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardStatus("Keyboard Shown");
       //  keyboardStatus.current = true;
@@ -158,21 +169,22 @@ const Home = ({ navigation, props }) => {
 
   const _onKeywordSearch = (text) => {
     setKeyword(text)
-    getStoreList(global.new_from_price, global.new_to_price, text, global.new_service, global.new_miles, global.latitude, global.longitude)
+    getStoreList(global.new_from_price, global.new_to_price, text, global.new_service, global.new_miles, global.latitude, global.longitude, "NULL")
   }
 
   const _onDrag = (value) => {
     setMiles(value)
-   // getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
+    // getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)
   }
 
 
   const resetFilter = () => {
     setKeyword('')
     setMiles(0)
-    getStoreList("", "", "", "", "", global.latitude, global.longitude)
+    getStoreList("", "", "", "", "", global.latitude, global.longitude, "NULL")
     setShowFilter(!showFilter)
   }
+
 
   return (
     <View style={styles.container}>
@@ -198,18 +210,59 @@ const Home = ({ navigation, props }) => {
               </MapView>
               <View style={styles.searchMainView}>
                 <View style={styles.searchView}>
-                  <TextInput
+                  {/* <TextInput
                     placeholder="Search By Salons, Location"
                     style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
                     value={keyword}
                     onChangeText={(text) => _onKeywordSearch(text)}
                     onFocus={() => _onSearch()}
-                  />
-                  <Image
-                    style={{ marginTop: 12, marginRight: 12 }}
-                    source={require('../../../Images/search.png')}
+                  /> */}
+                  <GooglePlacesAutocomplete
+                    placeholder="Address"
+                    GooglePlacesDetailsQuery={{ fields: "geometry" }}
+                    fetchDetails={true}
+                    query={{
+                      key: GOOGLE_PLACES_API_KEY,
+                      language: 'en', // language of the results
+                    }}
+                    returnKeyType={'default'}
+                    onPress={(data, details = null) => _onSearch()}
+                    onFail={(error) => console.error(error)}
+                    listViewDisplayed="auto"
+                    suppressDefaultStyles={true}
+                    styles={{
+                      textInputContainer: {
+                        // borderWidth: 1,
+                        textAlignVertical: 'top',
+                        marginLeft: 15.5,
+                        // marginRight: 15.5,
+                        width: '80%'
+                      },
+                      textInput: {
+                        height: 50,
+                        color: '#5d5d5d',
+                        fontSize: 16,
+                      },
+                      predefinedPlacesDescription: {
+                        color: '#1faadb',
+                      },
+                      listView: {
+                        marginLeft: 15.5,
+                        marginRight: 15.5,
+                      },
+                      row: {
+                        paddingTop: 10,
+                        paddingLeft: 5
+                      }
+                    }}
                   />
                 </View>
+                <Pressable style={{ backgroundColor: 'white', marginLeft: 5, alignItems: 'center', width: '12%', height: 50 }}>
+                  <Image
+                    style={{ marginTop: 12, }}
+                    source={require('../../../Images/search.png')}
+                  />
+                </Pressable>
                 {
                   showFilter == false ?
                     <Pressable style={styles.filterButton} onPress={() => setShowFilter(!showFilter)}>
@@ -242,13 +295,13 @@ const Home = ({ navigation, props }) => {
                       </Picker>
                     </View>
                     <View style={styles.currencyView}>
-                      <Pressable onPress={() => _onPriceFilter(0, 9)} style={{ borderRightWidth: 1 }}>
+                      <Pressable onPress={() => _onPriceFilter(0, 10)} style={{ borderRightWidth: 1 }}>
                         <Text style={styles.currency}>£</Text>
                       </Pressable>
-                      <Pressable onPress={() => _onPriceFilter(10, 99)} style={{ borderRightWidth: 1 }}>
+                      <Pressable onPress={() => _onPriceFilter(10, 50)} style={{ borderRightWidth: 1 }}>
                         <Text style={styles.currency}>££</Text>
                       </Pressable>
-                      <Pressable onPress={() => _onPriceFilter(100, 999)}>
+                      <Pressable onPress={() => _onPriceFilter(50, 100000)}>
                         <Text style={styles.currency}>£££</Text>
                       </Pressable>
                     </View>
@@ -285,7 +338,7 @@ const Home = ({ navigation, props }) => {
                   null
                   :
                   <View style={styles.pickStyleView}>
-                    <Image source={{ uri: updatedName.fav.data.upload_front_photo != null ? updatedName.fav.data.upload_front_photo : updatedName.fav.data.upload_back_photo != null ? updatedName.fav.data.upload_back_photo : updatedName.fav.data.upload_top_photo != null ? updatedName.fav.data.upload_top_photo : updatedName.fav.data.upload_right_photo != null ? updatedName.fav.data.upload_right_photo : updatedName.fav.data.upload_left_photo != null ? updatedName.fav.data.upload_left_photo : updatedName.fav.data.upload_left_photo}} style={styles.pickStyleImage} />
+                    <Image source={{ uri: updatedName.fav.data.upload_front_photo != null ? updatedName.fav.data.upload_front_photo : updatedName.fav.data.upload_back_photo != null ? updatedName.fav.data.upload_back_photo : updatedName.fav.data.upload_top_photo != null ? updatedName.fav.data.upload_top_photo : updatedName.fav.data.upload_right_photo != null ? updatedName.fav.data.upload_right_photo : updatedName.fav.data.upload_left_photo != null ? updatedName.fav.data.upload_left_photo : updatedName.fav.data.upload_left_photo }} style={styles.pickStyleImage} />
                     <Pressable onPress={() => _onSalonCancel()}>
                       <Image source={require('../../../Images/cross.png')} style={styles.crossImage} />
                     </Pressable>
@@ -338,7 +391,7 @@ const Home = ({ navigation, props }) => {
                           }
                           <View style={styles.storeContentView}>
                             <View style={styles.contentView}>
-                              <View style={{width: 90}}>
+                              <View style={{ width: 90 }}>
                                 <Text style={styles.storeName}>{res.store_name}</Text>
                               </View>
                               <View style={styles.contentView}>
@@ -424,7 +477,8 @@ const styles = StyleSheet.create({
   },
   searchView: {
     backgroundColor: '#FFFFFF',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    width: '62%'
   },
   storeView: {
     bottom: 0,
@@ -501,11 +555,11 @@ const styles = StyleSheet.create({
   store: {
     flexDirection: 'row',
     marginLeft: 10,
-  //  marginRight: 50,
+    //  marginRight: 50,
     marginTop: height * 0.02,
     borderBottomWidth: 1,
     borderColor: '#979797',
-  
+
     width: '100%'
   },
   noImage: {
