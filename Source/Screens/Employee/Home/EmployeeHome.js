@@ -9,7 +9,7 @@ import {
     StatusBar
 } from 'react-native';
 
-import { BASE_URL, Colors, width } from '../../../Config';
+import { BASE_URL, Colors, height, width } from '../../../Config';
 import SelectDropdown from 'react-native-select-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -19,8 +19,11 @@ import moment from 'moment';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Loader from '../../../Components/Loader';
 import messaging from '@react-native-firebase/messaging';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 const countries = ["TODAY", "UPCOMING"]
+
+const Tab = createMaterialTopTabNavigator();
 
 let entireScreenWidth = Dimensions.get('window').width;
 
@@ -131,42 +134,67 @@ const EmployeeHome = ({ navigation, props }) => {
         navigation.navigate('Notification')
     }
 
-    return (
-        <View style={styles.container}>
-            {
-                isLoading && <Loader />
-            }
-            {
-                <View style={styles.header}>
-                    <StatusBar barStyle="dark-content" backgroundColor={Colors.black} />
-                    <View style={{ justifyContent: 'space-between', flexDirection: 'row', width: '100%' }}>
-                        <Pressable onPress={() => _onMenuPress()}>
-                            <Image source={require('../../../Images/menu.png')} style={{ marginLeft: 13 }} />
-                        </Pressable>
-                        <Text numberOfLines={1} style={styles.title}>Appointments</Text>
-                        <Pressable style={{ flexDirection: 'row' }} onPress={() => _onNotify()}>
-                            <Text style={{ backgroundColor: 'red', borderRadius: 18 / 2, width: 18, height: 18, textAlign: 'center', left: 2, bottom: 5, color: 'white', fontSize: 12 }}>{notificationCount}</Text>
-                            <Image source={require('../../../Images/notification.png')} style={{ marginRight: 13 }} />
-                        </Pressable>
-                    </View>
-                </View>
-            }
-            {
-                <ScrollView style={{ marginBottom: 10 }}>
-                    <Text style={styles.title}>{`Welcome ${userData.name}!`}</Text>
-                    <Text style={styles.subTitle}>Your Appointment </Text>
-                    <View style={styles.dropdownView}>
-                        <SelectDropdown
-                            data={countries}
-                            buttonStyle={styles.dropdownStyle}
-                            defaultValue={"TODAY"}
-                            onSelect={(selectedItem, index) => {
-                                console.log(selectedItem, index)
-                                setDropdownValue(selectedItem)
-                                getAppointments(selectedItem);
-                            }}
-                        />
-                    </View>
+    const UpcomingScreen = () => {
+        return (
+            <View style={{ backgroundColor: 'white', height: height }}>
+                {
+                    <ScrollView style={{ marginBottom: 10 }}>
+                        <Text style={styles.title}>{`Welcome ${userData.name}!`}</Text>
+                        <Text style={styles.subTitle}>Your Appointment </Text>
+                        <View style={styles.dropdownView}>
+                            <SelectDropdown
+                                data={countries}
+                                buttonStyle={styles.dropdownStyle}
+                                defaultValue={"TODAY"}
+                                onSelect={(selectedItem, index) => {
+                                    console.log(selectedItem, index)
+                                    setDropdownValue(selectedItem)
+                                    getAppointments(selectedItem);
+                                }}
+                            />
+                        </View>
+                        {
+                            appointmentData.length == 0 ?
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={{ marginTop: 50 }}>No Data Found</Text>
+                                </View>
+                                :
+                                appointmentData?.map((res, index) => {
+                                    return (
+                                        <Pressable key={index} style={styles.boxStyle} onPress={() => navigation.navigate('AppointmentDetails', { data: userData, id: res.id })}>
+                                            {
+                                                res.user.image_url === null ?
+                                                    <Image
+                                                        style={styles.profileImageStyle}
+                                                        source={require('../../../Images/dummy.png')}
+
+                                                    />
+                                                    :
+                                                    <Image
+                                                        style={styles.userImage}
+                                                        source={{ uri: res.user.image_url }}
+
+                                                    />
+                                            }
+                                            <View style={styles.nameServiceBox}>
+                                                <Text style={styles.nameStyle} numberOfLines={1}>{res.user.name}</Text>
+                                                <Text style={styles.haircutStyle}>{res?.service?.name}</Text>
+                                            </View>
+                                            <Text style={styles.timeStyle}>{moment.utc(res.booking_date).local().format("hh:mm A")}</Text>
+                                        </Pressable>
+                                    )
+                                })
+                        }
+                    </ScrollView>
+                }
+            </View>
+        )
+    }
+
+    const PastScreen = () => {
+        return (
+            <View style={{ backgroundColor: 'white', height: height }}>
+                <ScrollView>
                     {
                         appointmentData.length == 0 ?
                             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -200,6 +228,49 @@ const EmployeeHome = ({ navigation, props }) => {
                             })
                     }
                 </ScrollView>
+            </View>
+        )
+    }
+
+
+    return (
+        <View style={styles.container}>
+            {
+                isLoading && <Loader />
+            }
+            {
+                <View style={styles.header}>
+                    <StatusBar barStyle="dark-content" backgroundColor={Colors.black} />
+                    <View style={{ justifyContent: 'space-between', flexDirection: 'row', width: '100%' }}>
+                        <Pressable onPress={() => _onMenuPress()}>
+                            <Image source={require('../../../Images/menu.png')} style={{ marginLeft: 13 }} />
+                        </Pressable>
+                        <Text numberOfLines={1} style={styles.title}>Appointments</Text>
+                        <Pressable style={{ flexDirection: 'row' }} onPress={() => _onNotify()}>
+                            <Text style={{ backgroundColor: 'red', borderRadius: 18 / 2, width: 18, height: 18, textAlign: 'center', left: 2, bottom: 5, color: 'white', fontSize: 12 }}>{notificationCount}</Text>
+                            <Image source={require('../../../Images/notification.png')} style={{ marginRight: 13 }} />
+                        </Pressable>
+                    </View>
+                </View>
+            }
+            {
+                <Tab.Navigator tabPress={() => console.log("object")}
+                    tabBarOptions={{
+                        indicatorStyle: {
+                            backgroundColor: 'black',
+                        },
+                    }}>
+                    <Tab.Screen name="Upcoming" component={UpcomingScreen} listeners={{
+                        tabPress: e => {
+                            getAppointments('TODAY')
+                        },
+                    }} />
+                    <Tab.Screen name="Past" component={PastScreen} listeners={{
+                        tabPress: e => {
+                            getAppointments('PAST')
+                        },
+                    }} />
+                </Tab.Navigator>
             }
         </View>
     )

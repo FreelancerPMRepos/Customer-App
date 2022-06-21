@@ -45,6 +45,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
             merchantDisplayName: 'Hairkut',
             googlePay: true,
             merchantCountryCode: 'US',
+            customerId: customerId,
             testEnv: true, // use test environment
         });
         if (error) {

@@ -75,9 +75,11 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
   const _onPick = () => {
     const user = list
     dispatch(addSalon(user))
-    navigation.navigate('HomeTabs', {
-      screen: 'Home'
-    })
+    setTimeout(() => {
+      navigation.navigate('HomeTabs', {
+        screen: 'Home'
+      })
+    }, 1000)
   }
 
   const renderAddNoteModal = () => {
@@ -279,83 +281,83 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   crossView: {
-    justifyContent: 'flex-end', 
+    justifyContent: 'flex-end',
     alignSelf: 'flex-end'
   },
   crossImage: {
-    marginRight: 14.49, 
+    marginRight: 14.49,
     marginTop: 18.5
   },
   addNote: {
-    color: '#1A1919', 
-    fontSize: 18, 
-    fontFamily: 'Avenir-Heavy', 
+    color: '#1A1919',
+    fontSize: 18,
+    fontFamily: 'Avenir-Heavy',
     marginLeft: 14.5
   },
   noteView: {
-    borderWidth: 1, 
-    borderColor: '#979797', 
-    marginLeft: 13, 
-    marginTop: 13.5, 
+    borderWidth: 1,
+    borderColor: '#979797',
+    marginLeft: 13,
+    marginTop: 13.5,
     marginRight: 12
   },
   saveButton: {
-    borderWidth: 1, 
-    borderColor: '#171717', 
-    marginLeft: 96, 
-    marginRight: 96, 
-    marginTop: 21, 
+    borderWidth: 1,
+    borderColor: '#171717',
+    marginLeft: 96,
+    marginRight: 96,
+    marginTop: 21,
     marginBottom: 26
   },
   saveText: {
-    color: '#1A1919', 
-    fontSize: 14, 
-    fontFamily: 'Avenir-Medium', 
-    textAlign: 'center', 
-    marginTop: 8.5, 
+    color: '#1A1919',
+    fontSize: 14,
+    fontFamily: 'Avenir-Medium',
+    textAlign: 'center',
+    marginTop: 8.5,
     marginBottom: 7.5
   },
   mainView: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     justifyContent: 'space-between'
   },
   heartImage: {
-    marginTop: 5, 
+    marginTop: 5,
     marginRight: 29
   },
   imageView: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     flexWrap: 'wrap'
   },
   frontImage: {
-    marginLeft: 26, 
-    marginTop: 15, 
-    height: height * 0.16, 
+    marginLeft: 26,
+    marginTop: 15,
+    height: height * 0.16,
     width: width * 0.26,
   },
   backImage: {
-    marginLeft: 12, 
-    marginTop: 15, 
-    height: height * 0.16, 
+    marginLeft: 12,
+    marginTop: 15,
+    height: height * 0.16,
     width: width * 0.26,
   },
   rightImage: {
-    marginLeft: 12, 
-    marginTop: 15, 
-    height: height * 0.16, 
-    width: width * 0.26, 
+    marginLeft: 12,
+    marginTop: 15,
+    height: height * 0.16,
+    width: width * 0.26,
     marginRight: 26
   },
   leftImage: {
-    marginLeft: 26, 
-    marginTop: 14, 
-    height: height * 0.16, 
+    marginLeft: 26,
+    marginTop: 14,
+    height: height * 0.16,
     width: width * 0.26,
   },
   topImage: {
-    marginLeft: 12, 
-    marginTop: 14, 
-    height: height * 0.16, 
+    marginLeft: 12,
+    marginTop: 14,
+    height: height * 0.16,
     width: width * 0.26,
   }
 })

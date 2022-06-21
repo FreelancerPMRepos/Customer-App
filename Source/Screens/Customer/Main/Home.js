@@ -88,7 +88,6 @@ const Home = ({ navigation, props }) => {
 
   const getStoreList = (fromPrice, toprice, keyword, serviceId, miles, latitude, longitude, store_id) => {
     { keyword ? '' : setLoading(true) }
-    console.log("df")
     global.new_to_price = toprice === undefined ? '' : toprice
     global.new_from_price = fromPrice === undefined ? '' : fromPrice
     global.new_keyword = keyword === undefined ? '' : keyword
@@ -209,7 +208,7 @@ const Home = ({ navigation, props }) => {
                   ))}
               </MapView>
               <View style={styles.searchMainView}>
-                <View style={styles.searchView}>
+                <View style={[styles.searchView, {width: showFilter == false ? '62%' : '75%'}]}>
                   {/* <TextInput
                     placeholder="Search By Salons, Location"
                     style={{ width: showFilter == false ? width * 0.6 : width * 0.8, paddingLeft: 18 }}
@@ -228,15 +227,13 @@ const Home = ({ navigation, props }) => {
                     returnKeyType={'default'}
                     onPress={(data, details = null) => _onSearch()}
                     onFail={(error) => console.error(error)}
-                    listViewDisplayed="auto"
+                    listViewDisplayed={true}
                     suppressDefaultStyles={true}
+                    keepResultsAfterBlur={true}
                     styles={{
                       textInputContainer: {
-                        // borderWidth: 1,
                         textAlignVertical: 'top',
                         marginLeft: 15.5,
-                        // marginRight: 15.5,
-                        width: '80%'
                       },
                       textInput: {
                         height: 50,
@@ -478,7 +475,6 @@ const styles = StyleSheet.create({
   searchView: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
-    width: '62%'
   },
   storeView: {
     bottom: 0,
@@ -488,7 +484,8 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     backgroundColor: '#FFFFFF',
-    marginLeft: 5
+    marginLeft: 5,
+    height: 50
   },
   filterImage: {
     marginTop: 12,

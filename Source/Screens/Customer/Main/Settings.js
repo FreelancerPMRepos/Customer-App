@@ -31,7 +31,7 @@ import {
 import SelectDropdown from 'react-native-select-dropdown';
 import { showMessageAlert } from '../../../Utils/Utility';
 
-const sex_dropdown = ["MEN", "WOMEN"]
+const sex_dropdown = ["MEN", "WOMEN", "PREFER NOT TO SAY"]
 const hair_length = ["SHORT", "MEDIUM", "LONG",]
 const color = ["YES", "NO",]
 
@@ -139,9 +139,6 @@ const Settings = ({navigation,props}) => {
     }
   }
 
-
-
-
   const onLogout = () => {
     Alert.alert(
       "Alert",
@@ -221,7 +218,7 @@ const Settings = ({navigation,props}) => {
         temp.push(res.id)
       }
     })
-    var gender = sex == 'MEN' ? 'MALE' : sex == 'WOMEN' ? 'FEMALE' : null
+    var gender = sex == 'MEN' ? 'MALE' : sex == 'WOMEN' ? 'FEMALE' : sex == 'PREFER NOT TO SAY' ? 'NOT_TO_SAY' : null
     console.log("data",{
       id: parData.id,
       name: name,

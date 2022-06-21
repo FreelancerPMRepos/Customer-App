@@ -27,7 +27,7 @@ const DaysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 
 const DayShortCapsName = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
-const genderList = ["Men", "Women"]
+const genderList = ["Men", "Women", 'Prefer Not To Say']
 
 
 const StoreDescription = ({ navigation, route, props }) => {
@@ -276,6 +276,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
         return discount;
     }
+    //  console.log("promotion time list", promotionTime)
 
     const getMonthDateDay = (year, date) => {
         setNextDate(date)
@@ -290,30 +291,38 @@ const StoreDescription = ({ navigation, route, props }) => {
                 newObj = {};
                 newObj.date = date.getDate();
                 newObj.is_open = getIsopen(date.getDay(), date);
+                newObj.is_discount = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 1) {
                 newObj.date1 = date.getDate();
                 newObj.is_open1 = getIsopen(date.getDay(), date);
+                newObj.is_discount1 = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 2) {
                 newObj.date2 = date.getDate();
                 newObj.is_open2 = getIsopen(date.getDay(), date);
+                newObj.is_discount2 = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 3) {
                 newObj.date3 = date.getDate();
                 newObj.is_open3 = getIsopen(date.getDay(), date);
+                newObj.is_discount3 = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 4) {
                 newObj.date4 = date.getDate();
                 newObj.is_open4 = getIsopen(date.getDay(), date);
+                newObj.is_discount4 = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 5) {
                 newObj.date5 = date.getDate();
                 newObj.is_open5 = getIsopen(date.getDay(), date);
+                newObj.is_discount5 = getIsDiscount(date.getDay(), date);
             } else if (date.getDay() == 6) {
                 newObj.date6 = date.getDate();
                 newObj.is_open6 = getIsopen(date.getDay(), date);
+                newObj.is_discount6 = getIsDiscount(date.getDay(), date);
             }
 
             date.setDate(date.getDate() + 1);
         }
         days.push(newObj);
         setDays(days);
+        console.log("Date response", days)
     }
 
     const getIsopen = (day, date) => {
@@ -324,7 +333,18 @@ const StoreDescription = ({ navigation, route, props }) => {
                 }
             }
         }
+        return 0;
+    }
 
+    const getIsDiscount = (day, date) => {
+        for (var i in promotionTime) {
+            //  console.log("sd", promotionTime)
+            if (promotionTime[i].is_open == 1) {
+                if (promotionTime[i].day == DaysName[day]) {
+                    return 1;
+                }
+            }
+        }
         return 0;
     }
 
@@ -638,6 +658,16 @@ const StoreDescription = ({ navigation, route, props }) => {
             var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
             var bookingDate = moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss")
             if (bookingDate) {
+                console.log("asd", {
+                    store_id: storeDetails.id,
+                    employee_id: hairdresserId,
+                    customer_id: userDetails.id,
+                    service_id: serviceId,
+                    style_type_id: serviceTypeId,
+                    style_id: pickStyleId,
+                    gender: genderName,
+                    booking_date: bookingDate,
+                })
                 axios.post(`${BASE_URL}/booking`, {
                     store_id: storeDetails.id,
                     employee_id: hairdresserId,
@@ -768,7 +798,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                         {
                             serviceTypeDiscount ?
                                 <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, marginRight: 14 }}>{serviceTypeDiscount}% Discount</Text> :
-                                <Text style={{marginTop: 5, marginRight: 60}}>{serviceTypePrice ? `$` + serviceTypePrice : null}</Text>
+                                <Text style={{ marginTop: 5, marginRight: 60 }}>{serviceTypePrice ? `$` + serviceTypePrice : null}</Text>
                         }
                         <Image source={require('../../../Images/Triangle.png')} style={{ marginTop: 12, marginRight: 9.36 }} />
                     </View>
@@ -915,6 +945,9 @@ const StoreDescription = ({ navigation, route, props }) => {
             <Dialog
                 visible={bookingDone}
                 onTouchOutside={() => {
+                    setBookingDone(!bookingDone);
+                }}
+                onHardwareBackPress={() => {
                     setBookingDone(!bookingDone);
                 }}
                 dialogStyle={{ width: '90%' }}>
@@ -1236,76 +1269,27 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     days.map((res, i) => {
                                                         return (
                                                             <View key={i} style={{ flexDirection: 'row' }}>
-                                                                {
-                                                                    res.is_open == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open1 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date1} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date1} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open2 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date2} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date2} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open3 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date3} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date3} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open4 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date4} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date4} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open5 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, color: '#979797' }}>{res.date5} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1 }}>{res.date5} </Text>
-                                                                        </Pressable>
-                                                                }
-                                                                {
-                                                                    res.is_open6 == 0 ?
-                                                                        <Pressable>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1, color: '#979797' }}>{res.date6} </Text>
-                                                                        </Pressable>
-                                                                        :
-                                                                        <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
-                                                                            <Text style={{ fontFamily: 'Avenir-Heavy', textAlign: 'center', width: 45, borderLeftWidth: 1, borderBottomWidth: 1, borderRightWidth: 1 }}>{res.date6} </Text>
-                                                                        </Pressable>
-                                                                }
+                                                                <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open == 0 ? '#979797' : res.is_discount == 1 ? 'red' : 'black' }]}>{res.date} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open1 == 0 ? '#979797' : res.is_discount1 == 1 ? 'red' : 'black' }]}>{res.date1} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open2 == 0 ? '#979797' : res.is_discount2 == 1 ? 'red' : 'black' }]}>{res.date2} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open3 == 0 ? '#979797' : res.is_discount3 == 1 ? 'red' : 'black' }]}>{res.date3} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open4 == 0 ? '#979797' : res.is_discount4 == 1 ? 'red' : 'black' }]}>{res.date4} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open5 == 0 ? '#979797' : res.is_discount5 == 1 ? 'red' : 'black' }]}>{res.date5} </Text>
+                                                                </Pressable>
+                                                                <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
+                                                                    <Text style={[styles.dateField, { color: res.is_open6 == 0 ? '#979797' : res.is_discount6 == 1 ? 'red' : 'black' }]}>{res.date6} </Text>
+                                                                </Pressable>
                                                             </View>
                                                         )
                                                     })
@@ -1462,4 +1446,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Avenir-Medium',
         marginTop: 4
     },
+    dateField: {
+        fontFamily: 'Avenir-Heavy',
+        textAlign: 'center',
+        width: 45,
+        borderLeftWidth: 1,
+        borderBottomWidth: 1,
+    }
 })
