@@ -74,6 +74,7 @@ const HairCutDescriptionScreen = ({ navigation, route, props }) => {
 
   const _onPick = () => {
     const user = list
+    global.pickStyleId = user.store.id
     dispatch(addSalon(user))
     setTimeout(() => {
       navigation.navigate('HomeTabs', {

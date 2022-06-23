@@ -34,6 +34,7 @@ import StyleScreen from '../Screens/Customer/Main/StyleScreen';
 import TagSearchScreen from '../Screens/Customer/Main/TagSearchScreen';
 import ProfileResetPassword from '../Screens/Customer/Main/ProfileResetPassword';
 import ChangeLocation from '../Screens/Customer/Main/ChangeLocation';
+import HomeScreenSearch from '../Screens/Customer/Main/HomeScreenSearch';
 
 // HairCut
 import HairCuts from '../Screens/Customer/HairCut/HairCuts';
@@ -191,6 +192,7 @@ const Routes = (props) => {
                     <Stack.Screen name="TagSearchScreen" component={TagSearchScreen} />
                     <Stack.Screen name='ProfileResetPassword' component={ProfileResetPassword} />
                     <Stack.Screen name="ChangeLocation" component={ChangeLocation} />
+                    <Stack.Screen name="HomeScreenSearch" component={HomeScreenSearch} />
                   </>
                   :
                   <>
