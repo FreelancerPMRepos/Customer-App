@@ -270,7 +270,7 @@ const EmployeeHome = ({ navigation, props }) => {
                             getAppointments(dropdownValue)
                         },
                     }} />
-                    <Tab.Screen name="Past" component={PastScreen} listeners={{
+                    <Tab.Screen name="Passed" component={PastScreen} listeners={{
                         tabPress: e => {
                             dropdownRef.current.reset()
                             getAppointments('PAST')
