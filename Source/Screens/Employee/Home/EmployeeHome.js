@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     Text,
     View,
@@ -37,6 +37,7 @@ const EmployeeHome = ({ navigation, props }) => {
     const [userData, setUserData] = useState([]);
     const [notificationCount, setNotificationCount] = useState('')
     const dispatch = useDispatch()
+    const dropdownRef = useRef({});
 
     useEffect(() => {
         let isCancelled = false;
@@ -44,13 +45,14 @@ const EmployeeHome = ({ navigation, props }) => {
             if (auth.access_token) {
                 setAuthToken(auth.access_token)
                 getUserInfo()
-                setDropdownValue('TODAY')
-                getAppointments('TODAY')
+                getAppointments(dropdownValue)
                 getNotificationCount()
                 requestUserPermission();
             }
         }
     }, [])
+
+    console.log("sd",dropdownValue)
 
     const requestUserPermission = async () => {
         const authStatus = await messaging().requestPermission();
@@ -104,10 +106,10 @@ const EmployeeHome = ({ navigation, props }) => {
     }
 
     const getAppointments = (value) => {
+        console.log("value",value)
         setLoading(true)
         axios.get(`${BASE_URL}/booking/employee?type=${value}`)
             .then(res => {
-                console.log("df", res.data)
                 setAppointmentData(res.data)
                 setLoading(false)
             })
@@ -143,9 +145,10 @@ const EmployeeHome = ({ navigation, props }) => {
                         <Text style={styles.subTitle}>Your Appointment </Text>
                         <View style={styles.dropdownView}>
                             <SelectDropdown
+                                ref={dropdownRef}
                                 data={countries}
                                 buttonStyle={styles.dropdownStyle}
-                                defaultValue={"TODAY"}
+                                defaultValue={dropdownValue}
                                 onSelect={(selectedItem, index) => {
                                     console.log(selectedItem, index)
                                     setDropdownValue(selectedItem)
@@ -259,14 +262,17 @@ const EmployeeHome = ({ navigation, props }) => {
                         indicatorStyle: {
                             backgroundColor: 'black',
                         },
-                    }}>
+                    }}
+                    swipeEnabled={false} >
                     <Tab.Screen name="Upcoming" component={UpcomingScreen} listeners={{
                         tabPress: e => {
-                            getAppointments('TODAY')
+                            dropdownRef.current.reset()
+                            getAppointments(dropdownValue)
                         },
                     }} />
                     <Tab.Screen name="Past" component={PastScreen} listeners={{
                         tabPress: e => {
+                            dropdownRef.current.reset()
                             getAppointments('PAST')
                         },
                     }} />
