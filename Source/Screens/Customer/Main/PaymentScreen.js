@@ -13,6 +13,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
     const [ephemeralKey, setEphemeralKey] = useState('');
     const [customerId, setCustomerId] = useState('')
     const [clientSecret, setClientSecret] = useState('');
+    const [transactionId, setTransactionId] = useState('');
     const { booking_id, salon_name, employee_name, date_time } = route.params
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -32,6 +33,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
                 setEphemeralKey(res.data.ephemeralKey)
                 setCustomerId(res.data.customer)
                 initializePaymentSheet(res.data.client_secret)
+                setTransactionId(res.transaction_id)
             })
             .catch(e => {
                 console.log('e', e)
@@ -44,7 +46,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
             paymentIntentClientSecret: clientSecret,
             merchantDisplayName: 'Hairkut',
             googlePay: true,
-            merchantCountryCode: 'US',
+            merchantCountryCode: 'UK',
             customerId: customerId,
             testEnv: true, // use test environment
         });
@@ -59,29 +61,34 @@ const PaymentScreen = ({ navigation, route, props }) => {
     }
 
     const openPaymentSheet = async () => {
-        const {error} = await presentPaymentSheet();
-    
+        const { error } = await presentPaymentSheet();
+
         if (error) {
-          // Error in payment
-          // Show error alert
-          Alert.alert(error)
+            // Error in payment
+            // Show error alert
+            Alert.alert(error)
         } else {
-          // Payment done
-          // Call success api for backend only
-        //   depositSuccess();
+            // Payment done
+            onConfirmPayment()
         }
-      };
+    };
 
-    // const pay = async () => {
-    //     console.log("Here")
-    //     const { error } = await presentPaymentSheet();
-
-    //     if (error) {
-    //         Alert.alert(`Error code: ${error.code}`, error.message);
-    //     } else {
-    //         Alert.alert('Success', 'Your order is confirmed!');
-    //     }
-    // };
+    const onConfirmPayment = () => {
+        axios.post(`${BASE_URL}/payment/getway`, {
+            booking_id: booking_id,
+            transaction_id: transactionId,
+        })
+            .then(res => {
+                console.log("payment response", res.data)
+                navigation.navigate('BookingSuccessfullScreen', { transaction_id: transactionId, booking_id: booking_id, salon_name: salon_name, employee_name: employee_name, date_time: date_time })
+                setLoading(false)
+            })
+            .catch(e => {
+                console.log('e', e)
+                alert(e.response.data.message)
+                setLoading(false)
+            })
+    }
 
 
     return (

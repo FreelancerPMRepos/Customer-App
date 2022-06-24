@@ -43,6 +43,7 @@ const App = () => {
     <>
       <StripeProvider
         publishableKey="pk_test_51JVfvXCnUpBJoNDHFLOyPrzRvBarz4oXWCCARl2UDVJJXdvBmCjSNkbrZN2lgqOEIiMpD7dngcowDCMR704rStrs00pQ4HmrW4"
+      //  publishableKey='pk_live_51JVfvXCnUpBJoNDHZnl7Wc2GDpHQl87Jd0qyARhinUENbShcwgDQptcUXPxcpM7jZVLxtWYfYg7kuuHQ4UOSwvxj00rhDblBG4'
       //   urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
       //  merchantIdentifier="merchant.com.{{YOUR_APP_NAME}}" // required for Apple Pay
       >
