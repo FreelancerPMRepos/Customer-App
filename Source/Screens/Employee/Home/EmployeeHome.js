@@ -141,7 +141,7 @@ const EmployeeHome = ({ navigation, props }) => {
             <View style={{ backgroundColor: 'white', height: height }}>
                 {
                     <ScrollView style={{ marginBottom: 10 }}>
-                        <Text style={styles.title}>{`Welcome ${userData.name}!`}</Text>
+                        <Text style={{fontSize: 18, fontFamily: 'Avenir-Heavy', marginLeft: 15, marginTop: 20}}>{`Welcome ${userData.name}!`}</Text>
                         <Text style={styles.subTitle}>Your Appointment </Text>
                         <View style={styles.dropdownView}>
                             <SelectDropdown
@@ -154,6 +154,9 @@ const EmployeeHome = ({ navigation, props }) => {
                                     setDropdownValue(selectedItem)
                                     getAppointments(selectedItem);
                                 }}
+                                renderDropdownIcon={isOpened => {
+                                    return <Image  source={require('../../../Images/arrowDown.png')}/>;
+                                  }}
                             />
                         </View>
                         {
@@ -197,6 +200,9 @@ const EmployeeHome = ({ navigation, props }) => {
     const PastScreen = () => {
         return (
             <View style={{ backgroundColor: 'white', height: height }}>
+                <View>
+                    <Text style={{marginTop: 20, marginLeft: 20, fontSize: 16, fontFamily: 'Avenir-Medium', marginRight: 80}}>Your appointments will be cleared after 24 hours of completing</Text>
+                </View>
                 <ScrollView>
                     {
                         appointmentData.length == 0 ?

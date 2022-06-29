@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, Pressable, Alert, TextInput } from 'react-nativ
 import Header from '../../../Components/Header';
 import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
 import axios from 'axios';
-import { BASE_URL } from '../../../Config';
+import { BASE_URL, height } from '../../../Config';
 import Loader from '../../../Components/Loader';
 import { useStripe } from '@stripe/stripe-react-native';
 
@@ -53,7 +53,8 @@ const PaymentScreen = ({ navigation, route, props }) => {
         if (error) {
             // Error in payment
             // Show error alert
-            Alert.alert(error)
+            alert(error.code)
+          console.log("error",error)
         } else {
             // Show payment sheet
             openPaymentSheet();
@@ -66,7 +67,9 @@ const PaymentScreen = ({ navigation, route, props }) => {
         if (error) {
             // Error in payment
             // Show error alert
-            Alert.alert(error)
+          //  Alert.alert(error)
+          alert(error.code)
+          console.log("error",error)
         } else {
             // Payment done
             onConfirmPayment()
@@ -101,9 +104,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
             }
             {
                 <View style={styles.mainView}>
-                    <Pressable style={styles.button} onPress={() => pay()}>
-                        <Text style={styles.buttonText}>Pay</Text>
-                    </Pressable>
+                    <Text style={{justifyContent: 'center', alignItems: 'center'}}>Please Wait.....</Text>
                 </View>
             }
         </View>
@@ -118,7 +119,8 @@ const styles = StyleSheet.create({
     },
     mainView: {
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        height: height
     },
     button: {
         backgroundColor: 'black',

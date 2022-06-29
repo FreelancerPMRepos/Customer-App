@@ -30,6 +30,7 @@
     "@twotalltotems/react-native-otp-input": "^1.3.11",
     "axios": "^0.24.0",
     "geolib": "^3.3.3",
+    "jetifier": "^2.0.0",
     "moment": "^2.29.1",
     "react": "17.0.2",
     "react-native": "0.66.3",
