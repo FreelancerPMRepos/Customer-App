@@ -276,7 +276,6 @@ const StoreDescription = ({ navigation, route, props }) => {
 
         return discount;
     }
-    //  console.log("promotion time list", promotionTime)
 
     const getMonthDateDay = (year, date) => {
         setNextDate(date)
@@ -349,7 +348,6 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const getDateSlot = (id) => {
-        console.log("id", id)
         setLoading(true)
         //    axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
         if (id == '001') {
@@ -499,6 +497,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         setServiceTypeId('')
         setPickStyleId('')
         setPickStyleName('')
+        setServiceDiscount('')
         setModalVisible(!modalVisible)
         if (data.discount === false) {
 
@@ -1092,7 +1091,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 />
                                 :
                                 <Image source={{
-                                    uri: storeData.images[0].url,
+                                    uri: storeData.image_url,
                                 }} style={styles.storeImage} />
                         }
                         <View style={{ marginLeft: 15 }}>

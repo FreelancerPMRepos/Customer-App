@@ -16,6 +16,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
     const [transactionId, setTransactionId] = useState('');
     const { booking_id, salon_name, employee_name, date_time } = route.params
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    const [paymentSheetError, setPaymentSheetError] = useState(false);
 
     const _onBack = () => navigation.goBack()
 
@@ -69,6 +70,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
             // Show error alert
           //  Alert.alert(error)
           alert(error.code)
+          setPaymentSheetError(true)
           console.log("error",error)
         } else {
             // Payment done
@@ -104,7 +106,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
             }
             {
                 <View style={styles.mainView}>
-                    <Text style={{justifyContent: 'center', alignItems: 'center'}}>Please Wait.....</Text>
+                    <Text style={{justifyContent: 'center', alignItems: 'center'}}>{paymentSheetError == true ? 'Cancel' : 'Please Wait.....'}</Text>
                 </View>
             }
         </View>

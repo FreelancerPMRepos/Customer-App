@@ -201,7 +201,7 @@ const EmployeeHome = ({ navigation, props }) => {
         return (
             <View style={{ backgroundColor: 'white', height: height }}>
                 <View>
-                    <Text style={{marginTop: 20, marginLeft: 20, fontSize: 16, fontFamily: 'Avenir-Medium', marginRight: 80}}>Your appointments will be cleared after 24 hours of completing</Text>
+                    <Text style={{marginTop: 20, marginLeft: 20, fontSize: 16, fontFamily: 'Avenir-Medium', marginRight: 80}}>Your appointments will be cleared after completing 24 hours</Text>
                 </View>
                 <ScrollView>
                     {

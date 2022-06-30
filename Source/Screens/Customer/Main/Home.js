@@ -312,7 +312,7 @@ const Home = ({ navigation, props, route }) => {
                           />
                           :
                           <Image source={{
-                            uri: res?.images[0]?.url,
+                            uri: res?.image_url,
                           }} style={styles.noImage} />
                       }
                       <View style={styles.storeContentView}>
