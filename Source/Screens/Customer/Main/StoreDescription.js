@@ -764,7 +764,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                                         <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginLeft: 10.5, }}>{res.name}</Text>
                                                         {
-                                                            res.discount === false ? null :
+                                                            res.discount === false || res.discount == 0 ? null :
                                                                 <Text style={{ backgroundColor: '#EB2C47', color: '#FFFFFF', marginTop: 5, borderRadius: 5, marginRight: 30.5, textAlign: 'center', marginBottom: 7, fontSize: 12, fontFamily: 'Avenir Medium', lineHeight: 16, paddingTop: 2, paddingBottom: 1, width: 125, height: 21.5 }}>Available Discount</Text>
 
                                                         }
