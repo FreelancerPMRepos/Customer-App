@@ -13,7 +13,7 @@ const Colors = {
   spanishGreyLight: '#979797'
 };
 
-const BASE_URL = `https://haircut.winayak.com/api`
+const BASE_URL = `https://app.hairkut.co.uk/api`
 
 const IMAGE_URL = `https://haircut.winayak.com/img`
 

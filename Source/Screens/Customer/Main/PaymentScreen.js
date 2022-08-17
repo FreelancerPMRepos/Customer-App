@@ -25,6 +25,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
     }, [])
 
     const fetchPaymentIntentClientSecret = async () => {
+        console.log("df",booking_id)
         axios.post(`${BASE_URL}/create/payment/intent`, {
             booking_id: booking_id
         })
@@ -37,7 +38,7 @@ const PaymentScreen = ({ navigation, route, props }) => {
                 setTransactionId(res.transaction_id)
             })
             .catch(e => {
-                console.log('e', e)
+                console.log('error', e)
                 alert(e.response.data.message)
             })
     }

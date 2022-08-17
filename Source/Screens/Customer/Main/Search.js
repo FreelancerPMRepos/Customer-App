@@ -88,7 +88,7 @@ const HelloWorldApp = (props) => {
     setLoading(true)
     axios.get(`${BASE_URL}/users/me`)
       .then(res => {
-        console.log("res",res.data)
+        console.log("res", res.data)
         try {
           const jsonValue = JSON.stringify(res.data)
           AsyncStorage.setItem('@user_details', jsonValue)
@@ -107,6 +107,7 @@ const HelloWorldApp = (props) => {
     setLoading(true)
     global.key = keyword === undefined ? '' : keyword
     global.seacrch_keyword = name === undefined ? '' : name
+    console.log("df", `${BASE_URL}/top/cuts/styles?name=${global.seacrch_keyword}&keyword=${global.key}`)
     axios.get(`${BASE_URL}/top/cuts/styles?name=${global.seacrch_keyword}&keyword=${global.key}`)
       .then(res => {
         if (Array.isArray(res.data)) {
@@ -114,7 +115,7 @@ const HelloWorldApp = (props) => {
         } else {
           setTopData(res.data)
         }
-
+        console.log("ds", res.data)
         setLoading(false)
       })
       .catch(e => {

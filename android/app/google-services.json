@@ -14,6 +14,38 @@
       },
       "oauth_client": [
         {
+          "client_id": "423891850043-a384485919jv0qdcl4ob1ue1nbqorkms.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haircut",
+            "certificate_hash": "d144165ea5aae91584b88097b540ac6a70b1c473"
+          }
+        },
+        {
+          "client_id": "423891850043-hqcm94da51etbrbkhldk12as1q6nbrlf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haircut",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "423891850043-ms5b5hj0uvo8gddf3efaaegolv6165te.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haircut",
+            "certificate_hash": "8b7e347f4bae167014109ca989a617ae25ccf162"
+          }
+        },
+        {
+          "client_id": "423891850043-q3mj92klh4jhhf0ft2m9fi7ara5u7cce.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haircut",
+            "certificate_hash": "dc08ff20f1d0ac0dfe0e6e04f007eb7c77a45e3b"
+          }
+        },
+        {
           "client_id": "423891850043-lhlcvfq0ih6m4qthi1f9fg53ob3sdktf.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +61,13 @@
             {
               "client_id": "423891850043-e8nks50e9jpcqo615qh7ngjfbncgnqhs.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "423891850043-0okpatsjcnifoksa49ccr56stlp81roq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.omsmoney.app"
+              }
             }
           ]
         }
