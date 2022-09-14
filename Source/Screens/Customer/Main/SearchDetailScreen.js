@@ -89,6 +89,7 @@ const SearchDetailScreen = ({ navigation, route, props }) => {
 
     const _onPick = () => {
         const user = list
+        global.pickStyleId = user.store.id
         dispatch(addSalon(user))
         navigation.navigate('HomeTabs', {
             screen: 'Home'
@@ -213,7 +214,7 @@ const SearchDetailScreen = ({ navigation, route, props }) => {
 
                     <Text style={[styles.title, { marginTop: 25 }]}>DESCRIPTION</Text>
                     <Text style={styles.subTitle}>{list.description}</Text>
-                    <Text style={[styles.title, { marginTop: 15 }]}>Style Tags</Text>
+                    {/* <Text style={[styles.title, { marginTop: 15 }]}>Style Tags</Text>
                     {
                         tagList[0] === "" ?
                             <Text style={{ marginLeft: 25, marginTop: 10 }}>No Style Tags</Text>
@@ -232,7 +233,7 @@ const SearchDetailScreen = ({ navigation, route, props }) => {
 
                             </View>
 
-                    }
+                    } */}
                     {/* <Text style={[styles.title, { marginTop: 15 }]}>NOTES</Text> */}
                     {/* {
             noteData.map((res) => {

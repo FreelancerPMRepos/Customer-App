@@ -92,6 +92,7 @@ const Home = ({ navigation, props, route }) => {
     var lat = global.searchLatitude ? global.searchLatitude : latitude
     var long = global.searchLongitude ? global.searchLongitude : longitude
     var storeId = store_id == '' ? '' : global.pickStyleId ? global.pickStyleId : ''
+    console.log("d", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
     axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
       .then(res => {
         setStoreList(res.data.list)
@@ -570,16 +571,16 @@ const styles = StyleSheet.create({
   },
   clearFilterText: {
     fontSize: 12,
-    fontFamily: 'Avenir-Book', 
-    marginTop: 5, 
-    marginBottom: 5, 
-    marginLeft: 15.5, 
+    fontFamily: 'Avenir-Book',
+    marginTop: 5,
+    marginBottom: 5,
+    marginLeft: 15.5,
     marginRight: 15.5
   },
   milesText: {
-    textAlign: 'right', 
-    marginRight: 10, 
-    fontFamily: 'Avenir-Book', 
+    textAlign: 'right',
+    marginRight: 10,
+    fontFamily: 'Avenir-Book',
     marginBottom: 10
   }
 })

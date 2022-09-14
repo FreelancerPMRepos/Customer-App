@@ -7,6 +7,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification, { Importance } from 'react-native-push-notification';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import moment from 'moment';
 
 const persistStore = persist();
 
@@ -17,7 +18,7 @@ const App = () => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       PushNotification.localNotification({
         channelId: 'Haircut',
-        message: remoteMessage.notification.body,
+        message: remoteMessage.notification.body + remoteMessage.data ? moment.utc(remoteMessage.data.date).local().format("DD MMM YYYY hh:mm A") : '',
         title: remoteMessage.notification.title,
         bigPictureUrl: remoteMessage.notification.android.imageUrl,
         smallIcon: remoteMessage.notification.android.imageUrl,

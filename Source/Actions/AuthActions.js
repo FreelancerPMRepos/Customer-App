@@ -120,11 +120,13 @@ export const signUp = (payload) => {
                             }
                         })
                         .catch(error => {
+                            console.log("Fd")
                             alert(error)
                         })
                 }
             })
             .catch(e => {
+                console.log("Fds")
                 alert(`${e.response.data.message}.`)
                 dispatch({ type: AUTH_ERROR, payload: { error: e } })
             })

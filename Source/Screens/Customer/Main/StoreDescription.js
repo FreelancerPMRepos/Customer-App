@@ -7,6 +7,7 @@ import {
     Pressable,
     Modal,
     ScrollView,
+    DatePickerAndroid,
 } from 'react-native';
 import Header from '../../../Components/Header';
 import { BASE_URL, width, height } from '../../../Config';
@@ -122,7 +123,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e', e)
                 setLoading(false)
             })
     }
@@ -145,7 +145,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e', e)
                 setLoading(false)
             })
     }
@@ -176,7 +175,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 setFees(res.data.fee)
             })
             .catch(e => {
-                console.log('e', e)
                 setLoading(false)
             })
     }
@@ -186,7 +184,6 @@ const StoreDescription = ({ navigation, route, props }) => {
         setSelectedDate(date)
         for (var i in dateList) {
             if (dateList[i].employee_id) {
-                console.log("In if")
                 if (dateList[i].day == DaysName[day]) {
                     var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
                     var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
@@ -196,9 +193,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
                 }
             } else {
-                console.log("In Else")
                 if (dateList[i].day == DaysName[day]) {
-                    console.log("Opne", dateList[i].open_time)
                     var new_array = getEmployeeTimeData(dateList[i].open_time, dateList[i].close_time, promotionTime, dateList[i].day, date)
                 }
             }
@@ -264,7 +259,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         for (var i in timeslot) {
             if (timeslot[i].day == day && timeslot[i].close_time != "" && timeslot[i].open_time != "" && timeslot[i].is_open == 1) {
                 var openTime = moment(timeslot[i].open_time, 'HH:mm');
-                var closeTime = moment(timeslot[i].close_time, 'HH:mm');
+                var closeTime = moment(timeslot[i].close_time, 'HH:mm').add(5, 'seconds');
                 if (temp.isBefore(closeTime) && temp.isAfter(openTime)) {
                     if (discount < timeslot[i].discount) {
                         discount = timeslot[i].discount;
@@ -281,7 +276,11 @@ const StoreDescription = ({ navigation, route, props }) => {
         setNextDate(date)
         var year = year;
         var month = date;
-        var date = new Date(year, month, 1);
+        var date = new Date();
+        date.setDate(1);
+        date.setYear(year);
+        date.setMonth(month);
+
         var days = [];
         var newObj = {};
         while (date.getMonth() === month) {
@@ -321,11 +320,10 @@ const StoreDescription = ({ navigation, route, props }) => {
         }
         days.push(newObj);
         setDays(days);
-        console.log("Date response", days)
     }
 
     const getIsopen = (day, date) => {
-        if (moment(date).format('MM/DD/YYYY') >= moment(new Date()).format('MM/DD/YYYY')) {
+        if (moment(date).format('MM/DD/YYYY') > moment(new Date()).format('MM/DD/YYYY') || (moment(date).format('MM/DD/YYYY') == moment(new Date()).format('MM/DD/YYYY') && moment.utc(date).isBefore(moment.utc(storeData.closetime, "HH:mm:ss")))) {
             for (var i in dateList) {
                 if (dateList[i].day == DaysName[day]) {
                     return dateList[i].is_open;
@@ -337,7 +335,6 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const getIsDiscount = (day, date) => {
         for (var i in promotionTime) {
-            //  console.log("sd", promotionTime)
             if (promotionTime[i].is_open == 1) {
                 if (promotionTime[i].day == DaysName[day]) {
                     return 1;
@@ -349,27 +346,22 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const getDateSlot = (id) => {
         setLoading(true)
-        //    axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
         if (id == '001') {
             axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
                 .then(res => {
                     setDateList(res.data.list)
-                    console.log('res.data.list', res.data.list)
                     setLoading(false)
                 })
                 .catch(e => {
-                    console.log('e getDateSlot', e)
                     setLoading(false)
                 })
         } else {
             axios.get(`${BASE_URL}/employee/working/hour/list/${id}`)
                 .then(res => {
                     setDateList(res.data.list)
-                    console.log('res.data.list', res.data.list)
                     setLoading(false)
                 })
                 .catch(e => {
-                    console.log('e getDateSlot', e)
                     setLoading(false)
                 })
         }
@@ -379,12 +371,10 @@ const StoreDescription = ({ navigation, route, props }) => {
         setLoading(true)
         axios.get(`${BASE_URL}/promotion/timeslot/list/${id}`)
             .then(res => {
-                console.log("rtr", res.data)
                 setPromotionTime(res.data)
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e getPromotionTimeList', e)
                 setLoading(false)
             })
     }
@@ -395,11 +385,9 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/service/all/list2?store_id=${storeDetails.id}`)
             .then(res => {
                 setServiceList(res.data)
-                console.log("SERVICE", res.data)
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e getServiceList', e)
                 setLoading(false)
             })
     }
@@ -412,7 +400,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e getHairdresserList', e)
                 setLoading(false)
             })
     }
@@ -425,7 +412,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                 setLoading(false)
             })
             .catch(e => {
-                console.log('e', e)
                 setLoading(false)
             })
     }
@@ -435,7 +421,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             alert('Please select service first.')
         } else {
             setLoading(true)
-            console.log("DATA", storeDetails.id, serviceId)
             axios.get(`${BASE_URL}/style/type/list/?store_id=${storeDetails.id}&service_id=${serviceId}`)
                 .then(res => {
                     if (res.data.length == 0) {
@@ -474,14 +459,12 @@ const StoreDescription = ({ navigation, route, props }) => {
                             res.data[i].total_female_price = female_total_price;
                         }
 
-                        console.log("largest", res.data)
                         setIsServiceTypeDiscount(true)
                         setServiceTypeList(res.data)
                         setLoading(false)
                     }
                 })
                 .catch(e => {
-                    console.log('e', e)
                     alert('No service type available.')
                     setLoading(false)
                 })
@@ -570,7 +553,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                     setLoading(false)
                 })
                 .catch(e => {
-                    console.log('es', e)
                     setLoading(false)
                 })
         } else {
@@ -622,11 +604,6 @@ const StoreDescription = ({ navigation, route, props }) => {
 
     const _onBook = () => {
         setLoading(true)
-        // if (genderName == '') {
-        //     alert('Please select sex.')
-        //     setLoading(false)
-        //     return false
-        // } else 
         if (serviceId == '') {
             alert('Please select service.')
             setLoading(false)
@@ -635,13 +612,7 @@ const StoreDescription = ({ navigation, route, props }) => {
             alert('Please select service type.')
             setLoading(false)
             return false
-        }
-        // else if (serviceTypeId == '') {
-        //     alert('Please select pick style.')
-        //     setLoading(false)
-        //     return false
-        // } 
-        else if (hairdresserId == '') {
+        } else if (hairdresserId == '') {
             alert('Please select stylist.')
             setLoading(false)
             return false
@@ -657,16 +628,6 @@ const StoreDescription = ({ navigation, route, props }) => {
             var date_time = `${nextYear}-${nextDate + 1}-${selectedDate} ${moment(selectedTime, "hh:mm A").format("HH:mm")}`
             var bookingDate = moment(date_time).utc().format("YYYY-MM-DD HH:mm:ss")
             if (bookingDate) {
-                console.log("asd", {
-                    store_id: storeDetails.id,
-                    employee_id: hairdresserId,
-                    customer_id: userDetails.id,
-                    service_id: serviceId,
-                    style_type_id: serviceTypeId,
-                    style_id: pickStyleId,
-                    gender: genderName,
-                    booking_date: bookingDate,
-                })
                 axios.post(`${BASE_URL}/booking`, {
                     store_id: storeDetails.id,
                     employee_id: hairdresserId,
@@ -683,7 +644,6 @@ const StoreDescription = ({ navigation, route, props }) => {
                         setLoading(false)
                     })
                     .catch(e => {
-                        console.log('e', e)
                         alert(e.response.data.message)
                         setLoading(false)
                     })
@@ -1157,7 +1117,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-Heavy', marginLeft: 28, marginTop: 10 }}>Book</Text>
                     <View style={{ marginLeft: 27.5 }}>
                         <View>
-                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex (Optional)</Text>
+                            <Text style={{ fontFamily: 'Avenir-Medium', marginTop: 7, marginBottom: 7.5 }}>Sex</Text>
                             {renderGender()}
                         </View>
                         <View>
@@ -1202,7 +1162,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                 source={require('../../../Images/storeCalendar.png')}
                                             />
                                         </Pressable>
-                                        <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 || selectedDate == '' ? alert("Please select date first") : setTimeModalVisible(!timeModalVisible) }}>
+                                        <Pressable style={{ flexDirection: 'row', borderWidth: 1, borderColor: '#979797', marginLeft: 15, height: 35 }} onPress={() => { time.length == 0 && selectedDate == '' ? alert("Please select date first") : time.length == 0 && selectedDate != '' ? alert('Saloon is closed') : setTimeModalVisible(!timeModalVisible) }}>
                                             <Text style={{ fontFamily: 'Avenir-Medium', marginLeft: 10.5, marginTop: 5 }}>{selectedTime == '' ? 'Select' : selectedTime}</Text>
                                             <Image
                                                 style={{ marginTop: 15, marginLeft: 36, marginRight: 6.36 }}
@@ -1268,25 +1228,25 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                     days.map((res, i) => {
                                                         return (
                                                             <View key={i} style={{ flexDirection: 'row' }}>
-                                                                <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
+                                                                <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open == 0 ? '#979797' : res.is_discount == 1 ? 'red' : 'black' }]}>{res.date} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
+                                                                <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open1 == 0 ? '#979797' : res.is_discount1 == 1 ? 'red' : 'black' }]}>{res.date1} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
+                                                                <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open2 == 0 ? '#979797' : res.is_discount2 == 1 ? 'red' : 'black' }]}>{res.date2} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
+                                                                <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open3 == 0 ? '#979797' : res.is_discount3 == 1 ? 'red' : 'black' }]}>{res.date3} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
+                                                                <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open4 == 0 ? '#979797' : res.is_discount4 == 1 ? 'red' : 'black' }]}>{res.date4} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
+                                                                <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open5 == 0 ? '#979797' : res.is_discount5 == 1 ? 'red' : 'black' }]}>{res.date5} </Text>
                                                                 </Pressable>
-                                                                <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? console.log("not Pressable") : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
+                                                                <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open6 == 0 ? '#979797' : res.is_discount6 == 1 ? 'red' : 'black' }]}>{res.date6} </Text>
                                                                 </Pressable>
                                                             </View>

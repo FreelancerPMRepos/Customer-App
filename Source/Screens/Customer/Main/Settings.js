@@ -266,7 +266,7 @@ const Settings = ({navigation,props}) => {
           <Text style={styles.commonText}>Email</Text>
           <TextInput placeholder="zoe.corby@gmail.com" onChangeText={text => setEmail(text)} value={email} style={styles.textInputStyle} />
           <Text style={styles.commonText}>Password</Text>
-          <TextInput placeholder="*********" onChangeText={text => setPassword(text)} value={password} style={styles.textInputStyle} />
+          <TextInput placeholder="*********" onChangeText={text => setPassword(text)} value={password} style={styles.textInputStyle} editable={false}/>
           <Pressable style={styles.loactionpasswordButton} onPress={() => navigation.navigate('ProfileResetPassword')}>
             <Text style={styles.resetPasswordText}>Reset Password</Text>
           </Pressable>

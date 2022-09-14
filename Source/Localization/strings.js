@@ -27,7 +27,7 @@ let strings = new LocalizedStrings({
         signup_log_in: 'Log In.',
         or_continue_with: 'Or Continue With',
         please_enter_valid_email: 'Please enter valid email.',
-        password_should_be_minimum: 'Password should be minimum 8 characters and at least one number.',
+        password_should_be_minimum: 'Password should be minimum 8 characters long and should contain at least one number and at least one alphabet.',
         please_enter_confirm_password: 'Please enter confirm password.',
         password_and_confirm_password_does_not_match: 'Password and confirm password does not match.',
 
