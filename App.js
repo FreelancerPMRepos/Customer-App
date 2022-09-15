@@ -8,7 +8,7 @@ import messaging from '@react-native-firebase/messaging';
 import PushNotification, { Importance } from 'react-native-push-notification';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import moment from 'moment';
-
+//
 const persistStore = persist();
 
 const App = () => {
