@@ -7,6 +7,7 @@ import {
     TextInput,
     PermissionsAndroid,
     ScrollView,
+    SafeAreaView,
     Pressable,
 } from 'react-native';
 
@@ -305,6 +306,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
     }
 
     return (
+        <SafeAreaView><ScrollView>
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
@@ -325,6 +327,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
             }
 
         </View>
+        </ScrollView></SafeAreaView>
     )
 }
 export default ChangeLocation;
