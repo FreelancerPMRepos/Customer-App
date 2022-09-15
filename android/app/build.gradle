@@ -149,10 +149,11 @@ android {
     }
     signingConfigs {
         debug {
-            storeFile file('haircutCustomer.keystore')
-            storePassword 'haircutCustomer'
-            keyAlias 'haircutCustomer'
-            keyPassword 'haircutCustomer'
+              storeFile file('debug.keystore')
+//            storeFile file('haircutCustomer.keystore')
+//            storePassword 'haircutCustomer'
+//            keyAlias 'haircutCustomer'
+//            keyPassword 'haircutCustomer'
         }
     }
     buildTypes {
