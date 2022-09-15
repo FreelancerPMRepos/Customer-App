@@ -72,7 +72,7 @@ const Home = ({ navigation, props, route }) => {
       global.longitude = longitude
       global.latitude = latitude
       {
-        global.longitude ? getStoreList("", "", "", "", "", latitude, longitude, global.pickStyleId) : null
+        global.longitude ? getStoreList("", "", "", "", miles, latitude, longitude, global.pickStyleId) : null
       }
       if (value !== null) {
         alert('Not getting current location')
@@ -95,6 +95,7 @@ const Home = ({ navigation, props, route }) => {
     console.log("d", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
     axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
       .then(res => {
+        console.log('list of stores=====>>>>',res.data.list );
         setStoreList(res.data.list)
         setLoading(false)
       })
@@ -153,7 +154,7 @@ const Home = ({ navigation, props, route }) => {
 
   const resetFilter = () => {
     setKeyword('')
-    setMiles(0)
+    setMiles(10)
     getStoreList("", "", undefined, "", "", global.latitude, global.longitude, "NULL")
     setShowFilter(!showFilter)
     global.keyword = '';
