@@ -14,6 +14,7 @@ const persistStore = persist();
 const App = () => {
 
   useEffect(() => {
+    
     createChannel()
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       PushNotification.localNotification({
