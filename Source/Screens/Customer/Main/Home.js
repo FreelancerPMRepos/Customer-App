@@ -189,8 +189,8 @@ const Home = ({ navigation, props, route }) => {
   }
 
   const mapView = () => {
-    console.log('Latitude is ===>>>', global.latitude);
-    console.log('Longitude is ===>>>', global.longitude);
+    // console.log('Latitude is ===>>>', global.latitude);
+    // console.log('Longitude is ===>>>', global.longitude);
     return (
       <MapView style={styles.map} initialRegion={{
         latitude: storeList[0]?.latitude === undefined
