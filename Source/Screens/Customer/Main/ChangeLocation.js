@@ -45,7 +45,14 @@ const ChangeLocation = ({ navigation, route, props }) => {
         setIsEnabled(previousState => !previousState);
         getCurrentLocation()
     }, [])
-
+    const storeLocationInAsync = async (currentLongitude, currentLatitude) => {
+        try {
+            await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
+            await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
+        } catch (e) {
+            // saving error
+        }
+    }
 
     const toggleSwitch = () => {
         setAddress('')
@@ -163,6 +170,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
                                 }}
                                 returnKeyType={'default'}
                                 onPress={(data, details = null) => {
+                                    storeLocationInAsync(details.geometry.location.lng, details.geometry.location.lat);
                                     setSearchLocation(details.geometry.location.lat, details.geometry.location.lng, data);
                                     setAddress(data);
                                     console.log('Location is =======>>>>>>>', data);

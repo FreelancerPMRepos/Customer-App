@@ -39,9 +39,9 @@ const Home = ({ navigation, props, route }) => {
   const updatedName = useSelector(state => state)
   const dispatch = useDispatch()
   const [keyboardStatus, setKeyboardStatus] = useState();
-  const [keyword, setKeyword] = useState('')
-  const [miles, setMiles] = useState(10)
-
+  const [keyword, setKeyword] = useState('');
+  const [miles, setMiles] = useState(10);
+  const pinColor = 'green';
 
 
   useEffect(() => {
@@ -189,13 +189,22 @@ const Home = ({ navigation, props, route }) => {
   }
 
   const mapView = () => {
+    console.log('Latitude is ===>>>', global.latitude);
+    console.log('Longitude is ===>>>', global.longitude);
     return (
       <MapView style={styles.map} initialRegion={{
-        latitude: storeList[0]?.latitude === undefined ? 37.78825 : storeList[0]?.latitude,
-        longitude: storeList[0]?.longitude === undefined ? -122.4324 : storeList[0]?.longitude,
+        latitude: storeList[0]?.latitude === undefined
+          ? Number(global.latitude)
+          : storeList[0]?.latitude,
+        longitude: storeList[0]?.longitude === undefined ? Number(global.longitude) : storeList[0]?.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       }}>
+          <Marker
+            coordinate={{ latitude: Number(global.latitude), longitude: Number(global.longitude) }}
+            title="My Location"
+            pinColor = {pinColor}
+          />
         {
           storeList.map((marker, index) => (
             <Marker
