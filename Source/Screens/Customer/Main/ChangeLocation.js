@@ -213,6 +213,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
         setSearchAddress(data.description)
         setSearchMark([{ latitude: lat, longitude: lng }])
         setSearchLatitude(lat)
+        console.log("search location ===>>> ",searchLatitude);
         setSearchLongitude(lng)
     }
 
@@ -306,7 +307,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
     }
 
     return (
-        <SafeAreaView><ScrollView>
+        <SafeAreaView>
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
@@ -327,7 +328,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
             }
 
         </View>
-        </ScrollView></SafeAreaView>
+        </SafeAreaView>
     )
 }
 export default ChangeLocation;

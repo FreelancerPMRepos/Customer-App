@@ -43,7 +43,8 @@ const Notification = (props) => {
         axios.get(`${BASE_URL}/notification/list/${id}`)
             .then(res => {
                 console.log("notification response", res.data)
-                setNotification(res.data)
+                setNotification(res.data);
+                
                 setNoticationDefault()
                 setLoading(false)
             })

@@ -14,12 +14,15 @@ const persistStore = persist();
 const App = () => {
 
   useEffect(() => {
-    
+
     createChannel()
     const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('message obj from app ===>>> ', JSON.stringify(remoteMessage));
       PushNotification.localNotification({
         channelId: 'Haircut',
-        message: remoteMessage.notification.body + remoteMessage.data ? moment.utc(remoteMessage.data.date).local().format("DD MMM YYYY hh:mm A") : '',
+        message: remoteMessage.notification.body + remoteMessage.data
+          ? remoteMessage.notification.body + ' ' + moment.utc(remoteMessage.data.date).local().format("DD MMM YYYY hh:mm A")
+          : '',
         title: remoteMessage.notification.title,
         bigPictureUrl: remoteMessage.notification.android.imageUrl,
         smallIcon: remoteMessage.notification.android.imageUrl,

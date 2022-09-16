@@ -61,7 +61,7 @@ const BookingSuccessfullScreen = ({ navigation, route, props }) => {
                             </View>
                         </View>
                     </View>
-                    <Pressable style={{ justifyContent: 'center', alignItems: 'center', borderWidth: 1, marginLeft: 122.5, marginRight: 122.5, marginTop: 75 }} onPress={() => navigation.navigate('HomeTabs')}>
+                    <Pressable style={{ justifyContent: 'center', alignItems: 'center', borderWidth: 1, marginLeft: 122.5, marginRight: 122.5, marginTop: 75 }} onPress={() => navigation.navigate('Appointments')}>
                         <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, marginTop: 9.5, marginBottom: 9.5 }}>OK</Text>
                     </Pressable>
                 </ScrollView>
