@@ -162,7 +162,11 @@ const ChangeLocation = ({ navigation, route, props }) => {
                                     language: 'en', // language of the results
                                 }}
                                 returnKeyType={'default'}
-                                onPress={(data, details = null) => setSearchLocation(details.geometry.location.lat, details.geometry.location.lng, data)}
+                                onPress={(data, details = null) => {
+                                    setSearchLocation(details.geometry.location.lat, details.geometry.location.lng, data);
+                                    setAddress(data);
+                                    console.log('Location is =======>>>>>>>', data);
+                                }}
                                 onFail={(error) => console.error(error)}
                                 listViewDisplayed="auto"
                                 suppressDefaultStyles={true}
@@ -307,7 +311,8 @@ const ChangeLocation = ({ navigation, route, props }) => {
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{flex: 1}}>
+       
         <View style={styles.container}>
             {
                 <Header leftIcon='back' onLeftIconPress={_onBack} {...props} />
@@ -328,6 +333,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
             }
 
         </View>
+      
         </SafeAreaView>
     )
 }
