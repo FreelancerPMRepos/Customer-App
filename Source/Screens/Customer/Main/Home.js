@@ -194,14 +194,14 @@ const Home = ({ navigation, props, route }) => {
     return (
       <MapView style={styles.map} initialRegion={{
         latitude: storeList[0]?.latitude === undefined
-          ? Number(global.latitude)
+          ? Math.abs( Number(global.latitude))
           : storeList[0]?.latitude,
-        longitude: storeList[0]?.longitude === undefined ? Number(global.longitude) : storeList[0]?.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        longitude: storeList[0]?.longitude === undefined ? Math.abs(Number(global.longitude)) : storeList[0]?.longitude,
+        latitudeDelta: Math.abs( 0.0922),
+        longitudeDelta: Math.abs(0.0421),
       }}>
           <Marker
-            coordinate={{ latitude: Number(global.latitude), longitude: Number(global.longitude) }}
+            coordinate={{ latitude: Math.abs(Number(global.latitude)), longitude: Math.abs(Number(global.longitude)) }}
             title="My Location"
             pinColor = {pinColor}
           />
@@ -209,7 +209,7 @@ const Home = ({ navigation, props, route }) => {
           storeList.map((marker, index) => (
             <Marker
               key={index}
-              coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+              coordinate={{ latitude: Math.abs(marker.latitude), longitude: Math.abs(marker.longitude) }}
               title={marker.store_name}
             />
           ))}
