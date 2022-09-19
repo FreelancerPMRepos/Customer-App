@@ -43,12 +43,24 @@ const HelloWorldApp = (props) => {
         getServiceList()
         getUserInfo()
         requestUserPermission();
+        getlocation();
       }
     }
     return () => {
       isCancelled = true
     }
   }, [])
+
+  const getlocation = async () => {
+    try {
+      var longitude = await AsyncStorage.getItem('CurrentLongitude');
+      var latitude = await AsyncStorage.getItem('CurrentLatitude');
+      global.longitude = longitude;
+      global.latitude = latitude;
+    } catch (e) {
+      console.log("Error while getting location in Search screen =====>>>>" , e);
+    }
+  }
 
   const requestUserPermission = async () => {
     const authStatus = await messaging().requestPermission();

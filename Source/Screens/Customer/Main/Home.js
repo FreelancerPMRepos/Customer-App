@@ -70,8 +70,8 @@ const Home = ({ navigation, props, route }) => {
     try {
       var longitude = await AsyncStorage.getItem('CurrentLongitude')
       var latitude = await AsyncStorage.getItem('CurrentLatitude')
-      global.longitude = longitude
-      global.latitude = latitude
+      // global.longitude = longitude
+      // global.latitude = latitude
       {
         global.longitude ? getStoreList("", "", "", "", miles, latitude, longitude, global.pickStyleId) : null
       }
