@@ -84,6 +84,7 @@ const StoreDescription = ({ navigation, route, props }) => {
 
 
     useEffect(() => {
+       
         let isCancelled = false;
         if (!isCancelled) {
             getStoreData();
@@ -107,6 +108,17 @@ const StoreDescription = ({ navigation, route, props }) => {
             isCancelled = true
         }
     }, [])
+
+    const timeFunction = () => {
+        console.log('date is here =====>>>>',moment.utc(storeData.closeTime(), "HH:mm:ss").local().format('hh:mm A'));
+        console.log('date is here =====>>>>',moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A'));
+        if(moment.utc(storeData.closeTime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')){
+            console.log('==========/////=======>>>> 1' );
+        }else{
+            console.log('==========/////=======>>>> 0' );
+        }
+
+    }
 
     const userData = () => {
         setLoading(true)
@@ -132,6 +144,7 @@ const StoreDescription = ({ navigation, route, props }) => {
         axios.get(`${BASE_URL}/store/detail/${storeDetails.id}`)
             .then(res => {
                 setStoreData(res.data)
+                console.log('stored Data ====>>>>>>', res.data); 
                 global.mark = [{ latitude: res.data.latitude, longitude: res.data.longitude }]
                 global.latitude = res.data.latitude
                 global.longitude = res.data.longitude
@@ -141,7 +154,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                 );
                 let distance = (pdis / 1609).toFixed(2)
                 setOverallDistance(distance)
-
+                
                 setLoading(false)
             })
             .catch(e => {
@@ -1216,6 +1229,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         <View style={{ borderColor: '#979797', flexDirection: 'row', borderBottomWidth: 1 }}>
                                             {
                                                 Days.map((res, index) => {
+                                                    
                                                     return (
                                                         <Text key={index} style={{ fontFamily: 'Avenir-Heavy', borderWidth: 1, textAlign: 'center', width: 45 }}>{res}</Text>
                                                     )
@@ -1226,28 +1240,43 @@ const StoreDescription = ({ navigation, route, props }) => {
                                             <View>
                                                 {
                                                     days.map((res, i) => {
+                                                     
                                                         return (
                                                             <View key={i} style={{ flexDirection: 'row' }}>
                                                                 <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open == 0 ? '#979797' : res.is_discount == 1 ? 'red' : 'black' }]}>{res.date} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount == 1 ? 'red' : 'black' }]}>{res.date} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open1 == 0 ? '#979797' : res.is_discount1 == 1 ? 'red' : 'black' }]}>{res.date1} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open1 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount1 == 1 ? 'red' : 'black' }]}>{res.date1} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open2 == 0 ? '#979797' : res.is_discount2 == 1 ? 'red' : 'black' }]}>{res.date2} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open2 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount2 == 1 ? 'red' : 'black' }]}>{res.date2} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open3 == 0 ? '#979797' : res.is_discount3 == 1 ? 'red' : 'black' }]}>{res.date3} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open3 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount3 == 1 ? 'red' : 'black' }]}>{res.date3} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open4 == 0 ? '#979797' : res.is_discount4 == 1 ? 'red' : 'black' }]}>{res.date4} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open4 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount4 == 1 ? 'red' : 'black' }]}>{res.date4} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open5 == 0 ? '#979797' : res.is_discount5 == 1 ? 'red' : 'black' }]}>{res.date5} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open5 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount5 == 1 ? 'red' : 'black' }]}>{res.date5} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open6 == 0 ? '#979797' : res.is_discount6 == 1 ? 'red' : 'black' }]}>{res.date6} </Text>
+                                                                    <Text style={[styles.dateField, { color: res.is_open6 == 0 
+                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        ? '#979797' : res.is_discount6 == 1 ? 'red' : 'black' }]}>{res.date6} </Text>
                                                                 </Pressable>
                                                             </View>
                                                         )
