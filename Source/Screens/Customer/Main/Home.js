@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Text,
   View,
@@ -40,8 +40,9 @@ const Home = ({ navigation, props, route }) => {
   const dispatch = useDispatch()
   const [keyboardStatus, setKeyboardStatus] = useState();
   const [keyword, setKeyword] = useState('')
-  const [miles, setMiles] = useState(10)
+  //const [miles, setMiles] = useState(10);
   const pinColor = 'green';
+  const miles = useRef(10);
 
 
 
@@ -73,7 +74,7 @@ const Home = ({ navigation, props, route }) => {
       // global.longitude = longitude
       // global.latitude = latitude
       {
-        global.longitude ? getStoreList("", "", "", "", miles, latitude, longitude, global.pickStyleId) : null
+        global.longitude ? getStoreList("", "", "", "", miles.current, latitude, longitude, global.pickStyleId) : null
       }
       if (value !== null) {
         alert('Not getting current location')
@@ -93,10 +94,10 @@ const Home = ({ navigation, props, route }) => {
     var lat = global.searchLatitude ? global.searchLatitude : latitude
     var long = global.searchLongitude ? global.searchLongitude : longitude
     var storeId = store_id == '' ? '' : global.pickStyleId ? global.pickStyleId : ''
-    console.log("d", `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
+    console.log('Url is ====>>>>>', `${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
     axios.get(`${BASE_URL}/store/list2?price_to=${global.new_to_price}&price_from=${global.new_from_price}&keyword=${global.new_keyword}&service_id=${global.new_service}&miles=${global.new_miles}&latitude=${lat}&longitude=${long}&store_id=${storeId}`)
       .then(res => {
-        console.log('list of stores=====>>>>', res.data.list);
+        //console.log('list of stores=====>>>>', res.data.list);
         setStoreList(res.data.list)
         // calculateDistance(global.latitude, global.longitude, storeList.latitude, storeList.longitude)
         setLoading(false)
@@ -176,13 +177,15 @@ const Home = ({ navigation, props, route }) => {
   }
 
   const _onDrag = (value) => {
-    setMiles(value)
+    //setMiles(value)
+    miles.current = value;
   }
 
   const resetFilter = () => {
     setKeyword('')
-    setMiles(10)
-    getStoreList("", "", undefined, "", "", global.latitude, global.longitude, "NULL")
+    //setMiles(10)
+    miles.current = 10;
+    getStoreList("", "", undefined, "", miles.current, Number(global.latitude), Number(global.longitude), "NULL")
     setShowFilter(!showFilter)
     global.keyword = '';
     global.searchLatitude = '';
@@ -278,11 +281,11 @@ const Home = ({ navigation, props, route }) => {
           maximumValue={20}
           minimumTrackTintColor="#A9A8A8"
           maximumTrackTintColor="#A9A8A8"
-          value={miles}
+          value={miles.current}
           onSlidingComplete={(value) => getStoreList(global.new_from_price, global.new_to_price, global.new_keyword, global.new_service, value, global.latitude, global.longitude)}
           onValueChange={(value) => _onDrag(value)}
         />
-        <Text style={styles.milesText}>{miles} Miles</Text>
+        <Text style={styles.milesText}>{miles.current} Miles</Text>
       </View>
     )
   }
