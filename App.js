@@ -32,6 +32,7 @@ const App = () => {
     return unsubscribe;
   }, [])
 
+  
   const createChannel = () => {
     PushNotification.createChannel({
       channelId: 'Haircut',

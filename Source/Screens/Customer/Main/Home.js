@@ -41,6 +41,7 @@ const Home = ({ navigation, props, route }) => {
   const [keyboardStatus, setKeyboardStatus] = useState();
   const [keyword, setKeyword] = useState('')
   const [miles, setMiles] = useState(10)
+  const pinColor = 'green';
 
 
 
@@ -69,8 +70,8 @@ const Home = ({ navigation, props, route }) => {
     try {
       var longitude = await AsyncStorage.getItem('CurrentLongitude')
       var latitude = await AsyncStorage.getItem('CurrentLatitude')
-      global.longitude = longitude
-      global.latitude = latitude
+      // global.longitude = longitude
+      // global.latitude = latitude
       {
         global.longitude ? getStoreList("", "", "", "", miles, latitude, longitude, global.pickStyleId) : null
       }
@@ -191,11 +192,16 @@ const Home = ({ navigation, props, route }) => {
   const mapView = () => {
     return (
       <MapView style={styles.map} initialRegion={{
-        latitude: storeList[0]?.latitude === undefined ? 37.78825 : storeList[0]?.latitude,
-        longitude: storeList[0]?.longitude === undefined ? -122.4324 : storeList[0]?.longitude,
+        latitude: storeList[0]?.latitude === undefined ? Number(global.latitude) : storeList[0]?.latitude,
+        longitude: storeList[0]?.longitude === undefined ? Number(global.longitude) : storeList[0]?.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       }}>
+             <Marker
+              coordinate={{ latitude: Number(global.latitude), longitude: Number(global.longitude) }}
+              title="My Location"
+              pinColor = {pinColor}
+            />
         {
           storeList.map((marker, index) => (
             <Marker

@@ -50,7 +50,7 @@ const ChangeLocation = ({ navigation, route, props }) => {
             await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
             await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
         } catch (e) {
-            // saving error
+           console.log('Error in change Location screen ====>>>', e);
         }
     }
 
@@ -171,6 +171,8 @@ const ChangeLocation = ({ navigation, route, props }) => {
                                 returnKeyType={'default'}
                                 onPress={(data, details = null) => {
                                     storeLocationInAsync(details.geometry.location.lng, details.geometry.location.lat);
+                                    global.latitude = details.geometry.location.lat;
+                                    global.longitude = details.geometry.location.lng;
                                     setSearchLocation(details.geometry.location.lat, details.geometry.location.lng, data);
                                     setAddress(data);
                                     console.log('Location is =======>>>>>>>', data);

@@ -106,6 +106,8 @@ const Login = (props) => {
         try {
             await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
             await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
+                global.longitude = currentLongitude
+                global.latitude = currentLatitude
         } catch (e) {
             // saving error
         }
