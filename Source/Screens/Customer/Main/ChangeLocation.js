@@ -315,6 +315,8 @@ const ChangeLocation = ({ navigation, route, props }) => {
         try {
             await AsyncStorage.setItem('CurrentLongitude', currentLongitude)
             await AsyncStorage.setItem('CurrentLatitude', currentLatitude)
+            global.latitude = currentLatitude;
+            global.longitude = currentLongitude;
         } catch (e) {
             // saving error
         }
