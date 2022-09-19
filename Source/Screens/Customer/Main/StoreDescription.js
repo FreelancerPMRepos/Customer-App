@@ -1245,37 +1245,34 @@ const StoreDescription = ({ navigation, route, props }) => {
                                                             <View key={i} style={{ flexDirection: 'row' }}>
                                                                 <Pressable onPress={() => { res.date === undefined || res.is_open == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date, 0)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        
                                                                         ? '#979797' : res.is_discount == 1 ? 'red' : 'black' }]}>{res.date} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date1 === undefined || res.is_open1 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date1, 1)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open1 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        
                                                                         ? '#979797' : res.is_discount1 == 1 ? 'red' : 'black' }]}>{res.date1} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date2 === undefined || res.is_open2 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date2, 2)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open2 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        
                                                                         ? '#979797' : res.is_discount2 == 1 ? 'red' : 'black' }]}>{res.date2} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date3 === undefined || res.is_open3 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date3, 3)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open3 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                        
                                                                         ? '#979797' : res.is_discount3 == 1 ? 'red' : 'black' }]}>{res.date3} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date4 === undefined || res.is_open4 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date4, 4)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open4 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                    <Text style={[styles.dateField, { color: res.is_open4 == 0           
                                                                         ? '#979797' : res.is_discount4 == 1 ? 'red' : 'black' }]}>{res.date4} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date5 === undefined || res.is_open5 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date5, 5)) }}>
-                                                                    <Text style={[styles.dateField, { color: res.is_open5 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
+                                                                    <Text style={[styles.dateField, { color: res.is_open5 == 0                               
                                                                         ? '#979797' : res.is_discount5 == 1 ? 'red' : 'black' }]}>{res.date5} </Text>
                                                                 </Pressable>
                                                                 <Pressable onPress={() => { res.date6 === undefined || res.is_open6 == 0 ? '' : (setDateModalVisible(!dateModalVisible), getTime(res.date6, 6)) }}>
                                                                     <Text style={[styles.dateField, { color: res.is_open6 == 0 
-                                                                        || moment.utc(storeData.closetime, "HH:mm:ss").local().format('hh:mm A') >  moment.utc(new Date(), "HH:mm:ss").local().format('hh:mm A')
                                                                         ? '#979797' : res.is_discount6 == 1 ? 'red' : 'black' }]}>{res.date6} </Text>
                                                                 </Pressable>
                                                             </View>
