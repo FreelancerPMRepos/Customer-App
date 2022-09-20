@@ -1296,9 +1296,9 @@ const StoreDescription = ({ navigation, route, props }) => {
                                 setTimeModalVisible(!timeModalVisible);
                             }}
                         >
-                            <View style={{ flex: 1, position: 'absolute', bottom: 15, left: 140, top: 500 }}>
+                            <View style={{ flex: 1, position: 'absolute', bottom: 15, alignSelf: 'flex-end', height: 200}}>
                                 <View style={{
-                                    width: 200,
+                                    //width: 200,
                                     margin: 20,
                                     alignItems: 'center',
                                     backgroundColor: "white",
@@ -1321,7 +1321,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         {
                                             time.map((res, index) => {
                                                 return (
-                                                    <View key={index}>
+                                                    <View key={index} style={{width: 200, alignItems: 'center'}}>
                                                         {
                                                             res.isOffer == true ?
                                                                 <Pressable style={{ flexDirection: 'row' }} onPress={() => _onTime(moment.utc(res.date, 'hh:mm A').local().format('hh:mm A'))}>
