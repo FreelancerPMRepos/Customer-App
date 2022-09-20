@@ -59,7 +59,7 @@ const HomeScreenSearch = (props) => {
                             onPress={(data, details = null) => searchLocation(details.geometry.location.lat, details.geometry.location.lng, data)}
                             onFail={(error) => console.error(error)}
                             textInputProps={{
-                                onChangeText: onChange
+                                onChangeText: onChange  
                             }}
                             listViewDisplayed={true}
                             suppressDefaultStyles={true}
