@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Image, Pressable, ScrollView } from 'react-nati
 import Header from '../../../Components/Header';
 import moment from 'moment';
 import { width } from '../../../Config';
+import { CommonActions } from '@react-navigation/native';
 
 const BookingSuccessfullScreen = ({ navigation, route, props }) => {
     const { transaction_id, booking_id, salon_name, employee_name, date_time } = route.params
@@ -10,6 +11,22 @@ const BookingSuccessfullScreen = ({ navigation, route, props }) => {
     console.log("asd",date_time)
 
     const _onBack = () => navigation.goBack()
+
+    const navigateToAppointment = () => {
+        navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{
+                  name: 'HomeTabs',
+                  state: {
+                      routes: [{
+                          name: 'Appointments'
+                      }]
+                  }
+            }],
+            }),
+          );
+    }
 
     return (
         <View style={Styles.container}>
@@ -61,7 +78,7 @@ const BookingSuccessfullScreen = ({ navigation, route, props }) => {
                             </View>
                         </View>
                     </View>
-                    <Pressable style={{ justifyContent: 'center', alignItems: 'center', borderWidth: 1, marginLeft: 122.5, marginRight: 122.5, marginTop: 75 , marginBottom: 20}} onPress={() => navigation.navigate('Appointments')}>
+                    <Pressable style={{ justifyContent: 'center', alignItems: 'center', borderWidth: 1, marginLeft: 122.5, marginRight: 122.5, marginTop: 75 , marginBottom: 20}} onPress={() => navigateToAppointment()}>
                         <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19, marginTop: 9.5, marginBottom: 9.5 }}>OK</Text>
                     </Pressable>
                 </ScrollView>
