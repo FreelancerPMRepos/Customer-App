@@ -73,6 +73,7 @@ const StoreDescription = ({ navigation, route, props }) => {
     const [overallDistance, setOverallDistance] = useState('');
     const [bookingData, setBookingData] = useState([]);
     const [isServiceTypeDiscount, setIsServiceTypeDiscount] = useState(false);
+    const [closeTime,setCloseTime] = useState('');
     const [fees, setFees] = useState('')
     // Date
     const [days, setDays] = useState([]);
@@ -145,6 +146,8 @@ const StoreDescription = ({ navigation, route, props }) => {
             .then(res => {
                 setStoreData(res.data)
                 console.log('stored Data ====>>>>>>', res.data); 
+                setCloseTime(res.data.closetime)
+                console.log('close time .....///>>',res.data.closetime);
                 global.mark = [{ latitude: res.data.latitude, longitude: res.data.longitude }]
                 global.latitude = res.data.latitude
                 global.longitude = res.data.longitude
@@ -193,21 +196,34 @@ const StoreDescription = ({ navigation, route, props }) => {
     }
 
     const getTime = (date, day) => {
+        console.log('date List it is ==///>>>', dateList);
         setLoading(true)
         setSelectedDate(date)
         for (var i in dateList) {
             if (dateList[i].employee_id) {
                 if (dateList[i].day == DaysName[day]) {
+                    if(closeTime < dateList[i].employee_end_time) {
                     var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
-                    var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
+                    var next_slot = getEmployeeTimeData(dateList[i].break_end_time, closeTime, promotionTime, dateList[i].day, date)
+                    console.log('date List it is ==///>>>', dateList);
                     for (var i in next_slot) {
                         new_array.push(next_slot[i])
+                    }
+                    }
+                    else{
+                        var new_array = getEmployeeTimeData(dateList[i].employee_start_time, dateList[i].break_start_time, promotionTime, dateList[i].day, date)
+                    var next_slot = getEmployeeTimeData(dateList[i].break_end_time, dateList[i].employee_end_time, promotionTime, dateList[i].day, date)
+                    console.log('date List it is ==///>>>', dateList);
+                    for (var i in next_slot) {
+                        new_array.push(next_slot[i])
+                    }
                     }
 
                 }
             } else {
                 if (dateList[i].day == DaysName[day]) {
                     var new_array = getEmployeeTimeData(dateList[i].open_time, dateList[i].close_time, promotionTime, dateList[i].day, date)
+                    console.log('data list ', dateList[i]);
                 }
             }
 
@@ -363,6 +379,8 @@ const StoreDescription = ({ navigation, route, props }) => {
             axios.get(`${BASE_URL}/timeslot/list/${storeDetails.id}`)
                 .then(res => {
                     setDateList(res.data.list)
+                    console.log('close time of Saloon===>>>>',res.data.list);
+                    setCloseTime(res.data.list.close_time)
                     setLoading(false)
                 })
                 .catch(e => {
