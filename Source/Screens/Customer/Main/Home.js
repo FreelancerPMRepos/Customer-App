@@ -340,7 +340,7 @@ const Home = ({ navigation, props, route }) => {
                     }
                   }
                   return (
-                    <Pressable style={styles.store} key={index} onPress={() => navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10 })}>
+                    <Pressable style={styles.store} key={index} onPress={() => navigation.navigate('StoreDescription', { storeDetails: res, page: 'Home', miles: 10,  })}>
                       {
                         res.images.length == 0 ?
                           <Image

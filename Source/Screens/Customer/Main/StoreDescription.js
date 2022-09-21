@@ -1100,7 +1100,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                             <View style={{ width: width * 0.65 }}>
                                 <Text>{storeData.address}</Text>
                             </View>
-                            <Text style={styles.miles}>{overallDistance} Miles</Text>
+                            <Text style={styles.miles}>{storeDetails?.distance} Miles</Text>
                             <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
                                 <Rating
                                     type='custom'
