@@ -951,7 +951,7 @@ const StoreDescription = ({ navigation, route, props }) => {
                                         source={require('../../../Images/cross.png')}
                                     />
                                 </Pressable>
-                                <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, marginLeft: 111, marginTop: 0.75 }}>Booking Details</Text>
+                                <Text style={{ fontSize: 18, fontFamily: 'Avenir-Heavy', lineHeight: 25, alignSelf: 'center', marginTop: 0.75 }}>Booking Details</Text>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 29.5, marginRight: 29.5, marginTop: 17 }}>
                                     <Text style={{ fontSize: 16, fontFamily: 'Avenir-medium' }}>Service Name</Text>
                                     <Text style={{ fontSize: 16 }}>{serviceName}</Text>
