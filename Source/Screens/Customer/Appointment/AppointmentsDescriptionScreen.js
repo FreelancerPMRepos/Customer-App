@@ -7,6 +7,7 @@ import {
   Image,
   Pressable,
   Modal,
+  Linking,
   TextInput,
   ScrollView
 } from 'react-native';
@@ -704,14 +705,22 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
               <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 36, marginBottom: 33 }}>
                 <Text style={{ fontFamily: 'Avenir-Medium', lineHeight: 19 }}>Share Your Style On</Text>
                 <View style={{ flexDirection: 'row', marginTop: 9 }}>
+                  <Pressable style={{padding: 10}} onPress={() => {
+                    Linking.openURL('fb://page/PAGE_ID');
+                  }}>
                   <Image
                     style={{}}
                     source={require('../../../Images/facebook.png')}
                   />
+                  </Pressable>
+                  <Pressable style={{padding: 10, marginLeft: 10}} onPress={() => {
+                   Linking.openURL('http://instagram.com/_u/USER_NAME');
+                  }}>
                   <Image
-                    style={{ marginLeft: 12 }}
+                    style={{}}
                     source={require('../../../Images/instagram.png')}
                   />
+                  </Pressable>
                 </View>
               </View>
               :
