@@ -330,15 +330,16 @@ const Home = ({navigation, props, route}) => {
         <View style={styles.currencyView}>
           <Pressable
             onPress={() => _onPriceFilter(0, 10)}
-            style={{borderRightWidth: 1}}>
+            style={{borderRightWidth: 1, justifyContent: 'center',}}>
             <Text style={styles.currency}>£</Text>
           </Pressable>
           <Pressable
             onPress={() => _onPriceFilter(10, 50)}
-            style={{borderRightWidth: 1}}>
+            style={{borderRightWidth: 1, justifyContent: 'center',}}>
             <Text style={styles.currency}>££</Text>
           </Pressable>
-          <Pressable onPress={() => _onPriceFilter(50, 100000)}>
+          <Pressable style={{justifyContent: 'center',}} 
+            onPress={() => _onPriceFilter(50, 100000)}>
             <Text style={styles.currency}>£££</Text>
           </Pressable>
         </View>
@@ -637,15 +638,18 @@ const styles = StyleSheet.create({
     width: width * 1,
   },
   filterButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffff',
     marginLeft: 5,
     height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 50,
   },
   filterImage: {
-    marginTop: 12,
-    marginRight: 12,
-    marginLeft: 17,
-    marginRight: 16,
+    // marginTop: 12,
+    // marginRight: 12,
+    // marginLeft: 17,
+    // marginRight: 16,
   },
   priceView: {
     top: 95,
@@ -664,7 +668,8 @@ const styles = StyleSheet.create({
   currency: {
     width: width * 0.13,
     textAlign: 'center',
-    paddingTop: 15.5,
+    //paddingTop: 15.5,
+    //justifyContent: 'center',
   },
   sliderView: {
     top: 110,

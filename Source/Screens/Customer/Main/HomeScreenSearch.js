@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
     Text,
     View,
+    Dimensions,
     StyleSheet,
     Image,
     Pressable
@@ -13,6 +14,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 
 
 const GOOGLE_PLACES_API_KEY = 'AIzaSyD6-vGk55XyKKw9TJCEiV0Q3XzwBSRq_0E';
+const ScreenWidth = Dimensions.get('screen').width;
 
 const HomeScreenSearch = (props) => {
     const [searchKeyword, setSearchKeyword] = useState('')
@@ -46,10 +48,11 @@ const HomeScreenSearch = (props) => {
             }
             {
                 <View style={{ flexDirection: 'row' }}>
-                    <View style={{ width: '80%' }}>
+                    <View style={{ width: '80%'}}>
                         <GooglePlacesAutocomplete
                             placeholder="Search By Salon, Location"
                             GooglePlacesDetailsQuery={{ fields: "geometry" }}
+                            //enablePoweredByContainer={false}
                             fetchDetails={true}
                             query={{
                                 key: GOOGLE_PLACES_API_KEY,
@@ -68,11 +71,14 @@ const HomeScreenSearch = (props) => {
                                 textInputContainer: {
                                     textAlignVertical: 'top',
                                     marginLeft: 15.5,
-                                    borderWidth: 1,
-                                    marginRight: 15.5
+                                    //borderWidth: 1,
+                                    borderLeftWidth: 1,
+                                    borderTopWidth: 1,
+                                    borderBottomWidth: 1,
+                                    //marginRight: 15.5
+                                    height: 50,
                                 },
                                 textInput: {
-                                    height: 50,
                                     color: '#5d5d5d',
                                     fontSize: 16,
                                 },
@@ -80,6 +86,8 @@ const HomeScreenSearch = (props) => {
                                     color: '#1faadb',
                                 },
                                 listView: {
+                                    //backgroundColor: 'green',
+                                    width: ScreenWidth - 44,
                                     marginLeft: 15.5,
                                     marginRight: 15.5,
                                     borderWidth: 1
@@ -87,11 +95,19 @@ const HomeScreenSearch = (props) => {
                                 row: {
                                     paddingTop: 10,
                                     paddingLeft: 5
+                                },
+                                poweredContainer: {
+                                    //paddingVertical: 5,
+                                 //backgroundColor: 'red',
+                                },
+                                powered: {
+                                    //fontWeight: '200',
+                                   //fontSize: 10,
                                 }
                             }}
                         />
                     </View>
-                    <Pressable style={{ backgroundColor: 'white', marginLeft: 5, alignItems: 'center', width: '12%', height: 50, borderWidth: 1 }} onPress={() => onSearch()}>
+                    <Pressable style={{alignItems: 'center', width: '12%', height: 50, borderBottomWidth: 1, borderRightWidth: 1, borderTopWidth: 1 }} onPress={() => onSearch()}>
                         <Image
                             style={{ marginTop: 12, }}
                             source={require('../../../Images/search.png')}

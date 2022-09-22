@@ -48,6 +48,11 @@ const Settings = ({navigation,props}) => {
   const [sex, setSex] = useState('');
   const [hairLength, setHairLength] = useState('');
   const [hairColor, setHairColor] = useState('');
+  const [genderModal, setGenderModal] = useState(false);
+  const [hairLengthModal, setHairLengthModal] = useState(false);
+  const [hairColorModal, setHairColorModal] = useState(false);
+  const [genderName, setGenderName] = useState('');
+
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -106,6 +111,8 @@ const Settings = ({navigation,props}) => {
             setSex('MEN')
           } else if (res.data.user_detail.gender == 'FEMALE') {
             setSex('WOMEN')
+          } else if (res.data.user_detail.gender == 'NOT_TO_SAY') {
+            setSex('PREFER NOT TO SAY');
           }
          
           setHairLength(res.data.user_detail.hair_length)
@@ -249,7 +256,117 @@ const Settings = ({navigation,props}) => {
       })
   }
 
+  const _onGenderSelect = () => {
+    setGenderModal(!genderModal)
+}
+  const renderGender = () => {
+    return (
+        <View>
+            <Pressable style={{ borderWidth: 1, borderColor: '#979797',alignItems: 'center', height: 40, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => _onGenderSelect()}>
+                <Text style={{marginLeft: 10.5}}>{genderName == '' || genderName == null ? 'Select an option' : genderName}</Text>
+                <Image source={require('../../../Images/Triangle.png')} style={{marginRight: 9.36 }} />
+            </Pressable>
+            {
+                genderModal == true ?
+                    <View style={{ borderWidth: 1}}>
+                        {
+                            sex_dropdown.map((res, index) => {
+                                return (
+                                    <Pressable key={index} onPress={() => {
+                                      console.log(res)
+                                      setGenderName(res)
+                                      setSex(res)
+                                      setGenderModal(!genderModal)
+                                    }}>
+                                        <Text style={{marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res}</Text>
+                                        <View
+                                            style={{
+                                                borderBottomColor: '#979797',
+                                                borderBottomWidth: 1,
+                                            }}
+                                        />
+                                    </Pressable>
+                                )
+                            })
+                        }
+                    </View> :
+                    null
+            }
+        </View>
+    )
+}
 
+const renderHairLength = () => {
+  return (
+      <View>
+          <Pressable style={{ borderWidth: 1, borderColor: '#979797',alignItems: 'center', height: 40, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setHairLengthModal(!hairLengthModal)}>
+              <Text style={{marginLeft: 10.5}}>{hairLength == '' || hairLength == null ? 'Select an option' : hairLength}</Text>
+              <Image source={require('../../../Images/Triangle.png')} style={{marginRight: 9.36 }} />
+          </Pressable>
+          {
+              hairLengthModal == true ?
+                  <View style={{ borderWidth: 1}}>
+                      {
+                          hair_length.map((res, index) => {
+                              return (
+                                  <Pressable key={index} onPress={() => {
+                                    console.log(res)
+                                    setHairLength(res)
+                                    setHairLengthModal(!hairLengthModal)
+                                  }}>
+                                      <Text style={{marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res}</Text>
+                                      <View
+                                          style={{
+                                              borderBottomColor: '#979797',
+                                              borderBottomWidth: 1,
+                                          }}
+                                      />
+                                  </Pressable>
+                              )
+                          })
+                      }
+                  </View> :
+                  null
+          }
+      </View>
+  )
+}
+
+const renderHairColor = () => {
+  return (
+      <View>
+          <Pressable style={{ borderWidth: 1, borderColor: '#979797',alignItems: 'center', height: 40, flexDirection: 'row', justifyContent: 'space-between' }} onPress={() => setHairColorModal(!hairColorModal)}>
+              <Text style={{marginLeft: 10.5}}>{hairColor == '' || hairColor == null ? 'Select an option' : hairColor}</Text>
+              <Image source={require('../../../Images/Triangle.png')} style={{marginRight: 9.36 }} />
+          </Pressable>
+          {
+              hairColorModal == true ?
+                  <View style={{ borderWidth: 1}}>
+                      {
+                          color.map((res, index) => {
+                              return (
+                                  <Pressable key={index} onPress={() => {
+                                    console.log(res)
+                                    setHairColor(res)
+                                    setHairColorModal(!hairColorModal)
+                                  }}>
+                                      <Text style={{marginTop: 7, marginLeft: 10.5, marginBottom: 7 }}>{res}</Text>
+                                      <View
+                                          style={{
+                                              borderBottomColor: '#979797',
+                                              borderBottomWidth: 1,
+                                          }}
+                                      />
+                                  </Pressable>
+                              )
+                          })
+                      }
+                  </View> :
+                  null
+          }
+      </View>
+  )
+}
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -299,7 +416,8 @@ const Settings = ({navigation,props}) => {
             />
           </View>
           <Text style={styles.commonText}>Sex</Text>
-          <SelectDropdown
+          {renderGender()}
+          {/* <SelectDropdown
             data={sex_dropdown}
             renderDropdownIcon={() => {
               return (
@@ -309,9 +427,10 @@ const Settings = ({navigation,props}) => {
                 />
               )
             }}
+            dropdownStyle={{borderRadius: 10}}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
-            rowStyle={{height: 30}}
+            rowStyle={{}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={sex}
@@ -319,9 +438,10 @@ const Settings = ({navigation,props}) => {
               setSex(selectedItem)
               console.log(selectedItem, index)
             }}
-          />
+          /> */}
           <Text style={styles.commonText}>Hair Length</Text>
-          <SelectDropdown
+          {renderHairLength()}
+          {/* <SelectDropdown
             data={hair_length}
             renderDropdownIcon={() => {
               return (
@@ -331,9 +451,10 @@ const Settings = ({navigation,props}) => {
                 />
               )
             }}
+            dropdownStyle={{borderRadius: 10}}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
-            rowStyle={{height: 30}}
+            rowStyle={{}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairLength}
@@ -341,9 +462,10 @@ const Settings = ({navigation,props}) => {
               setHairLength(selectedItem)
               console.log(selectedItem, index)
             }}
-          />
+          /> */}
           <Text style={styles.commonText}>Is your hair naturally coloured?</Text>
-          <SelectDropdown
+          {renderHairColor()}
+          {/* <SelectDropdown
             data={color}
             renderDropdownIcon={() => {
               return (
@@ -353,9 +475,10 @@ const Settings = ({navigation,props}) => {
                 />
               )
             }}
+            dropdownStyle={{borderRadius: 10}}
             dropdownIconPosition={"right"}
             rowTextStyle={styles.dropdown1RowTxtStyle}
-            rowStyle={{height: 30}}
+            rowStyle={{}}
             buttonTextStyle={{ textAlign: 'left', marginLeft: 10.5, fontSize: 12 }}
             buttonStyle={{ height: 42, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#979797', marginTop: 7.5, width: width * 0.87 }}
             defaultValue={hairColor}
@@ -363,7 +486,7 @@ const Settings = ({navigation,props}) => {
               setHairColor(selectedItem)
               console.log(selectedItem, index)
             }}
-          />
+          /> */}
           <Pressable style={styles.saveButton} onPress={() => _onSave()}>
             <Text style={styles.saveButtonText}>Save</Text>
           </Pressable>
@@ -456,6 +579,7 @@ const styles = StyleSheet.create({
   dropdown1RowTxtStyle: {
     color: "#444",
     textAlign: "left",
+    paddingLeft: 10,
   },
   saveButton: {
     flexDirection: 'row',

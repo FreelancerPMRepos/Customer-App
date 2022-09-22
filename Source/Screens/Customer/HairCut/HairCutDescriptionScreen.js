@@ -277,8 +277,7 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontSize: 14,
     fontFamily: 'Avenir-Medium',
-    marginTop: 9.5,
-    marginBottom: 6.5,
+    paddingVertical: 10,
     textAlign: 'center'
   },
   crossView: {
