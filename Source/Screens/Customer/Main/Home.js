@@ -506,7 +506,7 @@ const Home = ({navigation, props, route}) => {
                     )}
                     <View style={styles.storeContentView}>
                       <View style={styles.contentView}>
-                        <View style={{width: 90}}>
+                        <View style={{width: 85}}>
                           <Text style={styles.storeName}>{res.store_name}</Text>
                         </View>
                         <View style={styles.contentView}>
@@ -521,10 +521,17 @@ const Home = ({navigation, props, route}) => {
                               .local()
                               .format('hh:mm A')}
                           </Text>
-                          {res.is_available == 1 ? (
+                          {/* {res.is_available == 1 ? (
                             <Text style={styles.timeText}> Open</Text>
                           ) : (
                             <Text style={styles.timeText}> Closed</Text>
+                          )} */}
+                           {( moment.utc(res.opentime, "HH:mm:ss").local().format('HH:mm:ss').valueOf() <=  moment(new Date()).format("HH:mm:ss"))
+                                            && (moment.utc(res.closetime, "HH:mm:ss").local().format('HH:mm:ss').valueOf() >=  moment(new Date()).format("HH:mm:ss"))
+                                            && res?.is_available == 1 ? (
+                            <Text style={styles.timeText}> Open</Text>
+                          ) : (
+                            <Text style={[styles.timeText,{color:'red'}]}> Closed</Text>
                           )}
                         </View>
                       </View>
