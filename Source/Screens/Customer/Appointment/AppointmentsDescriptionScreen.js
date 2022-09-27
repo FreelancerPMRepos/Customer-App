@@ -51,7 +51,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
   const _onBack = () => navigation.goBack()
 
   useEffect(() => {
-    console.log("appointmentDetails",appointmentDetails)
+    console.log("appointmentDetails===>>>",appointmentDetails)
     setNextYear(new Date().getFullYear());
     setNextDate(new Date().getMonth());
     getDateSlot(appointmentDetails.employee.id);
@@ -169,6 +169,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
     var startTime = "";
     var endTime = "";
     var timeStops = [];
+    console.log('Date list is =====>>>>', dateList);
     for (var i in dateList) {
       if (dateList[i].day == DaysName[day]) {
         startTime = dateList[i].employee_start_time;
@@ -234,6 +235,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           setModalVisible(!modalVisible);
           getNote()
           setNote('');
+          console.log('message===>>>>',res.data.message);
           alert(res.data.message)
           setLoading(false)
         })
@@ -512,7 +514,7 @@ const AppointmentsDescriptionScreen = ({ navigation, route, props }) => {
           setTimeModalVisible(!timeModalVisible);
         }}
       >
-        <View style={{ flex: 1, position: 'relative', justifyContent: 'center' }}>
+        <View style={{ flex: 1, position: 'relative', justifyContent: 'center' ,}}>
           <View style={{
             width: 145,
             height: 229,

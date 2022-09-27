@@ -415,11 +415,13 @@ const StoreDescription = ({ navigation, route, props }) => {
         setLoading(true)
         axios.get(`${BASE_URL}/service/all/list2?store_id=${storeDetails.id}`)
             .then(res => {
+                console.log('service/all/list2', JSON.stringify(res.data));
                 setServiceList(res.data)
                 setLoading(false)
             })
             .catch(e => {
                 setLoading(false)
+                console.log('service/all/list2 Error', JSON.stringify(e));
             })
     }
 

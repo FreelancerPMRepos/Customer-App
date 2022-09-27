@@ -37,6 +37,7 @@ const Appointments = ({ navigation, props }) => {
     setLoading(true)
     axios.get(`${BASE_URL}/booking/customer/list?type=UPCOMING`)
       .then(res => {
+        console.log('upcomming list ===>>>', res.data);
         setUpcomingList(res.data)
         setLoading(false)
       })
