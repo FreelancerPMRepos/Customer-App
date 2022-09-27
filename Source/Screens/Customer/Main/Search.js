@@ -229,6 +229,7 @@ const HelloWorldApp = (props) => {
   }
 
   const TopCuts = () => {
+    console.log("top cuts===>>>",topData?.top_cuts);
     return (
       <View>
         <Text style={styles.topCutText}>{strings.top_cuts}</Text>
@@ -268,6 +269,7 @@ const HelloWorldApp = (props) => {
   }
 
   const PopularStyles = () => {
+    console.log("popular styles===>>>",topData?.top_styles);
     return (
       <View style={{ marginBottom: 20 }}>
         <Text style={styles.popularStyleText}>{strings.popular_styles}</Text>
@@ -278,7 +280,7 @@ const HelloWorldApp = (props) => {
                 <Pressable key={index} onPress={() => props.navigation.navigate('SearchDetailScreen', { id: item.style_id })}>
                   <ImageBackground
                     style={styles.searchImage}
-                    source={{
+                    source={{ 
                       uri: `${item.upload_front_photo != null ? item.upload_front_photo : item.upload_back_photo != null ? item.upload_back_photo : item.upload_top_photo != null ? item.upload_top_photo : item.upload_right_photo != null ? item.upload_right_photo : item.upload_left_photo != null ? item.upload_left_photo : item.upload_left_photo}`,
                     }}
                   >
@@ -370,9 +372,8 @@ const HelloWorldApp = (props) => {
               <Pressable key={index} onPress={() => props.navigation.navigate('SearchDetailScreen', { id: res.style_id })}>
                 <ImageBackground
                   style={styles.searchImage}
-                  source={{
-                    uri: `${res.upload_front_photo != null ? res.upload_front_photo : res.upload_back_photo != null ? res.upload_back_photo : res.upload_top_photo != null ? res.upload_top_photo : res.upload_right_photo != null ? res.upload_right_photo : res.upload_left_photo != null ? res.upload_left_photo : res.upload_left_photo}`,
-                  }}
+                  source={res.upload_front_photo != null ? {uri: `${res.upload_front_photo}`} : res.upload_back_photo != null ? {uri: `${res.upload_back_photo}`} : res.upload_top_photo != null ? {uri : `${res.upload_top_photo}`} : res.upload_right_photo != null ? {uri : `${res.upload_right_photo}`} : res.upload_left_photo != null ? {uri: `${ res.upload_left_photo }`}  : (require('../../../Images/noImage.jpg')) 
+                }
                 >
                   <Pressable onPress={() => _onFavourite(res.style_id)}>
                     {
